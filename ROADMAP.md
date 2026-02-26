@@ -7,20 +7,24 @@
 
 ## Phase 0 — Foundation & Scaffold
 
-**Goal:** Repository structure, Docker infrastructure, database schema, CI skeleton
+**Goal:** Repository structure, Docker infrastructure, database schema, auth system, structured logging
 
-| Task | Description | Deliverable |
-|------|-------------|-------------|
-| 0.1 | Repository scaffold with monorepo structure | `/backend`, `/frontend`, `/ml`, `/db`, `/docker` |
-| 0.2 | Docker Compose setup (FastAPI + React + PostgreSQL) | `docker-compose.yml` boots all 3 services |
-| 0.3 | PostgreSQL schema migration (Alembic) | All tables from REQUIREMENTS.md §2 created |
-| 0.4 | FastAPI skeleton with health check | `GET /health` returns 200 |
-| 0.5 | React TypeScript skeleton with router | Landing page renders |
-| 0.6 | Auth system (JWT + bcrypt + RBAC) | Login/logout + role middleware |
-| 0.7 | Structured logging setup | JSON logs from backend |
-| 0.8 | Environment configuration (.env template) | `.env.example` with all required vars |
+**Plans:** 4 plans in 3 waves
 
-**Verification gate:** `docker compose up` starts all services; login flow works; DB tables exist.
+Plans:
+- [ ] 00-01-PLAN.md — Monorepo scaffold + Docker infrastructure + environment config
+- [ ] 00-02-PLAN.md — Database layer: SQLAlchemy models + Alembic migrations (12 tables + view)
+- [ ] 00-03-PLAN.md — Frontend skeleton: React + Vite + Tailwind + routing + API client
+- [ ] 00-04-PLAN.md — Auth system (JWT + bcrypt + RBAC) + structured logging
+
+**Wave structure:**
+| Wave | Plans | Parallel |
+|------|-------|----------|
+| 1 | 00-01 (scaffold + docker) | solo |
+| 2 | 00-02 (backend + DB), 00-03 (frontend) | parallel |
+| 3 | 00-04 (auth + logging) | solo |
+
+**Verification gate:** `docker compose up` starts all services; login flow works; DB has 12 tables; structured JSON logs.
 
 ---
 
