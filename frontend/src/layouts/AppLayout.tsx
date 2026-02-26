@@ -8,6 +8,7 @@ import {
   BarChart3,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -20,10 +21,7 @@ const navItems = [
 ];
 
 export default function AppLayout() {
-  const handleLogout = () => {
-    localStorage.removeItem("ovulite_token");
-    window.location.href = "/login";
-  };
+  const { logout, user } = useAuth();
 
   return (
     <div className="flex h-screen">
@@ -58,12 +56,20 @@ export default function AppLayout() {
           ))}
         </nav>
 
-        {/* Logout */}
-        <div className="border-t p-4">
+        {/* User info + Logout */}
+        <div className="border-t p-4 space-y-2">
+          {user && (
+            <div className="px-3 py-1 text-xs text-muted-foreground truncate">
+              {user.full_name || user.username}
+              <span className="ml-1 text-[10px] uppercase opacity-60">
+                ({user.role})
+              </span>
+            </div>
+          )}
           <Button
             variant="ghost"
             className="w-full justify-start gap-3"
-            onClick={handleLogout}
+            onClick={logout}
           >
             <LogOut className="h-4 w-4" />
             Logout

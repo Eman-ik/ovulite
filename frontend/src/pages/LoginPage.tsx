@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +13,23 @@ import {
 } from "@/components/ui/card";
 
 export default function LoginPage() {
+  const { login, user, isLoading: authLoading } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // If already authenticated, redirect to dashboard
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -22,9 +37,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Will be wired to useAuth().login() in Plan 04
-      console.log("Login attempt:", { username, password });
-      // Placeholder — auth integration in Plan 04
+      await login(username, password);
     } catch {
       setError("Login failed. Please check your credentials.");
     } finally {
