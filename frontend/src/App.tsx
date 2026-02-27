@@ -7,6 +7,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import DataEntryPage from "@/pages/DataEntryPage";
 import TransferFormPage from "@/pages/TransferFormPage";
 import PredictionPage from "@/pages/PredictionPage";
+import GradingPage from "@/pages/GradingPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
               <Route path="data-entry/new" element={<TransferFormPage />} />
               <Route path="data-entry/:id" element={<TransferFormPage />} />
               <Route path="predictions" element={<PredictionPage />} />
+              <Route path="embryo-grading" element={<GradingPage />} />
             </Route>
           </Route>
         </Routes>
