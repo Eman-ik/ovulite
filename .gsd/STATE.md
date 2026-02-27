@@ -1,12 +1,12 @@
 # Ovulite – Project State
 
 ## Current Position
-- **Phase:** 1 – Data Intake & Validation (COMPLETE)
+- **Phase:** 2 – Pregnancy Prediction Pipeline (COMPLETE)
 - **Plan:** 3 of 3 (all complete)
-- **Status:** Phase 1 complete, ready for Phase 2
-- **Last updated:** 2025-02-26
+- **Status:** Phase 2 complete, ready for Phase 3/4
+- **Last updated:** 2025-02-27
 
-Progress: ████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3)
+Progress: ████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3, Phase 2: 3/3)
 
 ## Accumulated Decisions
 - FastAPI (Python 3.11+) for backend
@@ -29,17 +29,26 @@ Progress: ███████████████████████�
 - Semen type "Pre-Sorted for Female" → "Sexed"
 - PC result: "P"→"Pregnant", "O"→"Open", "R"→"Recheck"
 - Client + server CL validation (0–50mm)
+- Temporal holdout Dec 2025+ for final test set
+- GroupKFold by donor tag for cross-validation
+- TabPFN with CalibratedLR fallback
+- Bootstrap CI (n=200) for uncertainty estimation
+- Isotonic calibration post-hoc on all models
+- SHAP Explainer for feature contributions
+- Singleton predictor pattern for API serving
+- Model artifacts in ml/artifacts/{version}/
+- Predictions persisted to DB for audit trail
 
 ## Pending Todos
-- None (Phase 1 complete)
+- None (Phase 2 complete)
 
 ## Blockers / Concerns
 - No git CI/CD yet — local Docker dev only
 - Embryo image labels unavailable — deferred to Phase 3
-- BCScore 77.5% missing — accounted for in feature engineering plan
-- Need `docker compose up` + `alembic upgrade head` + seed before verifying end-to-end
+- BCScore 77.5% missing — handled with bc_missing flag in feature engineering
+- TabPFN may need fallback if package not installable in deployment env
 
 ## Session Continuity
-- **Last session:** 2025-02-26
-- **Stopped at:** Completed Phase 1 (Data Intake & Validation)
+- **Last session:** 2025-02-27
+- **Stopped at:** Completed Phase 2 (Pregnancy Prediction Pipeline)
 - **Resume file:** None
