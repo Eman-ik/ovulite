@@ -9,6 +9,7 @@ from app.api.auth import router as auth_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
+from app.api.predictions import router as predictions_router
 from app.api.protocols import router as protocols_router
 from app.api.recipients import router as recipients_router
 from app.api.sires import router as sires_router
@@ -40,6 +41,7 @@ app.include_router(transfers_router, prefix="/transfers", tags=["transfers"])
 app.include_router(technicians_router, prefix="/technicians", tags=["technicians"])
 app.include_router(protocols_router, prefix="/protocols", tags=["protocols"])
 app.include_router(import_router, prefix="/import", tags=["import"])
+app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 
 
 @app.middleware("http")
