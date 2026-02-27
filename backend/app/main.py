@@ -6,6 +6,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.donors import router as donors_router
+from app.api.embryos import router as embryos_router
+from app.api.import_data import router as import_router
+from app.api.protocols import router as protocols_router
+from app.api.recipients import router as recipients_router
+from app.api.sires import router as sires_router
+from app.api.technicians import router as technicians_router
+from app.api.transfers import router as transfers_router
 from app.logging_config import setup_logging
 
 # Initialize structured JSON logging before anything else
@@ -24,6 +32,14 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(donors_router, prefix="/donors", tags=["donors"])
+app.include_router(sires_router, prefix="/sires", tags=["sires"])
+app.include_router(recipients_router, prefix="/recipients", tags=["recipients"])
+app.include_router(embryos_router, prefix="/embryos", tags=["embryos"])
+app.include_router(transfers_router, prefix="/transfers", tags=["transfers"])
+app.include_router(technicians_router, prefix="/technicians", tags=["technicians"])
+app.include_router(protocols_router, prefix="/protocols", tags=["protocols"])
+app.include_router(import_router, prefix="/import", tags=["import"])
 
 
 @app.middleware("http")
