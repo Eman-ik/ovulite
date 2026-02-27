@@ -1,12 +1,12 @@
 # Ovulite – Project State
 
 ## Current Position
-- **Phase:** 2 – Pregnancy Prediction Pipeline (COMPLETE)
+- **Phase:** 3 – Embryo Grading Model (COMPLETE)
 - **Plan:** 3 of 3 (all complete)
-- **Status:** Phase 2 complete, ready for Phase 3/4
+- **Status:** Phase 3 complete, ready for Phase 4
 - **Last updated:** 2025-02-27
 
-Progress: ████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3, Phase 2: 3/3)
+Progress: ████████████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3, Phase 2: 3/3, Phase 3: 3/3)
 
 ## Accumulated Decisions
 - FastAPI (Python 3.11+) for backend
@@ -30,7 +30,7 @@ Progress: ███████████████████████�
 - PC result: "P"→"Pregnant", "O"→"Open", "R"→"Recheck"
 - Client + server CL validation (0–50mm)
 - Temporal holdout Dec 2025+ for final test set
-- GroupKFold by donor tag for cross-validation
+- GroupKFold by donor for cross-validation
 - TabPFN with CalibratedLR fallback
 - Bootstrap CI (n=200) for uncertainty estimation
 - Isotonic calibration post-hoc on all models
@@ -38,17 +38,24 @@ Progress: ███████████████████████�
 - Singleton predictor pattern for API serving
 - Model artifacts in ml/artifacts/{version}/
 - Predictions persisted to DB for audit trail
+- 3-class pseudo-labels from pregnancy outcomes (no ground-truth embryo grades)
+- SimCLR self-supervised pretraining before supervised fine-tuning
+- EfficientNet-B0 backbone (1280-dim) with frozen early layers
+- Metadata fusion via MLP branch (32-dim output)
+- Combined grade (3-class) + viability (sigmoid) dual-head output
+- Grad-CAM on last conv block for visual explanations
+- Singleton EmbryoGrader pattern for API serving
 
 ## Pending Todos
-- None (Phase 2 complete)
+- None (Phase 3 complete)
 
 ## Blockers / Concerns
 - No git CI/CD yet — local Docker dev only
-- Embryo image labels unavailable — deferred to Phase 3
+- Model training not yet run (requires PyTorch install + GPU recommended)
 - BCScore 77.5% missing — handled with bc_missing flag in feature engineering
 - TabPFN may need fallback if package not installable in deployment env
 
 ## Session Continuity
 - **Last session:** 2025-02-27
-- **Stopped at:** Completed Phase 2 (Pregnancy Prediction Pipeline)
+- **Stopped at:** Completed Phase 3 (Embryo Grading Model)
 - **Resume file:** None
