@@ -4,6 +4,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/layouts/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
+import DataEntryPage from "@/pages/DataEntryPage";
+import TransferFormPage from "@/pages/TransferFormPage";
 
 function App() {
   return (
@@ -14,6 +16,9 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
+              <Route path="data-entry" element={<DataEntryPage />} />
+              <Route path="data-entry/new" element={<TransferFormPage />} />
+              <Route path="data-entry/:id" element={<TransferFormPage />} />
             </Route>
           </Route>
         </Routes>
