@@ -1,12 +1,12 @@
 # Ovulite – Project State
 
 ## Current Position
-- **Phase:** 0 – Foundation & Scaffold (COMPLETE)
-- **Plan:** 4 of 4 (all complete)
-- **Status:** Phase 0 complete, ready for Phase 1
-- **Last updated:** 2026-02-26
+- **Phase:** 1 – Data Intake & Validation (COMPLETE)
+- **Plan:** 3 of 3 (all complete)
+- **Status:** Phase 1 complete, ready for Phase 2
+- **Last updated:** 2025-02-26
 
-Progress: ████████████████████ 100% (4/4 plans in Phase 0)
+Progress: ████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3)
 
 ## Accumulated Decisions
 - FastAPI (Python 3.11+) for backend
@@ -22,16 +22,24 @@ Progress: ████████████████████ 100% (4/4
 - Seed endpoint creates admin only on empty DB
 - stdlib JSON logging with custom formatter (no structlog/loguru)
 - UUID4 request_id middleware for request tracing
+- PaginatedResponse[T] generic for all list endpoints
+- get-or-create pattern for CSV ingestion dedup
+- '.' treated as NULL during CSV parsing
+- CL side normalized to title-case (Left/Right)
+- Semen type "Pre-Sorted for Female" → "Sexed"
+- PC result: "P"→"Pregnant", "O"→"Open", "R"→"Recheck"
+- Client + server CL validation (0–50mm)
 
 ## Pending Todos
-- None (Phase 0 complete)
+- None (Phase 1 complete)
 
 ## Blockers / Concerns
-- No git CI/CD yet — local Docker dev only for Phase 0
+- No git CI/CD yet — local Docker dev only
 - Embryo image labels unavailable — deferred to Phase 3
 - BCScore 77.5% missing — accounted for in feature engineering plan
+- Need `docker compose up` + `alembic upgrade head` + seed before verifying end-to-end
 
 ## Session Continuity
-- **Last session:** 2026-02-26
-- **Stopped at:** Completed 00-04-PLAN.md (Phase 0 fully done)
+- **Last session:** 2025-02-26
+- **Stopped at:** Completed Phase 1 (Data Intake & Validation)
 - **Resume file:** None
