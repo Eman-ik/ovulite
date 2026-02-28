@@ -12,6 +12,7 @@ from app.api.import_data import router as import_router
 from app.api.grading import router as grading_router
 from app.api.predictions import router as predictions_router
 from app.api.protocols import router as protocols_router
+from app.api.qc import router as qc_router
 from app.api.recipients import router as recipients_router
 from app.api.sires import router as sires_router
 from app.api.technicians import router as technicians_router
@@ -44,6 +45,7 @@ app.include_router(protocols_router, prefix="/protocols", tags=["protocols"])
 app.include_router(import_router, prefix="/import", tags=["import"])
 app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 app.include_router(grading_router, prefix="/grade", tags=["grading"])
+app.include_router(qc_router, prefix="/qc", tags=["qc"])
 
 
 @app.middleware("http")
