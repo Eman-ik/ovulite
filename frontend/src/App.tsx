@@ -8,6 +8,7 @@ import DataEntryPage from "@/pages/DataEntryPage";
 import TransferFormPage from "@/pages/TransferFormPage";
 import PredictionPage from "@/pages/PredictionPage";
 import GradingPage from "@/pages/GradingPage";
+import QCDashboardPage from "@/pages/QCDashboardPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="data-entry/:id" element={<TransferFormPage />} />
               <Route path="predictions" element={<PredictionPage />} />
               <Route path="embryo-grading" element={<GradingPage />} />
+              <Route path="lab-qc" element={<QCDashboardPage />} />
             </Route>
           </Route>
         </Routes>
