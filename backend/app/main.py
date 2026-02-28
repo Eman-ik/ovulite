@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.analytics import router as analytics_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
@@ -46,6 +47,7 @@ app.include_router(import_router, prefix="/import", tags=["import"])
 app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 app.include_router(grading_router, prefix="/grade", tags=["grading"])
 app.include_router(qc_router, prefix="/qc", tags=["qc"])
+app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 
 
 @app.middleware("http")
