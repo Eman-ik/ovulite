@@ -1,12 +1,12 @@
 # Ovulite – Project State
 
 ## Current Position
-- **Phase:** 4 – Lab QC & Anomaly Detection (COMPLETE)
-- **Plan:** 3 of 3 (all complete)
-- **Status:** Phase 4 complete, ready for Phase 5
+- **Phase:** 5 – Analytics Dashboard & Final Evaluation (COMPLETE)
+- **Plan:** 4 of 4 (all complete)
+- **Status:** ALL PHASES COMPLETE — Project fully implemented
 - **Last updated:** 2025-02-28
 
-Progress: ████████████████████████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3, Phase 2: 3/3, Phase 3: 3/3, Phase 4: 3/3)
+Progress: ████████████████████████████████████████████████████████████████████████ 100% (Phase 0: 4/4, Phase 1: 3/3, Phase 2: 3/3, Phase 3: 3/3, Phase 4: 3/3, Phase 5: 4/4)
 
 ## Accumulated Decisions
 - FastAPI (Python 3.11+) for backend
@@ -50,18 +50,22 @@ Progress: ███████████████████████�
 - 5 synthetic anomaly types for testing: low_preg_rate, cl_drift, grade_anomaly, volume_spike, mixed
 - Lazy QC pipeline execution with JSON artifact caching
 - Text-based bar chart visualization for QC control charts (upgrade to Recharts later)
+- Wilson score interval for all binomial CIs (more accurate than Wald for small N)
+- Permutation importance over SHAP for protocol contribution (more robust)
+- 8-bin CL measure analysis with custom clinical ranges
+- Tab-based analytics UI without charting library dependency
 
 ## Pending Todos
-- None (Phase 4 complete)
+- None — All ROADMAP phases complete
 
 ## Blockers / Concerns
 - No git CI/CD yet — local Docker dev only
 - Model training not yet run (requires PyTorch install + GPU recommended)
 - BCScore 77.5% missing — handled with bc_missing flag in feature engineering
 - TabPFN may need fallback if package not installable in deployment env
-- QC pipeline needs actual data to produce meaningful alerts (run POST /qc/run after CSV import)
+- QC and Analytics pipelines need actual data to produce meaningful results
 
 ## Session Continuity
 - **Last session:** 2025-02-28
-- **Stopped at:** Completed Phase 4 (Lab QC & Anomaly Detection)
+- **Stopped at:** Completed Phase 5 (Analytics Dashboard & Final Evaluation) — ALL PHASES DONE
 - **Resume file:** None
