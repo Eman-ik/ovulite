@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Heritage Collective</title>
+    <style>
+        :root {
+            --oak: #0F0F0F;
+            --sage: #232D3F;
+            --parchment: #005B41;
+            --wheat: #008170;
+        }
+
+        body {
+            background-color: var(--parchment);
+            color: var(--oak);
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--oak);
+            color: var(--parchment);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: -40px auto 50px;
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 30px;
+            border: 1px solid var(--wheat);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--sage);
+            background-color: #fcfbf7;
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: var(--sage);
+            font-style: italic;
+            border-bottom: 2px solid var(--parchment);
+            padding-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--wheat);
+            color: var(--oak);
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: block;
+            width: fit-content;
+            margin: 40px auto;
+            padding: 15px 40px;
+            border: 2px solid var(--sage);
+            background: transparent;
+            color: var(--sage);
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--sage);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--wheat);
+            font-size: 0.9rem;
+            color: var(--sage);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>HERITAGE COLLECTIVE</h1>
+        <p>Crafting Timelessness from the Earth Up</p>
+    </header>
+
+    <div class="container">
+        <div class="grid">
+            <div class="card">
+                <span class="tag">Process</span>
+                <h2>The Harvest</h2>
+                <p>Rooted in tradition, our process begins with the selection of raw materials that mirror the tones of the landscape.</p>
+            </div>
+            <div class="card">
+                <span class="tag">Design</span>
+                <h2>Sustainable Form</h2>
+                <p>Architecture that breathes. We use muted tones and natural textures to ensure every space feels like an extension of the garden.</p>
+            </div>
+            <div class="card">
+                <span class="tag">Mission</span>
+                <h2>Muted Elegance</h2>
+                <p>Why shout when you can whisper? Our palette is designed for those who appreciate the quiet strength of organic design.</p>
+            </div>
+        </div>
+        
+        <a href="#" class="btn">VIEW THE PORTFOLIO</a>
+    </div>
+
+    <footer>
+        &copy; 2026 HERITAGE COLLECTIVE • DESIGNED WITH NATURE
+    </footer>
+
+</body>
+</html>
