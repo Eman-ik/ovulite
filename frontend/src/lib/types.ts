@@ -86,29 +86,29 @@ export interface ETTransfer {
   cl_side: string | null;
   cl_measure_mm: number | null;
   protocol_id: number | null;
-  heat_observed: boolean | null;
-  heat_day: number | null;
-  embryo_id: number | null;
-  technician_id: number | null;
-  assistant_name: string | null;
-  pc1_date: string | null;
-  pc1_result: string | null;
-  pc2_date: string | null;
-  pc2_result: string | null;
-  fetal_sexing: string | null;
-  days_in_pregnancy: number | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ETTransferDetail extends ETTransfer {
-  donor_tag: string | null;
-  donor_breed: string | null;
-  sire_name: string | null;
-  recipient_tag: string | null;
-  technician_name: string | null;
   protocol_name: string | null;
   embryo_stage: number | null;
   embryo_grade: number | null;
   fresh_or_frozen: string | null;
+}
+
+/* AI Agent Types */
+
+export interface AgentQueryRequest {
+  input: string;
+  session_id?: string;
+}
+
+export interface AgentQueryResponse {
+  output: string;
+  used_tools: string[];
+  intermediate_steps?: Array<Record<string, unknown>>;
+  is_domain_refusal: boolean;
+}
+
+export interface AgentHealthResponse {
+  status: "healthy" | "error";
+  vectorstore_status: string;
+  lab_data_status: string;
+  message?: string;
 }

@@ -33,14 +33,14 @@ interface GradingResult {
 /* ─── Constants ─────────────────────────────────────────── */
 
 const GRADE_COLORS: Record<string, string> = {
-  High: "bg-green-500",
-  Medium: "bg-yellow-500",
+  High: "bg-primary",
+  Medium: "bg-emerald-300",
   Low: "bg-red-500",
 };
 
 const GRADE_TEXT_COLORS: Record<string, string> = {
-  High: "text-green-600",
-  Medium: "text-yellow-600",
+  High: "text-primary",
+  Medium: "text-emerald-200",
   Low: "text-red-600",
 };
 
@@ -71,10 +71,6 @@ export default function GradingPage() {
   /* ─── File handling ───────────────────────────────── */
 
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) {
-      setError("Please upload a JPEG or PNG image");
-      return;
-    }
     setImageFile(file);
     setError(null);
     setResult(null);
@@ -159,8 +155,8 @@ export default function GradingPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-violet-100 rounded-lg">
-          <Microscope className="w-6 h-6 text-violet-600" />
+        <div className="rounded-lg bg-primary/15 p-2">
+          <Microscope className="h-6 w-6 text-primary" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">Embryo Grading</h1>
@@ -178,7 +174,7 @@ export default function GradingPage() {
             <CardHeader>
               <CardTitle className="text-lg">Upload Image</CardTitle>
               <CardDescription>
-                Drag & drop or click to upload a blastocyst image (JPEG/PNG)
+                Drag & drop or click to upload any image format
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -186,8 +182,8 @@ export default function GradingPage() {
                 className={`
                   border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
                   transition-colors duration-200
-                  ${isDragging ? "border-violet-500 bg-violet-50" : "border-gray-300 hover:border-violet-400"}
-                  ${imagePreview ? "border-green-500 bg-green-50/30" : ""}
+                  ${isDragging ? "border-primary bg-primary/10" : "border-white/25 hover:border-primary/60"}
+                  ${imagePreview ? "border-primary bg-primary/10" : ""}
                 `}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -197,7 +193,7 @@ export default function GradingPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png"
+                  accept="*"
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -234,10 +230,10 @@ export default function GradingPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Upload className="w-12 h-12 mx-auto text-gray-400" />
+                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                     <p className="font-medium">Drop image here or click to browse</p>
                     <p className="text-sm text-muted-foreground">
-                      JPEG or PNG, max 10MB
+                      Any image format, max 10MB
                     </p>
                   </div>
                 )}
@@ -254,7 +250,7 @@ export default function GradingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="stage">Embryo Stage</Label>
                   <Select
@@ -293,7 +289,7 @@ export default function GradingPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="ff">Fresh or Frozen</Label>
                   <Select
@@ -320,7 +316,7 @@ export default function GradingPage() {
           </Card>
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <Button
               className="flex-1"
               onClick={handleGrade}
@@ -344,7 +340,7 @@ export default function GradingPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm">
+            <div className="rounded-md border border-red-300/40 bg-red-500/10 p-3 text-sm text-red-100">
               {error}
             </div>
           )}
@@ -382,13 +378,13 @@ export default function GradingPage() {
                         {(result.viability_score * 100).toFixed(1)}%
                       </span>
                     </div>
-                    <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-4 overflow-hidden rounded-full bg-white/15">
                       <div
                         className={`h-full rounded-full transition-all duration-1000 ease-out ${
                           result.viability_score >= 0.6
-                            ? "bg-green-500"
+                            ? "bg-primary"
                             : result.viability_score >= 0.35
-                            ? "bg-yellow-500"
+                            ? "bg-emerald-300"
                             : "bg-red-500"
                         }`}
                         style={{ width: `${result.viability_score * 100}%` }}
@@ -412,7 +408,7 @@ export default function GradingPage() {
                           <span className={GRADE_TEXT_COLORS[grade]}>{grade}</span>
                           <span className="font-mono">{(prob * 100).toFixed(1)}%</span>
                         </div>
-                        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2.5 overflow-hidden rounded-full bg-white/15">
                           <div
                             className={`h-full rounded-full transition-all duration-700 ${GRADE_COLORS[grade]}`}
                             style={{ width: `${prob * 100}%` }}

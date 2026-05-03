@@ -132,11 +132,32 @@ export default function QCDashboardPage() {
         api.get("/qc/technicians"),
         api.get("/qc/charts"),
       ]);
+
+      if (!isQcSummary(sumRes.data)) {
+        throw new Error("Unexpected QC summary response format.");
+      }
+
       setSummary(sumRes.data);
-      setAlerts(alertRes.data.alerts);
-      setTechnicians(techRes.data.technicians);
-      setGlobalPregRate(techRes.data.global_pregnancy_rate);
-      setCharts(chartRes.data.charts);
+      setAlerts(
+        Array.isArray((alertRes.data as { alerts?: unknown }).alerts)
+          ? (alertRes.data as { alerts: QCAlert[] }).alerts
+          : []
+      );
+      setTechnicians(
+        Array.isArray((techRes.data as { technicians?: unknown }).technicians)
+          ? (techRes.data as { technicians: TechnicianStats[] }).technicians
+          : []
+      );
+      setGlobalPregRate(
+        typeof (techRes.data as { global_pregnancy_rate?: unknown }).global_pregnancy_rate === "number"
+          ? (techRes.data as { global_pregnancy_rate: number }).global_pregnancy_rate
+          : null
+      );
+      setCharts(
+        Array.isArray((chartRes.data as { charts?: unknown }).charts)
+          ? (chartRes.data as { charts: ControlChart[] }).charts
+          : []
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load QC data";
       setError(msg);
@@ -198,7 +219,7 @@ export default function QCDashboardPage() {
       <div className="flex h-96 flex-col items-center justify-center gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-muted-foreground">{error}</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           <Button onClick={() => runPipeline(false)}>
             <Activity className="mr-2 h-4 w-4" />
             Run QC Pipeline
@@ -220,14 +241,14 @@ export default function QCDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="ov-reveal ov-stagger-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Lab QC & Anomaly Detection</h2>
           <p className="text-muted-foreground">
             Monitor quality control metrics, detect anomalies, and track technician performance
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Button variant="outline" size="sm" onClick={fetchAll} disabled={running}>
             <RefreshCw className={`mr-2 h-4 w-4 ${running ? "animate-spin" : ""}`} />
             Refresh
@@ -252,7 +273,7 @@ export default function QCDashboardPage() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="ov-reveal ov-stagger-1 ov-hover-lift">
             <CardHeader className="pb-2">
               <CardDescription>Total Records</CardDescription>
               <CardTitle className="text-3xl">{summary.total_records.toLocaleString()}</CardTitle>
@@ -264,7 +285,7 @@ export default function QCDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="ov-reveal ov-stagger-2 ov-hover-lift">
             <CardHeader className="pb-2">
               <CardDescription>Anomalies Detected</CardDescription>
               <CardTitle className="text-3xl text-destructive">
@@ -278,7 +299,7 @@ export default function QCDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="ov-reveal ov-stagger-3 ov-hover-lift">
             <CardHeader className="pb-2">
               <CardDescription>Active Alerts</CardDescription>
               <CardTitle className="text-3xl">{summary.total_alerts}</CardTitle>
@@ -299,7 +320,7 @@ export default function QCDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="ov-reveal ov-stagger-4 ov-hover-lift">
             <CardHeader className="pb-2">
               <CardDescription>Technicians</CardDescription>
               <CardTitle className="text-3xl">{summary.technicians_analyzed}</CardTitle>
@@ -315,9 +336,9 @@ export default function QCDashboardPage() {
 
       {/* Control Charts Section */}
       {charts.length > 0 && currentChart && (
-        <Card>
+        <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5" />
@@ -327,7 +348,7 @@ export default function QCDashboardPage() {
                   EWMA and CUSUM statistical process control
                 </CardDescription>
               </div>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap gap-1">
                 {charts.map((c) => (
                   <Button
                     key={c.metric}
@@ -450,7 +471,7 @@ export default function QCDashboardPage() {
       )}
 
       {/* Alerts Table */}
-      <Card>
+      <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -512,7 +533,7 @@ export default function QCDashboardPage() {
       </Card>
 
       {/* Technician Stats */}
-      <Card>
+      <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -572,5 +593,16 @@ export default function QCDashboardPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function isQcSummary(v: unknown): v is QCSummary {
+  if (!v || typeof v !== "object") return false;
+  const x = v as Record<string, unknown>;
+  return (
+    typeof x.total_records === "number" &&
+    typeof x.total_batches === "number" &&
+    typeof x.total_alerts === "number" &&
+    typeof x.anomaly_rate === "number"
   );
 }

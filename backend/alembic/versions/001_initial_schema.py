@@ -9,7 +9,6 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects.postgresql import JSONB
 
 # revision identifiers, used by Alembic.
 revision: str = "001_initial_schema"
@@ -278,7 +277,7 @@ def upgrade() -> None:
         sa.Column("confidence_lower", sa.Numeric(5, 4)),
         sa.Column("confidence_upper", sa.Numeric(5, 4)),
         sa.Column("risk_band", sa.String(20)),
-        sa.Column("shap_json", JSONB),
+        sa.Column("shap_json", sa.JSON),
         sa.Column(
             "predicted_at",
             sa.DateTime(timezone=True),

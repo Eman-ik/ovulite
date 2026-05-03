@@ -28,7 +28,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("ovulite_token");
-      window.location.href = "/login";
+      // Let the app-level auth provider handle navigation consistently.
+      window.dispatchEvent(new CustomEvent("ovulite:unauthorized"));
     }
     return Promise.reject(error);
   }

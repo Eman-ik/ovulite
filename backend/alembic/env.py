@@ -4,6 +4,10 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))  
 from app.database import Base
 from app.models import (  # noqa: F401 — ensure all models registered
     Anomaly,

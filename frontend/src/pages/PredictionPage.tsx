@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import PredictionAssistantChatbox from "@/components/PredictionAssistantChatbox";
 import { Brain, Info, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 /* ─── Types ─────────────────────────────────────────────── */
@@ -38,6 +39,19 @@ interface PredictionResult {
     contributions: ShapContribution[];
   };
   prediction_id: number | null;
+}
+
+interface PredictionHistoryItem {
+  prediction_id: number;
+  transfer_id: number | null;
+  model_name: string;
+  model_version: string | null;
+  probability: number;
+  confidence_lower: number | null;
+  confidence_upper: number | null;
+  risk_band: string | null;
+  predicted_at: string;
+  shap_json: Record<string, unknown> | null;
 }
 
 interface ModelInfo {
@@ -74,23 +88,73 @@ export default function PredictionPage() {
   // Results
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
+  const [history, setHistory] = useState<PredictionHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [initError, setInitError] = useState("");
+
+  // Load prediction history
+  useEffect(() => {
+    setHistoryLoading(true);
+    api
+      .get<{ predictions: PredictionHistoryItem[]; total: number }>("/predict/history", {
+        params: { limit: 10 },
+      })
+      .then((res) => {
+        setHistory(res.data.predictions);
+      })
+      .catch(() => {
+        // Silently fail - history is optional
+        setHistory([]);
+      })
+      .finally(() => setHistoryLoading(false));
+  }, [prediction]); // Reload when new prediction is made
 
   // Load reference data and model info
   useEffect(() => {
-    Promise.all([
-      api.get<PaginatedResponse<Protocol>>("/protocols/", { params: { page_size: 50 } }),
-      api.get<PaginatedResponse<Technician>>("/technicians/", { params: { page_size: 50 } }),
-    ]).then(([protoRes, techRes]) => {
-      setProtocols(protoRes.data.items);
-      setTechnicians(techRes.data.items);
-    });
+    let cancelled = false;
 
-    api
-      .get<ModelInfo>("/predict/model-info")
-      .then((res) => setModelInfo(res.data))
-      .catch(() => {});
+    const loadInitialData = async () => {
+      setInitLoading(true);
+      setInitError("");
+      try {
+        const [protoRes, techRes, modelRes] = await Promise.all([
+          api.get<PaginatedResponse<Protocol>>("/protocols/", {
+            params: { page_size: 50 },
+          }),
+          api.get<PaginatedResponse<Technician>>("/technicians/", {
+            params: { page_size: 50 },
+          }),
+          api.get<ModelInfo>("/predict/model-info"),
+        ]);
+
+        if (cancelled) return;
+        setProtocols(Array.isArray(protoRes.data.items) ? protoRes.data.items : []);
+        setTechnicians(Array.isArray(techRes.data.items) ? techRes.data.items : []);
+        if (isModelInfo(modelRes.data)) {
+          setModelInfo(modelRes.data);
+        } else {
+          setInitError("Prediction model metadata has an unexpected format.");
+        }
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const msg =
+          err instanceof Error
+            ? err.message
+            : "Failed to load prediction reference data";
+        setInitError(msg);
+      } finally {
+        if (!cancelled) setInitLoading(false);
+      }
+    };
+
+    void loadInitialData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handlePredict = async () => {
@@ -115,6 +179,9 @@ export default function PredictionPage() {
       if (customerId) payload.customer_id = customerId;
 
       const res = await api.post<PredictionResult>("/predict/pregnancy", payload);
+      if (!isPredictionResult(res.data)) {
+        throw new Error("Prediction response has an unexpected format.");
+      }
       setPrediction(res.data);
     } catch (err: unknown) {
       const msg =
@@ -131,7 +198,7 @@ export default function PredictionPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="ov-reveal ov-stagger-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold">Pregnancy Prediction</h2>
           <p className="text-sm text-muted-foreground">
@@ -148,7 +215,7 @@ export default function PredictionPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         {/* Input Form - 3 columns */}
         <div className="lg:col-span-3 space-y-4">
-          <Card>
+          <Card className="ov-reveal ov-stagger-2 ov-hover-lift">
             <CardHeader>
               <CardTitle className="text-base">Transfer Features</CardTitle>
               <CardDescription>
@@ -328,7 +395,7 @@ export default function PredictionPage() {
           {prediction ? (
             <>
               {/* Probability Gauge */}
-              <Card>
+              <Card className="ov-reveal ov-stagger-3 ov-hover-lift">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">Prediction Result</CardTitle>
                 </CardHeader>
@@ -405,7 +472,7 @@ export default function PredictionPage() {
 
               {/* SHAP Explanation */}
               {prediction.shap_explanation.contributions.length > 0 && (
-                <Card>
+                <Card className="ov-reveal ov-stagger-4 ov-hover-lift">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base">Feature Contributions</CardTitle>
                     <CardDescription>
@@ -427,14 +494,14 @@ export default function PredictionPage() {
 
                           return (
                             <div key={i} className="space-y-1">
-                              <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center justify-between gap-3 text-xs">
                                 <span className="truncate max-w-[60%]">
                                   {formatFeatureName(c.feature)}
                                 </span>
                                 <span
                                   className={
                                     isPositive
-                                      ? "text-green-600 font-medium"
+                                      ? "text-primary font-medium"
                                       : "text-red-600 font-medium"
                                   }
                                 >
@@ -445,7 +512,7 @@ export default function PredictionPage() {
                               <div className="relative h-1.5 w-full bg-muted rounded-full overflow-hidden">
                                 <div
                                   className={`absolute top-0 h-full rounded-full ${
-                                    isPositive ? "bg-green-500" : "bg-red-500"
+                                    isPositive ? "bg-primary" : "bg-red-500"
                                   }`}
                                   style={{
                                     width: `${pct * 100}%`,
@@ -465,7 +532,7 @@ export default function PredictionPage() {
               )}
             </>
           ) : (
-            <Card className="flex items-center justify-center min-h-[300px]">
+            <Card className="ov-reveal ov-stagger-3 flex min-h-[300px] items-center justify-center ov-hover-lift">
               <CardContent className="text-center text-muted-foreground">
                 <Brain className="mx-auto h-12 w-12 opacity-20 mb-3" />
                 <p className="text-sm">
@@ -474,10 +541,102 @@ export default function PredictionPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Prediction History */}
+          {history.length > 0 && (
+            <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
+              <CardHeader>
+                <CardTitle className="text-lg">Recent Predictions</CardTitle>
+                <CardDescription>Last 10 predictions ordered by recency</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {historyLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {history.map((item) => (
+                      <div
+                        key={item.prediction_id}
+                        className="ov-hover-lift flex flex-col gap-2 rounded-lg border border-white/15 bg-white/5 p-3 transition-colors hover:bg-white/10 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge
+                              variant={
+                                item.risk_band === "Low"
+                                  ? "success"
+                                  : item.risk_band === "High"
+                                    ? "destructive"
+                                    : "secondary"
+                              }
+                            >
+                              {item.risk_band ?? "Unknown"}
+                            </Badge>
+                            <span className="text-sm font-semibold">
+                              {(item.probability * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(item.predicted_at).toLocaleString()} • {item.model_version ?? "Unknown version"}
+                          </div>
+                        </div>
+                        {item.confidence_lower != null && item.confidence_upper != null && (
+                          <div className="text-xs text-muted-foreground sm:text-right">
+                            CI: {(item.confidence_lower * 100).toFixed(1)}% - {(item.confidence_upper * 100).toFixed(1)}%
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          <PredictionAssistantChatbox prediction={prediction} loading={loading} />
         </div>
       </div>
+
+      {initLoading && (
+        <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+          Loading protocols, technicians, and model metadata...
+        </div>
+      )}
+
+      {initError && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {initError}
+        </div>
+      )}
     </div>
   );
+}
+
+function isModelInfo(v: unknown): v is ModelInfo {
+  if (!v || typeof v !== "object") return false;
+  const x = v as Record<string, unknown>;
+  return (
+    typeof x.model_name === "string" &&
+    typeof x.model_version === "string" &&
+    typeof x.n_features === "number"
+  );
+}
+
+function isPredictionResult(v: unknown): v is PredictionResult {
+  if (!v || typeof v !== "object") return false;
+  const x = v as Record<string, unknown>;
+  if (
+    typeof x.probability !== "number" ||
+    typeof x.confidence_lower !== "number" ||
+    typeof x.confidence_upper !== "number" ||
+    typeof x.risk_band !== "string"
+  ) {
+    return false;
+  }
+  const shap = x.shap_explanation as Record<string, unknown> | undefined;
+  return !!shap && Array.isArray(shap.contributions);
 }
 
 /* ─── Helpers ───────────────────────────────────────────── */

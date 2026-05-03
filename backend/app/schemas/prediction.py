@@ -1,5 +1,6 @@
 """Pydantic schemas for pregnancy prediction API."""
 
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -74,3 +75,26 @@ class ModelInfoResponse(BaseModel):
     best_model_key: str
     training_split: dict = {}
     top_features: list = []
+
+
+class PredictionHistoryItem(BaseModel):
+    """Single prediction history record."""
+
+    prediction_id: int
+    transfer_id: Optional[int] = None
+    model_name: str
+    model_version: Optional[str] = None
+    probability: float
+    confidence_lower: Optional[float] = None
+    confidence_upper: Optional[float] = None
+    risk_band: Optional[str] = None
+    predicted_at: datetime
+    shap_json: Optional[dict] = None
+
+
+class PredictionHistoryResponse(BaseModel):
+    """List of prediction history records."""
+
+    predictions: list[PredictionHistoryItem]
+    total: int
+

@@ -23,7 +23,7 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Search, Upload } from "lucide-react";
 
 export default function DataEntryPage() {
   const navigate = useNavigate();
@@ -36,13 +36,19 @@ export default function DataEntryPage() {
   const [filterProtocol, setFilterProtocol] = useState("");
   const [filterTech, setFilterTech] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const pageSize = 25;
 
   // Load reference data
   useEffect(() => {
+    let cancelled = false;
+
     Promise.all([
       api.get<PaginatedResponse<Protocol>>("/protocols/", {
         params: { page_size: 100 },
@@ -50,15 +56,30 @@ export default function DataEntryPage() {
       api.get<PaginatedResponse<Technician>>("/technicians/", {
         params: { page_size: 100 },
       }),
-    ]).then(([protocolRes, techRes]) => {
-      setProtocols(protocolRes.data.items);
-      setTechnicians(techRes.data.items);
-    });
+    ])
+      .then(([protocolRes, techRes]) => {
+        if (cancelled) return;
+        setProtocols(protocolRes.data.items);
+        setTechnicians(techRes.data.items);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        const msg =
+          err instanceof Error
+            ? err.message
+            : "Failed to load protocols and technicians";
+        setError(msg);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Load transfers
   useEffect(() => {
     setLoading(true);
+    setError(null);
     const params: Record<string, string | number> = {
       page,
       page_size: pageSize,
@@ -75,8 +96,69 @@ export default function DataEntryPage() {
         setTotal(res.data.total);
         setPages(res.data.pages);
       })
+      .catch((err: unknown) => {
+        const msg =
+          err instanceof Error ? err.message : "Failed to load transfer records";
+        setError(msg);
+        setTransfers([]);
+        setTotal(0);
+        setPages(0);
+      })
       .finally(() => setLoading(false));
   }, [page, search, filterResult, filterProtocol, filterTech]);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith(".csv")) {
+      setUploadError("Please upload a CSV file");
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await api.post<{ 
+        message: string; 
+        created: number; 
+        updated: number; 
+        skipped: number; 
+      }>("/import/csv", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const { created, updated, skipped } = response.data;
+      setUploadSuccess(
+        `Import successful: ${created} created, ${updated} updated, ${skipped} skipped`
+      );
+      
+      // Auto-dismiss success message after 5 seconds
+      setTimeout(() => setUploadSuccess(null), 5000);
+      
+      // Refresh the transfers list
+      setPage(1);
+      setSearch("");
+      setFilterResult("");
+      setFilterProtocol("");
+      setFilterTech("");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to upload CSV file";
+      setUploadError(msg);
+    } finally {
+      setUploading(false);
+      // Reset file input
+      event.target.value = "";
+    }
+  };
 
   const resultBadge = (result: string | null) => {
     if (!result) return <span className="text-muted-foreground">—</span>;
@@ -91,22 +173,66 @@ export default function DataEntryPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold">ET Transfer Records</h2>
           <p className="text-sm text-muted-foreground">
             {total} total records
           </p>
         </div>
-        <Button onClick={() => navigate("/data-entry/new")}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Transfer
-        </Button>
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+          <input
+            type="file"
+            id="csv-upload"
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileUpload}
+            disabled={uploading}
+          />
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById("csv-upload")?.click()}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                Import CSV
+              </>
+            )}
+          </Button>
+          <Button onClick={() => navigate("/app/data-entry/new")}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Transfer
+          </Button>
+        </div>
       </div>
+
+      {/* Upload feedback */}
+      {uploadSuccess && (
+        <div className="rounded-md border border-primary/30 bg-primary/15 p-3 text-sm text-primary">
+          {uploadSuccess}
+        </div>
+      )}
+      {uploadError && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+          {uploadError}
+        </div>
+      )}
 
       {/* Filters */}
       <Card>
         <CardContent className="pt-4">
+          {error && (
+            <div className="mb-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
           <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -236,11 +362,11 @@ export default function DataEntryPage() {
 
       {/* Pagination */}
       {pages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             Page {page} of {pages} ({total} records)
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-auto">
             <Button
               variant="outline"
               size="sm"

@@ -28,6 +28,16 @@ class GradingResult(BaseModel):
     heatmap_available: bool = Field(False, description="Whether Grad-CAM heatmap was generated")
 
 
+class GradingResultWithHeatmap(BaseModel):
+    """Response from embryo-with-heatmap endpoint."""
+
+    grade_label: str = Field(..., description="Predicted grade: High, Medium, or Low viability")
+    grade_class: int = Field(..., ge=0, le=2, description="Grade class index (0=Low, 1=Medium, 2=High)")
+    grade_probabilities: GradeProbabilities
+    viability_score: float = Field(..., ge=0, le=1, description="Viability probability (0-1)")
+    heatmap_base64: str | None = Field(None, description="Base64-encoded Grad-CAM heatmap JPEG")
+
+
 class ImageUploadResponse(BaseModel):
     """Response from image upload endpoint."""
     image_id: int

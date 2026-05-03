@@ -4,10 +4,17 @@ __pycache__/
 *$py.class
 *.so
 .venv/
+venv/
+**/venv/
+backend/venv/
+backend/.venv/
 *.egg-info/
 *.egg
 dist/
 build/
+.pytest_cache/
+.coverage
+coverage.xml
 
 # Node
 node_modules/
@@ -26,8 +33,14 @@ docker-compose.override.yml
 .idea/
 
 # ML artifacts
+ml/artifacts/
 ml/artifacts/*.pkl
 ml/artifacts/*.joblib
+
+# Local backend runtime/test outputs
+backend/*.db
+backend/*_output.txt
+backend/test_results.txt
 
 # OS
 .DS_Store
@@ -35,3 +48,9 @@ Thumbs.db
 
 # Uploaded images
 uploads/
+
+# Agent/workflow local state
+.gsd/
+
+# Local training exports
+ovulite_training_*.csv

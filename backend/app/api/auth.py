@@ -8,10 +8,16 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
-from app.auth.security import create_access_token, hash_password, verify_password
+from app.auth.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+    verify_token,
+)
 from app.database import get_db
 from app.models.user import User
-from app.schemas.auth import TokenResponse
+from app.schemas.auth import TokenResponse, RefreshTokenRequest
 from app.schemas.user import UserCreate, UserResponse
 
 logger = logging.getLogger(__name__)
@@ -49,8 +55,62 @@ def login(
     access_token = create_access_token(
         data={"sub": user.username, "role": user.role}
     )
+    refresh_token = create_refresh_token(
+        data={"sub": user.username}
+    )
     logger.info("User '%s' logged in successfully", user.username)
-    return TokenResponse(access_token=access_token)
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh_access_token(
+    payload: RefreshTokenRequest,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    """Exchange a valid refresh token for a new access token.
+    
+    Accepts refresh_token as JSON body field.
+    Returns new access_token and the same refresh_token.
+    """
+    try:
+        # Verify refresh token (must be type="refresh")
+        token_payload = verify_token(payload.refresh_token, token_type="refresh")
+        username = token_payload.get("sub")
+        if not username:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+        
+        # Verify user still exists and is active
+        user = db.query(User).filter(User.username == username).first()
+        if user is None or not user.active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found or inactive",
+            )
+        
+        # Create new access token
+        new_access_token = create_access_token(
+            data={"sub": user.username, "role": user.role}
+        )
+        
+        logger.info("Refreshed access token for user '%s'", user.username)
+        return TokenResponse(
+            access_token=new_access_token,
+            refresh_token=payload.refresh_token,  # Return same refresh token
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Token refresh failed: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not refresh token",
+        )
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)

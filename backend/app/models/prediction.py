@@ -2,8 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import ForeignKey, String, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import ForeignKey, JSON, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -25,7 +24,7 @@ class Prediction(Base):
     confidence_lower: Mapped[Optional[Decimal]] = mapped_column()
     confidence_upper: Mapped[Optional[Decimal]] = mapped_column()
     risk_band: Mapped[Optional[str]] = mapped_column(String(20))
-    shap_json: Mapped[Optional[Any]] = mapped_column(JSONB)
+    shap_json: Mapped[Optional[Any]] = mapped_column(JSON)
     predicted_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Relationships

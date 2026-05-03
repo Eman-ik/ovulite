@@ -10,9 +10,9 @@ An uncertainty-aware, explainable AI decision-support platform for cattle IVF an
 
 | Attribute        | Value                                |
 |------------------|--------------------------------------|
-| Current Phase    | Phase 0 – Foundation & Scaffold      |
-| Version          | 0.0.0 (pre-alpha)                    |
-| Last Updated     | 2026-02-26                           |
+| Current Phase    | Phase 5 – Analytics Dashboard (95% complete) |
+| Version          | 0.5.0 (pre-release)                  |
+| Last Updated     | 2026-03-06                           |
 | Repository       | Ovulite new                          |
 | Team             | Eman Malik, Inshal Zafar             |
 | Supervisor       | Dr. Nusrat Shaheen                   |

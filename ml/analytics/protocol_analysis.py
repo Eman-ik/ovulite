@@ -121,7 +121,9 @@ def protocol_shap_importance(df: pd.DataFrame) -> dict:
 
     # Permutation importance
     from sklearn.inspection import permutation_importance
-    result = permutation_importance(model, X, y, n_repeats=20, random_state=SEED, n_jobs=-1)
+    # Use a single worker to avoid process-spawn memory failures on Windows and
+    # low-memory container environments during API-triggered pipeline runs.
+    result = permutation_importance(model, X, y, n_repeats=20, random_state=SEED, n_jobs=1)
 
     importances = {}
     for i, col in enumerate(X.columns):

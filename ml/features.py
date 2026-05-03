@@ -56,10 +56,16 @@ _COL_MAP = {
 
 def _parse_date(val: str) -> pd.Timestamp | None:
     """Parse M/D/YYYY or similar date strings, return None for dirty values."""
-    if not val or val.strip() in (".", "", "nan", "None"):
+    if val is None:
+        return None
+    if isinstance(val, float) and pd.isna(val):
+        return None
+
+    s = str(val).strip()
+    if s in (".", "", "nan", "None"):
         return None
     try:
-        return pd.to_datetime(val, format="mixed", dayfirst=False)
+        return pd.to_datetime(s, format="mixed", dayfirst=False)
     except Exception:
         return None
 
@@ -152,15 +158,22 @@ def build_feature_matrix(csv_path: str | None = None) -> pd.DataFrame:
     else:
         df["days_opu_to_et"] = np.nan
 
-    # BC missing flag
-    df["bc_missing"] = df["bc_score"].isna().astype(int)
+    # Ensure bc_score exists even when source CSV only has BCScore.
+    if "bc_score" not in df.columns:
+        if "bc_score_alt" in df.columns:
+            df["bc_score"] = pd.to_numeric(df["bc_score_alt"], errors="coerce")
+        else:
+            df["bc_score"] = np.nan
 
-    # Use bc_score_alt as fallback if primary is missing
+    # Use bc_score_alt as fallback if primary is missing.
     if "bc_score_alt" in df.columns:
         mask = df["bc_score"].isna() & df["bc_score_alt"].notna()
         df.loc[mask, "bc_score"] = pd.to_numeric(
             df.loc[mask, "bc_score_alt"], errors="coerce"
         )
+
+    # BC missing flag
+    df["bc_missing"] = df["bc_score"].isna().astype(int)
 
     # Binary target: Pregnant=1, Open=0; exclude Recheck and missing
     df = df[df["pc1_result"].isin(["Pregnant", "Open"])].copy()
@@ -210,9 +223,13 @@ def preprocess_for_model(
             df[col] = np.nan
         if fit:
             median_val = df[col].median()
+            if pd.isna(median_val):
+                median_val = 0.0
             encoder_map[f"{col}_median"] = median_val
         else:
-            median_val = encoder_map.get(f"{col}_median", 0)
+            median_val = encoder_map.get(f"{col}_median", 0.0)
+            if pd.isna(median_val):
+                median_val = 0.0
         df[col] = df[col].fillna(median_val)
         feature_cols.append(col)
 

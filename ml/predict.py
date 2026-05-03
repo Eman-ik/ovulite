@@ -20,13 +20,9 @@ class PregnancyPredictor:
         """Load model artifacts for the given version (or latest)."""
         if version:
             self.artifact_dir = ARTIFACTS_DIR / version
+            self._validate_artifact_dir(self.artifact_dir)
         else:
-            # Find latest version by directory modification time
-            versions = sorted(ARTIFACTS_DIR.iterdir(), key=lambda p: p.stat().st_mtime)
-            versions = [v for v in versions if v.is_dir()]
-            if not versions:
-                raise FileNotFoundError("No model artifacts found in %s" % ARTIFACTS_DIR)
-            self.artifact_dir = versions[-1]
+            self.artifact_dir = self._resolve_latest_valid_artifact_dir()
 
         self.version = self.artifact_dir.name
         logger.info("Loading model artifacts from %s", self.artifact_dir)
@@ -53,10 +49,43 @@ class PregnancyPredictor:
                 if candidate.exists():
                     model_path = candidate
                     break
+        if not model_path.exists():
+            raise FileNotFoundError(
+                f"No trained model file found under {self.artifact_dir}. "
+                "Expected one of: logistic_model.joblib, xgboost_model.joblib, tabpfn_model.joblib"
+            )
 
         self.model = joblib.load(model_path)
         self.model_name = self.metadata.get("models", {}).get(best_key, {}).get("name", best_key)
         logger.info("Loaded model: %s (version: %s)", self.model_name, self.version)
+
+    @staticmethod
+    def _validate_artifact_dir(path: Path) -> None:
+        required = ["encoder_map.joblib", "feature_names.json", "metadata.json"]
+        missing = [name for name in required if not (path / name).exists()]
+        if missing:
+            raise FileNotFoundError(
+                f"Model artifact directory is incomplete: {path}. Missing files: {', '.join(missing)}"
+            )
+
+    @classmethod
+    def _resolve_latest_valid_artifact_dir(cls) -> Path:
+        if not ARTIFACTS_DIR.exists():
+            raise FileNotFoundError(f"No model artifacts found in {ARTIFACTS_DIR}")
+
+        versions = [p for p in ARTIFACTS_DIR.iterdir() if p.is_dir() and p.name.startswith("v")]
+        versions = sorted(versions, key=lambda p: p.stat().st_mtime)
+        for candidate in reversed(versions):
+            try:
+                cls._validate_artifact_dir(candidate)
+                return candidate
+            except FileNotFoundError:
+                continue
+
+        raise FileNotFoundError(
+            f"No complete model artifact set found in {ARTIFACTS_DIR}. "
+            "Run training to generate versioned artifacts."
+        )
 
     def predict(self, features: dict) -> dict:
         """Generate pregnancy prediction for a single transfer.

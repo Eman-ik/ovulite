@@ -163,12 +163,33 @@ export default function AnalyticsPage() {
           api.get("/analytics/donors"),
           api.get("/analytics/biomarkers"),
         ]);
+
+      if (!isKpis(kpiRes.data)) {
+        throw new Error("Unexpected analytics KPI response format.");
+      }
+
       setKpis(kpiRes.data);
-      setTrends(trendRes.data);
-      setFunnel(funnelRes.data.stages);
-      setProtocols(protocolRes.data.protocols);
-      setDonors(donorRes.data.donors);
-      setBiomarkers(bioRes.data);
+      setTrends(Array.isArray(trendRes.data) ? trendRes.data : []);
+      setFunnel(
+        Array.isArray((funnelRes.data as { stages?: unknown }).stages)
+          ? (funnelRes.data as { stages: FunnelStage[] }).stages
+          : []
+      );
+      setProtocols(
+        Array.isArray((protocolRes.data as { protocols?: unknown }).protocols)
+          ? (protocolRes.data as { protocols: ProtocolRate[] }).protocols
+          : []
+      );
+      setDonors(
+        Array.isArray((donorRes.data as { donors?: unknown }).donors)
+          ? (donorRes.data as { donors: DonorStat[] }).donors
+          : []
+      );
+      setBiomarkers(
+        bioRes.data && typeof bioRes.data === "object"
+          ? (bioRes.data as Record<string, BiomarkerResult>)
+          : {}
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load analytics";
       setError(msg);
@@ -223,14 +244,14 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="ov-reveal ov-stagger-1 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Analytics Dashboard</h2>
           <p className="text-muted-foreground">
             Reproductive KPIs, protocol effectiveness, donor performance & biomarker analysis
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Button variant="outline" size="sm" onClick={fetchAll} disabled={running}>
             <RefreshCw className={`mr-2 h-4 w-4 ${running ? "animate-spin" : ""}`} />
             Refresh
@@ -247,7 +268,7 @@ export default function AnalyticsPage() {
       )}
 
       {/* Tab navigation */}
-      <div className="flex gap-1 border-b">
+      <div className="ov-reveal ov-stagger-2 flex gap-1 overflow-x-auto border-b pb-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -273,6 +294,19 @@ export default function AnalyticsPage() {
   );
 }
 
+function isKpis(v: unknown): v is KPIs {
+  if (!v || typeof v !== "object") return false;
+  const x = v as Record<string, unknown>;
+  return (
+    typeof x.total_transfers === "number" &&
+    typeof x.with_outcome === "number" &&
+    typeof x.pregnant === "number" &&
+    typeof x.open === "number" &&
+    x.entity_counts != null &&
+    typeof x.entity_counts === "object"
+  );
+}
+
 /* ─── Tab: Overview ─────────────────────────────────────── */
 
 function OverviewTab({
@@ -290,7 +324,7 @@ function OverviewTab({
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="ov-reveal ov-stagger-1 ov-hover-lift">
           <CardHeader className="pb-2">
             <CardDescription>Total Transfers</CardDescription>
             <CardTitle className="text-3xl">{kpis.total_transfers.toLocaleString()}</CardTitle>
@@ -302,10 +336,10 @@ function OverviewTab({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="ov-reveal ov-stagger-2 ov-hover-lift">
           <CardHeader className="pb-2">
             <CardDescription>Pregnancy Rate</CardDescription>
-            <CardTitle className="text-3xl text-green-600">{pct(kpis.pregnancy_rate)}</CardTitle>
+            <CardTitle className="text-3xl text-primary">{pct(kpis.pregnancy_rate)}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
@@ -314,7 +348,7 @@ function OverviewTab({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="ov-reveal ov-stagger-3 ov-hover-lift">
           <CardHeader className="pb-2">
             <CardDescription>Unique Donors</CardDescription>
             <CardTitle className="text-3xl">{kpis.entity_counts.donors}</CardTitle>
@@ -326,7 +360,7 @@ function OverviewTab({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="ov-reveal ov-stagger-4 ov-hover-lift">
           <CardHeader className="pb-2">
             <CardDescription>Embryo Utilization</CardDescription>
             <CardTitle className="text-3xl">{fmt(kpis.embryo_utilization)}</CardTitle>
@@ -341,12 +375,12 @@ function OverviewTab({
 
       {/* Fresh vs Frozen */}
       {Object.keys(kpis.fresh_vs_frozen).length > 0 && (
-        <Card>
+        <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
           <CardHeader>
             <CardTitle>Fresh vs Frozen</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-8">
+            <div className="flex flex-wrap gap-5 sm:gap-8">
               {Object.entries(kpis.fresh_vs_frozen).map(([type, stats]) => (
                 <div key={type} className="text-center">
                   <div className="text-2xl font-bold">{pct(stats.rate)}</div>
@@ -363,7 +397,7 @@ function OverviewTab({
 
       {/* IVF Funnel */}
       {funnel.length > 0 && (
-        <Card>
+        <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5" />
@@ -407,7 +441,7 @@ function OverviewTab({
 
       {/* Monthly Trends */}
       {trends.length > 0 && (
-        <Card>
+        <Card className="ov-reveal ov-stagger-5 ov-hover-lift">
           <CardHeader>
             <CardTitle>Monthly Pregnancy Rate Trend</CardTitle>
             <CardDescription>

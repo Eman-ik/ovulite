@@ -105,6 +105,9 @@ def run_qc_pipeline(
         "technicians_analyzed": len(tech_stats),
         "protocols_analyzed": len(protocol_stats),
         "months_analyzed": len(monthly),
+        "global_pregnancy_rate": round(float(df["pregnant"].mean()), 4)
+        if "pregnant" in df.columns and len(df) > 0
+        else None,
     }
 
     if detection_result:
@@ -128,6 +131,24 @@ def run_qc_pipeline(
 
     with open(save_dir / "qc_alerts.json", "w") as f:
         json.dump(all_alerts, f, indent=2)
+
+    # Persist additional QC artifacts for API retrieval and auditability.
+    with open(save_dir / "qc_technicians.json", "w") as f:
+        json.dump(tech_stats.to_dict(orient="records"), f, indent=2, default=str)
+
+    with open(save_dir / "qc_protocols.json", "w") as f:
+        json.dump(protocol_stats.to_dict(orient="records"), f, indent=2, default=str)
+
+    with open(save_dir / "qc_monthly_metrics.json", "w") as f:
+        json.dump(monthly.to_dict(orient="records"), f, indent=2, default=str)
+
+    with open(save_dir / "qc_anomalous_batches.json", "w") as f:
+        json.dump(
+            results_df[results_df["is_anomaly"]].to_dict(orient="records"),
+            f,
+            indent=2,
+            default=str,
+        )
 
     logger.info("=" * 60)
     logger.info(f"QC Pipeline complete. Artifacts saved to {save_dir}")

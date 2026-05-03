@@ -8,7 +8,14 @@ DATABASE_URL = os.getenv(
     "postgresql://ovulite:ovulite_dev_password@db:5432/ovulite",
 )
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_size=int(os.getenv("DB_POOL_SIZE", "20")),
+    max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "40")),
+    pool_recycle=int(os.getenv("DB_POOL_RECYCLE", "3600")),
+    echo=os.getenv("SQLALCHEMY_ECHO", "false").lower() == "true",
+)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 

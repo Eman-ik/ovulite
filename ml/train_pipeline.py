@@ -330,10 +330,9 @@ def run_full_pipeline(csv_path: str | None = None, version: str | None = None) -
 
     # ── 7. Confidence intervals ──
     if best_model is not None:
-        best_probs = (
-            results[best_key].get("calibrated_y_prob_test")
-            or results[best_key]["y_prob_test"]
-        )
+        best_probs = results[best_key].get("calibrated_y_prob_test")
+        if best_probs is None:
+            best_probs = results[best_key]["y_prob_test"]
         ci_lower, ci_upper = compute_confidence_interval(best_probs)
     else:
         ci_lower = ci_upper = np.array([])

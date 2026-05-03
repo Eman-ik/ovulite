@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import type {
   PaginatedResponse,
   Donor,
+  Embryo,
   Sire,
   Recipient,
   Technician,
@@ -81,6 +82,8 @@ export default function TransferFormPage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
+  const [currentEmbryoId, setCurrentEmbryoId] = useState<number | null>(null);
 
   // Reference data
   const [donors, setDonors] = useState<Donor[]>([]);
@@ -91,6 +94,8 @@ export default function TransferFormPage() {
 
   // Load reference data
   useEffect(() => {
+    let cancelled = false;
+
     Promise.all([
       api.get<PaginatedResponse<Donor>>("/donors/", {
         params: { page_size: 100 },
@@ -107,20 +112,47 @@ export default function TransferFormPage() {
       api.get<PaginatedResponse<Protocol>>("/protocols/", {
         params: { page_size: 100 },
       }),
-    ]).then(([donorRes, sireRes, recipRes, techRes, protoRes]) => {
-      setDonors(donorRes.data.items);
-      setSires(sireRes.data.items);
-      setRecipients(recipRes.data.items);
-      setTechnicians(techRes.data.items);
-      setProtocols(protoRes.data.items);
-    });
+    ])
+      .then(([donorRes, sireRes, recipRes, techRes, protoRes]) => {
+        if (cancelled) return;
+        setDonors(donorRes.data.items);
+        setSires(sireRes.data.items);
+        setRecipients(recipRes.data.items);
+        setTechnicians(techRes.data.items);
+        setProtocols(protoRes.data.items);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        const msg =
+          err instanceof Error
+            ? err.message
+            : "Failed to load donors, sires, recipients, technicians, and protocols";
+        setError(msg);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Load existing record for edit
   useEffect(() => {
-    if (isEdit) {
-      api.get<ETTransferDetail>(`/transfers/${id}`).then((res) => {
+    if (!isEdit) {
+      setCurrentEmbryoId(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadTransfer = async () => {
+      setInitialLoading(true);
+      setError("");
+      try {
+        const res = await api.get<ETTransferDetail>(`/transfers/${id}`);
+        if (cancelled) return;
         const t = res.data;
+
+        setCurrentEmbryoId(t.embryo_id ?? null);
         setForm({
           et_number: t.et_number?.toString() ?? "",
           et_date: t.et_date ?? "",
@@ -134,7 +166,7 @@ export default function TransferFormPage() {
           heat_observed:
             t.heat_observed === null ? "" : t.heat_observed ? "true" : "false",
           heat_day: t.heat_day?.toString() ?? "",
-          donor_id: "", // not directly on transfer
+          donor_id: "",
           sire_id: "",
           embryo_stage: t.embryo_stage?.toString() ?? "",
           embryo_grade: t.embryo_grade?.toString() ?? "",
@@ -146,8 +178,35 @@ export default function TransferFormPage() {
           pc1_date: t.pc1_date ?? "",
           pc1_result: t.pc1_result ?? "",
         });
-      });
-    }
+
+        if (t.embryo_id) {
+          const embryoRes = await api.get<Embryo>(`/embryos/${t.embryo_id}`);
+          if (cancelled) return;
+          const embryo = embryoRes.data;
+          setForm((prev) => ({
+            ...prev,
+            donor_id: embryo.donor_id?.toString() ?? "",
+            sire_id: embryo.sire_id?.toString() ?? "",
+            opu_date: embryo.opu_date ?? "",
+            cane_number: embryo.cane_number ?? "",
+            fresh_or_frozen: embryo.fresh_or_frozen ?? prev.fresh_or_frozen,
+          }));
+        }
+      } catch (err: unknown) {
+        if (cancelled) return;
+        const msg =
+          err instanceof Error ? err.message : "Failed to load transfer record";
+        setError(msg);
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
+    };
+
+    void loadTransfer();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, isEdit]);
 
   const set = (field: keyof FormData) => (
@@ -176,8 +235,8 @@ export default function TransferFormPage() {
         }
       }
 
-      // First create embryo if we have embryo data
-      let embryo_id: number | undefined;
+      // Create or update embryo if embryo data is present.
+      let embryo_id: number | undefined = currentEmbryoId ?? undefined;
       if (form.embryo_stage || form.embryo_grade) {
         const embryoPayload: Record<string, unknown> = {};
         if (form.donor_id) embryoPayload.donor_id = parseInt(form.donor_id);
@@ -190,11 +249,19 @@ export default function TransferFormPage() {
         embryoPayload.fresh_or_frozen = form.fresh_or_frozen || null;
         if (form.cane_number) embryoPayload.cane_number = form.cane_number;
 
-        const embryoRes = await api.post<{ embryo_id: number }>(
-          "/embryos/",
-          embryoPayload
-        );
-        embryo_id = embryoRes.data.embryo_id;
+        if (embryo_id && isEdit) {
+          const embryoRes = await api.put<{ embryo_id: number }>(
+            `/embryos/${embryo_id}`,
+            embryoPayload
+          );
+          embryo_id = embryoRes.data.embryo_id;
+        } else {
+          const embryoRes = await api.post<{ embryo_id: number }>(
+            "/embryos/",
+            embryoPayload
+          );
+          embryo_id = embryoRes.data.embryo_id;
+        }
       }
 
       // Build transfer payload
@@ -227,7 +294,7 @@ export default function TransferFormPage() {
         await api.post("/transfers/", payload);
       }
 
-      navigate("/data-entry");
+      navigate("/app/data-entry");
     } catch (err: unknown) {
       const msg =
         err instanceof Error
@@ -247,7 +314,7 @@ export default function TransferFormPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/data-entry")}>
+        <Button variant="ghost" size="sm" onClick={() => navigate("/app/data-entry")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
@@ -257,6 +324,12 @@ export default function TransferFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {initialLoading && (
+          <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+            Loading transfer details...
+          </div>
+        )}
+
         {/* Transfer Info */}
         <Card>
           <CardHeader>
@@ -558,7 +631,7 @@ export default function TransferFormPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/data-entry")}
+            onClick={() => navigate("/app/data-entry")}
           >
             Cancel
           </Button>

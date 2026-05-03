@@ -15,6 +15,56 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
+def _normalize_csv_columns(df: "pd.DataFrame") -> "pd.DataFrame":
+    """Normalize CSV column names to internal format.
+    
+    Maps raw CSV headers to internal column names, handling:
+    - Whitespace and special characters (parentheses, hyphens, etc)
+    - Trailing spaces in column names
+    - Duplicate columns (kept as-is for second occurrence)
+    """
+    col_map = {
+        "CL measure (mm)": "cl_measure_mm",
+        "CL Side": "cl_side",
+        "ET Date": "et_date",
+        "ET Tech": "technician_name",
+        "Embryo Stage 4-8": "embryo_stage",
+        "1st PC Result": "pc1_result",
+        "BC Score": "bc_score",
+        "BCScore": "bc_score",
+        "Heat day": "heat_day",
+        "Protocol": "protocol_name",
+        "Fresh or Frozen": "fresh_or_frozen",
+        "Donor Breed": "donor_breed",
+        "Donor": "donor_tag",
+        "SIRE Name": "sire_name",
+        "SIRE Breed": "sire_breed",
+        "SIRE BW EPD": "sire_bw_epd",
+        "Customer ID": "customer_id",
+        "CLIENT ": "client_id",
+        "OPU Date": "opu_date",
+        "Semen type": "semen_type",
+        "Embryo Grade": "embryo_grade",
+    }
+
+    rename_map = {}
+    seen_cols = set()
+    for raw_col in df.columns:
+        stripped = raw_col.strip()
+        if stripped in col_map:
+            internal_name = col_map[stripped]
+            if internal_name not in seen_cols:
+                rename_map[raw_col] = internal_name
+                seen_cols.add(internal_name)
+        else:
+            clean = stripped.lower().replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
+            if clean not in seen_cols:
+                rename_map[raw_col] = clean
+                seen_cols.add(clean)
+
+    return df.rename(columns=rename_map)
+
+
 def load_et_data(csv_path: Path | None = None) -> "pd.DataFrame":
     """Load and prepare ET data for analytics."""
     import pandas as pd
@@ -23,33 +73,32 @@ def load_et_data(csv_path: Path | None = None) -> "pd.DataFrame":
 
     path = csv_path or DATA_CSV
     if not path.exists():
-        # Try globbing
         candidates = list(path.parent.glob("*ET Data*"))
         if candidates:
             path = candidates[0]
+        else:
+            raise FileNotFoundError(f"CSV not found at {path}")
 
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, dtype=str)
+    df = df.dropna(how="all").reset_index(drop=True)
+    df = df.replace(".", None)
 
-    # Normalize column names
-    col_map = {}
-    for c in df.columns:
-        clean = c.strip().lower().replace(" ", "_").replace(".", "_")
-        col_map[c] = clean
-    df = df.rename(columns=col_map)
+    # Normalize column names using centralized mapping
+    df = _normalize_csv_columns(df)
+
+    # Convert numeric columns after normalization
+    for col in ["cl_measure_mm", "bc_score", "heat_day"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
     # Ensure pregnant column
     if "pregnant" not in df.columns:
         if "pc1_result" in df.columns:
-            df["pregnant"] = df["pc1_result"].str.strip().str.upper().map(
+            df["pregnant"] = df["pc1_result"].fillna("").str.strip().str.upper().map(
                 {"P": 1, "PREGNANT": 1, "O": 0, "OPEN": 0}
             )
         else:
             df["pregnant"] = None
-
-    # Ensure consistent types
-    for col in ["cl_measure_mm", "bc_score", "heat_day"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
 
     return df
 

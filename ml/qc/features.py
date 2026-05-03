@@ -16,36 +16,77 @@ logger = logging.getLogger(__name__)
 
 
 def load_et_data(csv_path: Path | None = None) -> pd.DataFrame:
-    """Load and clean ET transfer data for QC analysis."""
+    """Load and clean ET transfer data for QC analysis.
+    
+    Maps raw CSV column names to internal canonical names.
+    Handles trailing spaces and special characters in headers.
+    """
     path = csv_path or DATA_CSV
+    if not path.exists():
+        raise FileNotFoundError(f"Data CSV not found at {path}")
+
     df = pd.read_csv(str(path), dtype=str)
     df = df.dropna(how="all").reset_index(drop=True)
+    df = df.replace(".", None)
 
-    # Parse key columns
+    # Column mapping: raw CSV header -> internal name
+    col_map = {
+        "CL measure (mm)": "cl_measure_mm",
+        "CL Measure (mm)": "cl_measure_mm",
+        "Embryo Stage 4-8": "embryo_stage",
+        "Embryo Grade": "embryo_grade",
+        "BCScore": "bc_score",
+        "BC Score": "bc_score",
+        "Heat day": "heat_day",
+        "ET Tech": "technician_name",
+        "Protocol": "protocol_name",
+        "Donor Breed": "donor_breed",
+        "Donor": "donor_tag",
+        "Fresh or Frozen": "fresh_or_frozen",
+        "Customer ID": "customer_id",
+        "CL Side": "cl_side",
+        "1st PC Result": "pc1_result",
+        "ET Date": "et_date",
+        "SIRE Name": "sire_name",
+        "SIRE Breed": "sire_breed",
+        "SIRE BW EPD": "sire_bw_epd",
+        "CLIENT ": "client_id",
+        "OPU Date": "opu_date",
+        "Semen type": "semen_type",
+    }
+
+    # Apply mapping for known columns
+    for raw_col, internal_col in col_map.items():
+        for col in df.columns:
+            if col.strip() == raw_col:
+                df[internal_col] = df[col]
+                break
+
+    # Parse numeric columns
     df["et_number"] = pd.to_numeric(df.get("# ET"), errors="coerce")
-    df["embryo_stage"] = pd.to_numeric(df.get("Embryo Stage 4-8"), errors="coerce")
-    df["embryo_grade"] = pd.to_numeric(df.get("Embryo Grade"), errors="coerce")
-    df["cl_measure_mm"] = pd.to_numeric(df.get("CL Measure (mm)"), errors="coerce")
-    df["bc_score"] = pd.to_numeric(df.get("BCScore"), errors="coerce")
-    df["heat_day"] = pd.to_numeric(df.get("Heat Day"), errors="coerce")
+    df["embryo_stage"] = pd.to_numeric(df.get("embryo_stage"), errors="coerce")
+    df["embryo_grade"] = pd.to_numeric(df.get("embryo_grade"), errors="coerce")
+    df["cl_measure_mm"] = pd.to_numeric(df.get("cl_measure_mm"), errors="coerce")
+    df["bc_score"] = pd.to_numeric(df.get("bc_score"), errors="coerce")
+    df["heat_day"] = pd.to_numeric(df.get("heat_day"), errors="coerce")
 
-    # Categorical
-    df["technician_name"] = df.get("ET Tech", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["protocol_name"] = df.get("Protocol", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["donor_breed"] = df.get("Donor Breed", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["fresh_or_frozen"] = df.get("Fresh or Frozen", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["customer_id"] = df.get("Customer ID", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["semen_type"] = df.get("Semen Type", pd.Series(dtype=str)).fillna("Unknown").str.strip()
-    df["cl_side"] = df.get("CL Side", pd.Series(dtype=str)).fillna("Unknown").str.strip()
+    # Parse categorical columns
+    df["technician_name"] = df.get("technician_name", "").fillna("Unknown").str.strip()
+    df["protocol_name"] = df.get("protocol_name", "").fillna("Unknown").str.strip()
+    df["donor_breed"] = df.get("donor_breed", "").fillna("Unknown").str.strip()
+    df["fresh_or_frozen"] = df.get("fresh_or_frozen", "").fillna("Unknown").str.strip()
+    df["customer_id"] = df.get("customer_id", "").fillna("Unknown").str.strip()
+    df["semen_type"] = df.get("semen_type", "").fillna("Unknown").str.strip()
+    df["cl_side"] = df.get("cl_side", "").fillna("Unknown").str.strip()
 
-    # Outcome
-    pc1_raw = df.get("1st PC Result", pd.Series(dtype=str)).fillna("")
+    # Parse pregnancy outcome
+    pc1_raw = df.get("pc1_result", "").fillna("")
     df["pregnant"] = pc1_raw.str.strip().map(
         {"Pregnant": 1, "P": 1, "Open": 0, "O": 0, "Recheck": np.nan, "R": np.nan}
     )
 
-    # Dates
-    df["et_date"] = pd.to_datetime(df.get("ET Date"), errors="coerce", dayfirst=True)
+    # Parse dates
+    df["et_date"] = pd.to_datetime(df.get("et_date"), errors="coerce", dayfirst=True)
     df["year_month"] = df["et_date"].dt.to_period("M")
 
     return df
