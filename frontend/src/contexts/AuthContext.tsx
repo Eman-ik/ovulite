@@ -1,13 +1,7 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api";
+import { getRoleLandingPath } from "@/lib/roleRoutes";
 
 export interface User {
   user_id: number;
@@ -35,23 +29,26 @@ const TOKEN_REFRESH_INTERVAL = 25 * 60 * 1000; // 25 minutes (5 min before 30 mi
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem(TOKEN_KEY),
-  );
-  const [refreshToken, setRefreshToken] = useState<string | null>(
-    () => localStorage.getItem(REFRESH_TOKEN_KEY),
-  );
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+  const [refreshToken, setRefreshToken] = useState<string | null>(() => localStorage.getItem(REFRESH_TOKEN_KEY));
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   const loadUser = useCallback(async (accessToken: string) => {
     try {
-      const res = await api.get<User>("/auth/me", {
+      // Add 5 second timeout for loading user
+      const loadUserPromise = api.get<User>("/auth/me", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+      
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("User load timeout")), 5000)
+      );
+      
+      const res = await Promise.race([loadUserPromise, timeoutPromise]) as Awaited<typeof loadUserPromise>;
       setUser(res.data);
-    } catch {
-      // Token invalid or expired — clear it
+    } catch (error) {
+      console.error("[AuthContext] Failed to load user:", error);
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       setToken(null);
@@ -81,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("[AuthContext] Token refresh failed:", error);
-      // Clear tokens and logout
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       setToken(null);
@@ -91,7 +87,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Set up automatic token refresh interval
   useEffect(() => {
     if (!token || !refreshToken) return;
 
@@ -103,7 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [token, refreshToken, refreshAccessToken]);
 
-  // On mount: if token exists, validate and load user
   useEffect(() => {
     if (token) {
       loadUser(token).finally(() => setIsLoading(false));
@@ -112,14 +106,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Centralized 401 handling from API interceptor.
-  // Try to refresh token before logging out.
   useEffect(() => {
     const onUnauthorized = async () => {
       console.log("[AuthContext] Received 401 - attempting token refresh");
       const refreshed = await refreshAccessToken();
       if (!refreshed) {
-        // Refresh failed, logout
         navigate("/login");
       }
     };
@@ -132,18 +123,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (username: string, password: string) => {
-      // FastAPI OAuth2PasswordRequestForm expects form-encoded data
       const params = new URLSearchParams();
       params.append("username", username);
       params.append("password", password);
 
       console.log("[AuthContext] Attempting login for user:", username);
       try {
-        const res = await api.post<{ 
-          access_token: string; 
-          refresh_token: string; 
-          token_type: string; 
-        }>(
+        const res = await api.post<{ access_token: string; refresh_token: string; token_type: string }>(
           "/auth/login",
           params,
           { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
@@ -157,7 +143,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(accessToken);
         setRefreshToken(refreshTokenValue);
 
-        // Load user profile
         console.log("[AuthContext] Fetching user profile with token...");
         const userRes = await api.get<User>("/auth/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -165,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("[AuthContext] Got user profile:", userRes.data.username);
         setUser(userRes.data);
 
-        navigate("/app");
+        navigate(getRoleLandingPath(userRes.data.role));
       } catch (error) {
         console.error("[AuthContext] Login failed:", error);
         throw error;
@@ -173,6 +158,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [navigate],
   );
+
+
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);

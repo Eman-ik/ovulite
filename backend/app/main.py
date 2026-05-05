@@ -11,7 +11,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.auth import ensure_default_admin
 from app.api.analytics import router as analytics_router
+from app.api.autonomous_agent import router as autonomous_agent_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
@@ -70,23 +72,25 @@ def _warm_qc_cache():
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Ovulite API started")
+
+    # Seed the default admin for local/dev databases when no users exist.
+    # This keeps the default login working without requiring a separate bootstrap step.
+    from app.database import SessionLocal
+
+    db = SessionLocal()
+    try:
+      seeded = ensure_default_admin(db)
+      if seeded:
+          logger.info("Seeded default admin user during startup")
+    finally:
+        db.close()
     
-    # Skip cache warming in test environment
-    test_mode = os.getenv("PYTEST_CURRENT_TEST") is not None
-    if not test_mode:
-        # Pre-warm analytics and QC caches in background (non-blocking)
-        executor = ThreadPoolExecutor(max_workers=2)
-        executor.submit(_warm_analytics_cache)
-        executor.submit(_warm_qc_cache)
+    # Skip cache warming - causes startup delays
+    # The caches will be computed on-demand when endpoints are called
     
     yield
     
-    # Shutdown background executor if it was created
-    if not test_mode:
-        try:
-            executor.shutdown(wait=False)
-        except:
-            pass  # Ignore cleanup errors
+    logger.info("Ovulite API shutdown")
 
 
 app = FastAPI(title="Ovulite API", version="0.1.0", lifespan=lifespan)
@@ -102,6 +106,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(autonomous_agent_router, tags=["autonomous_agent"])
 app.include_router(donors_router, prefix="/donors", tags=["donors"])
 app.include_router(sires_router, prefix="/sires", tags=["sires"])
 app.include_router(recipients_router, prefix="/recipients", tags=["recipients"])

@@ -47,7 +47,7 @@ def test_grade_embryo_rejects_invalid_content_type(client, auth_headers):
 
     response = client.post("/grade/embryo", files=files, headers=auth_headers)
     assert response.status_code == 400
-    assert "JPEG" in response.text or "PNG" in response.text
+    assert "invalid image" in response.text.lower()
 
 
 @pytest.mark.integration
@@ -250,3 +250,4 @@ def test_grade_embryo_size_limit(client, auth_headers):
 
     response = client.post("/grade/embryo", files=files, headers=auth_headers)
     assert response.status_code in (400, 413, 422)
+

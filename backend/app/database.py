@@ -8,13 +8,28 @@ DATABASE_URL = os.getenv(
     "postgresql://ovulite:ovulite_dev_password@db:5432/ovulite",
 )
 
+# Fallback to local SQLite if running outside Docker and DATABASE_URL points to 'db' host
+if "@db" in DATABASE_URL and not os.path.exists("/.dockerenv"):
+    DATABASE_URL = "sqlite:///./ovulite_local.db"
+
+engine_args = {
+    "pool_pre_ping": True,
+}
+
+if "sqlite" in DATABASE_URL:
+    # SQLite doesn't support the pool arguments used for Postgres
+    engine_args["connect_args"] = {"check_same_thread": False}
+else:
+    engine_args.update({
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "3600")),
+    })
+
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=int(os.getenv("DB_POOL_SIZE", "20")),
-    max_overflow=int(os.getenv("DB_MAX_OVERFLOW", "40")),
-    pool_recycle=int(os.getenv("DB_POOL_RECYCLE", "3600")),
     echo=os.getenv("SQLALCHEMY_ECHO", "false").lower() == "true",
+    **engine_args
 )
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 

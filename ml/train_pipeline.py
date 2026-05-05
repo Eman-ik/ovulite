@@ -206,9 +206,12 @@ def compute_shap_values(model, X: np.ndarray, feature_names: list[str]) -> dict:
         return {"error": "shap not installed", "values": [], "feature_names": feature_names}
 
     try:
+        # Use a background summary for faster/consistent explanation
+        background = shap.kmeans(X, 50) if len(X) > 50 else X
+        
         # Use appropriate explainer based on model type
         if hasattr(model, "predict_proba"):
-            explainer = shap.Explainer(model.predict_proba, X[:100], feature_names=feature_names)
+            explainer = shap.Explainer(model.predict_proba, background, feature_names=feature_names)
             shap_values = explainer(X)
             # Take SHAP values for positive class (Pregnant)
             if len(shap_values.shape) == 3:
@@ -216,7 +219,7 @@ def compute_shap_values(model, X: np.ndarray, feature_names: list[str]) -> dict:
             else:
                 vals = shap_values.values
         else:
-            explainer = shap.Explainer(model, X[:100], feature_names=feature_names)
+            explainer = shap.Explainer(model, background, feature_names=feature_names)
             shap_values = explainer(X)
             vals = shap_values.values
 
@@ -235,6 +238,7 @@ def compute_shap_values(model, X: np.ndarray, feature_names: list[str]) -> dict:
             else 0.0,
             "feature_names": feature_names,
             "feature_importance": importance[:20],  # top 20
+            "background_summary": background
         }
     except Exception as exc:
         logger.warning("SHAP computation failed: %s", exc)
@@ -355,6 +359,14 @@ def run_full_pipeline(csv_path: str | None = None, version: str | None = None) -
     # Save feature names
     with open(artifact_dir / "feature_names.json", "w") as f:
         json.dump(feature_names, f, indent=2)
+
+    # Save background summary for real-time SHAP
+    if "background_summary" in shap_result:
+        joblib.dump(shap_result["background_summary"], artifact_dir / "background_summary.joblib")
+    else:
+        # Fallback summary
+        summary = X_train[:100] if len(X_train) > 100 else X_train
+        joblib.dump(summary, artifact_dir / "background_summary.joblib")
 
     # Save metadata
     metadata = {

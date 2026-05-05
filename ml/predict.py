@@ -57,6 +57,16 @@ class PregnancyPredictor:
 
         self.model = joblib.load(model_path)
         self.model_name = self.metadata.get("models", {}).get(best_key, {}).get("name", best_key)
+        
+        # Load background summary for SHAP
+        bg_path = self.artifact_dir / "background_summary.joblib"
+        if bg_path.exists():
+            self.background = joblib.load(bg_path)
+            logger.info("Loaded SHAP background summary from %s", bg_path)
+        else:
+            self.background = None
+            logger.warning("No SHAP background found. Contributions may be zero for this version.")
+
         logger.info("Loaded model: %s (version: %s)", self.model_name, self.version)
 
     @staticmethod
@@ -147,12 +157,21 @@ class PregnancyPredictor:
         try:
             import shap
 
-            explainer = shap.Explainer(self.model.predict_proba, X, feature_names=self.feature_names)
+            # Use saved background if available, otherwise fallback to zero-vector to avoid 0s
+            background = self.background
+            if background is None:
+                background = np.zeros_like(X)
+            
+            # Use appropriate explainer
+            explainer = shap.Explainer(self.model.predict_proba, background, feature_names=self.feature_names)
             sv = explainer(X)
+            
             if len(sv.shape) == 3:
                 vals = sv.values[0, :, 1]
+                base_val = float(sv.base_values[0, 1])
             else:
                 vals = sv.values[0]
+                base_val = float(sv.base_values[0])
 
             contributions = sorted(
                 zip(self.feature_names, vals.tolist()),
@@ -160,7 +179,7 @@ class PregnancyPredictor:
                 reverse=True,
             )
             return {
-                "base_value": float(sv.base_values[0][1]) if len(sv.base_values.shape) > 1 else float(sv.base_values[0]),
+                "base_value": base_val,
                 "contributions": contributions[:15],
             }
         except Exception as exc:

@@ -188,7 +188,7 @@ def sample_transfer_data():
         "sire_name": "TEST-SIRE-001",
         "embryo_stage": 7,  # Blastocyst
         "embryo_grade": 1,
-        "cl_size_mm": 25.0,
+        "cl_measure_mm": 25.0,
         "protocol_name": "CIDR",
         "fresh_or_frozen": "Fresh",
         "technician_name": "Test Technician"
@@ -199,7 +199,7 @@ def sample_transfer_data():
 def sample_prediction_input():
     """Sample prediction input for testing"""
     return {
-        "cl_size_mm": 25.0,
+        "cl_measure_mm": 25.0,
         "embryo_stage": 7,
         "embryo_grade": 1,
         "protocol_name": "CIDR",
@@ -207,3 +207,4 @@ def sample_prediction_input():
         "sire_breed": "Angus",
         "fresh_or_frozen": "Fresh"
     }
+

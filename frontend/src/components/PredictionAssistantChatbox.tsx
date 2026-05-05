@@ -106,14 +106,14 @@ export default function PredictionAssistantChatbox({ prediction, loading = false
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div ref={viewportRef} className="max-h-72 space-y-2 overflow-y-auto rounded-md border border-white/15 bg-white/5 p-2">
+        <div ref={viewportRef} className="max-h-72 space-y-2 overflow-y-auto rounded-md border border-[var(--surface-border)] bg-white/75 p-2 shadow-inner backdrop-blur-sm">
           {messages.map((m, idx) => (
             <div
               key={`${m.role}-${idx}`}
               className={`rounded-md px-3 py-2 text-xs leading-relaxed ${
                 m.role === "assistant"
-                  ? "border border-primary/20 bg-primary/10 text-foreground"
-                  : "border border-white/15 bg-white/10 text-foreground"
+                  ? "border border-primary/15 bg-emerald-50/80 text-foreground"
+                  : "border border-[var(--surface-border)] bg-white/90 text-foreground"
               }`}
             >
               <div className="mb-1 flex items-center gap-1.5 font-semibold">

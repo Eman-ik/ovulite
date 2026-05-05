@@ -95,8 +95,14 @@ RISK_BANDS = {
 
 
 def get_risk_band(probability: float) -> str:
-    """Return risk band label for a pregnancy probability."""
-    for band, (lo, hi) in RISK_BANDS.items():
-        if lo <= probability < hi:
-            return band
-    return "High"
+    """Return risk band using business-rule thresholds.
+
+    - High: probability > 0.6
+    - Medium: 0.3 <= probability <= 0.6
+    - Low: probability < 0.3
+    """
+    if probability > 0.6:
+        return "High"
+    if probability >= 0.3:
+        return "Medium"
+    return "Low"

@@ -10,12 +10,12 @@ class PredictionInput(BaseModel):
     """Input features for pregnancy prediction.
 
     These map to the canonical feature set from REQUIREMENTS §3.4.
-    All fields are optional except what the model needs minimally.
+    Required fields enforce the business rule that prediction cannot run on incomplete ET input.
     """
 
     # Numeric features
-    cl_measure_mm: Optional[float] = Field(None, ge=0, le=50, description="CL diameter in mm")
-    embryo_stage: Optional[int] = Field(None, ge=1, le=9, description="IETS embryo stage")
+    cl_measure_mm: float = Field(..., ge=0, le=50, description="CL diameter in mm")
+    embryo_stage: int = Field(..., ge=1, le=9, description="IETS embryo stage")
     embryo_grade: Optional[int] = Field(None, ge=1, le=4, description="IETS embryo grade")
     heat_day: Optional[int] = Field(None, description="Days since heat")
     donor_bw_epd: Optional[float] = Field(None, description="Donor birth weight EPD")
@@ -97,4 +97,6 @@ class PredictionHistoryResponse(BaseModel):
 
     predictions: list[PredictionHistoryItem]
     total: int
+
+
 

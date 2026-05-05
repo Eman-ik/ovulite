@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user
@@ -25,6 +26,28 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def ensure_default_admin(db: Session) -> bool:
+    """Create the default admin user if the database is empty.
+
+    Returns True when a new admin user was created, False otherwise.
+    """
+    user_count = db.query(User).count()
+    if user_count > 0:
+        return False
+
+    admin = User(
+        username="admin",
+        password_hash=hash_password("ovulite2026"),
+        role="admin",
+        full_name="System Administrator",
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    logger.info("Default admin user seeded")
+    return True
+
+
 @router.post("/login", response_model=TokenResponse)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -34,7 +57,17 @@ def login(
 
     Accepts OAuth2-compatible form data (username + password fields).
     """
-    user = db.query(User).filter(User.username == form_data.username).first()
+    login_value = form_data.username.strip()
+    user = (
+        db.query(User)
+        .filter(
+            or_(
+                func.lower(User.username) == func.lower(login_value),
+                func.lower(User.email) == func.lower(login_value),
+            )
+        )
+        .first()
+    )
     if user is None or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -86,7 +119,7 @@ def refresh_access_token(
             )
         
         # Verify user still exists and is active
-        user = db.query(User).filter(User.username == username).first()
+        user = db.query(User).filter(func.lower(User.username) == func.lower(username)).first()
         if user is None or not user.active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -122,7 +155,7 @@ def register(
 
     Open for initial setup; should be admin-only in production.
     """
-    existing = db.query(User).filter(User.username == payload.username).first()
+    existing = db.query(User).filter(func.lower(User.username) == func.lower(payload.username)).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -156,21 +189,11 @@ def seed_admin(db: Session = Depends(get_db)) -> User:
     This is a one-time bootstrap endpoint. Returns 409 if any user
     already exists in the database.
     """
-    user_count = db.query(User).count()
-    if user_count > 0:
+    if not ensure_default_admin(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Users already exist. Seed is only for initial bootstrap.",
         )
 
-    admin = User(
-        username="admin",
-        password_hash=hash_password("ovulite2026"),
-        role="admin",
-        full_name="System Administrator",
-    )
-    db.add(admin)
-    db.commit()
-    db.refresh(admin)
-    logger.info("Default admin user seeded")
-    return admin
+    return db.query(User).filter(func.lower(User.username) == "admin").first()
+

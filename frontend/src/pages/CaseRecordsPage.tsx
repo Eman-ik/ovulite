@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -161,7 +161,7 @@ export default function CaseRecordsPage() {
               <label className="block text-sm font-medium mb-1">Outcome</label>
               <Select
                 value={filter.outcome}
-                onValueChange={(value) => handleFilterChange("outcome", value)}
+                onChange={(e) => handleFilterChange("outcome", (e.target as HTMLSelectElement).value)}
               >
                 <option value="">All Outcomes</option>
                 <option value="pregnant">Pregnant</option>

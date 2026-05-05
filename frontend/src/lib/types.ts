@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Shared TypeScript types for API responses and entities.
  */
 
@@ -111,4 +111,23 @@ export interface AgentHealthResponse {
   vectorstore_status: string;
   lab_data_status: string;
   message?: string;
+}
+
+export interface ETTransferDetail extends ETTransfer {
+  donor_tag?: string | null;
+  donor_breed?: string | null;
+  sire_name?: string | null;
+  recipient_tag?: string | null;
+  technician_name?: string | null;
+  pc1_result: string | null;
+  embryo_id?: number | null;
+  heat_observed?: boolean | null;
+  heat_day?: number | null;
+  technician_id?: number | null;
+  assistant_name?: string | null;
+  pc1_date?: string | null;
+  donor_id?: number | null;
+  sire_id?: number | null;
+  opu_date?: string | null;
+  cane_number?: string | null;
 }

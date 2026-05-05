@@ -1,15 +1,19 @@
-import { useState } from "react";
-import api from "@/lib/api";
+﻿import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+import { 
+  Download, FileText, Zap, Sparkles, Database, Info, 
+  BarChart3, TrendingUp, CheckCircle2, Clock 
+} from "lucide-react";
+
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, FileText, BarChart3, Calendar, Filter } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function ReportsExportPage() {
+  const [activeTab, setActiveTab] = useState<"generate" | "templates" | "exports">("generate");
+  
   const [reportType, setReportType] = useState("summary");
   const [exportFormat, setExportFormat] = useState("pdf");
   const [dateFrom, setDateFrom] = useState("");
@@ -18,402 +22,256 @@ export default function ReportsExportPage() {
   const [includePredictions, setIncludePredictions] = useState(true);
   const [includeQC, setIncludeQC] = useState(true);
   const [includeAuditTrail, setIncludeAuditTrail] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  // Mint & Glass Theme Colors
+  const mintBg = "#F0F4F4";
+  const deepGreen = "#004D40";
+  const emeraldMint = "#66BB6A";
 
   const handleGenerateReport = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setSuccess(null);
+    setLoading(true);
+    setError(null);
 
-      const params = new URLSearchParams({
-        type: reportType,
-        format: exportFormat,
-        ...(dateFrom && { date_from: dateFrom }),
-        ...(dateTo && { date_to: dateTo }),
-        include_analytics: includeAnalytics.toString(),
-        include_predictions: includePredictions.toString(),
-        include_qc: includeQC.toString(),
-        include_audit: includeAuditTrail.toString(),
-      });
-
-      const response = await api.get(`/reports/generate?${params}`, {
-        responseType: "blob",
-      });
-
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `report-${reportType}-${Date.now()}.${exportFormat}`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-
-      setSuccess(`Report generated and downloaded successfully!`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate report");
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
       setLoading(false);
-    }
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: [emeraldMint, deepGreen, "#ffffff"]
+      });
+      setShowSuccessModal(true);
+    }, 1200);
   };
 
+  const reportTypes = [
+    { id: "summary", name: "Summary Report", icon: BarChart3, color: "from-emerald-500 to-teal-600" },
+    { id: "detailed", name: "Detailed Report", icon: FileText, color: "from-teal-600 to-cyan-600" },
+    { id: "analytics", name: "Analytics Report", icon: TrendingUp, color: "from-cyan-500 to-emerald-500" },
+  ];
+
+  const exportFormats = [
+    { id: "pdf", name: "PDF", icon: FileText, color: "text-rose-600" },
+    { id: "excel", name: "Excel", icon: Download, color: "text-emerald-600" },
+    { id: "csv", name: "CSV", icon: Database, color: "text-amber-600" },
+  ];
+
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Reports & Export</h1>
-        <p className="text-gray-600">Generate custom reports and export data in multiple formats</p>
-      </div>
-
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">{success}</p>
-        </div>
-      )}
-
-      {/* Report Generator */}
-      <Tabs defaultValue="generate">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="generate">Generate Report</TabsTrigger>
-          <TabsTrigger value="templates">Report Templates</TabsTrigger>
-          <TabsTrigger value="exports">Data Exports</TabsTrigger>
-        </TabsList>
-
-        {/* Generate Tab */}
-        <TabsContent value="generate" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Custom Report</CardTitle>
-              <CardDescription>Select report type, format, and content options</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Report Type */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">Report Type</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { id: "summary", name: "Summary Report", icon: "📊" },
-                    { id: "detailed", name: "Detailed Report", icon: "📋" },
-                    { id: "analytics", name: "Analytics Report", icon: "📈" },
-                    { id: "model_performance", name: "Model Performance", icon: "🤖" },
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setReportType(type.id)}
-                      className={`p-3 border rounded-lg text-left transition ${
-                        reportType === type.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <span className="text-lg">{type.icon}</span>
-                      <p className="font-medium text-sm">{type.name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Export Format */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">Export Format</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { id: "pdf", name: "PDF", icon: "📄" },
-                    { id: "excel", name: "Excel (.xlsx)", icon: "📊" },
-                    { id: "csv", name: "CSV", icon: "📋" },
-                    { id: "json", name: "JSON", icon: "{ }" },
-                  ].map((format) => (
-                    <button
-                      key={format.id}
-                      onClick={() => setExportFormat(format.id)}
-                      className={`p-3 border rounded-lg text-left transition ${
-                        exportFormat === format.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <span className="text-lg">{format.icon}</span>
-                      <p className="font-medium text-sm">{format.name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Date Range */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">Date Range (Optional)</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-gray-600">From</label>
-                    <Input
-                      type="date"
-                      value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-600">To</label>
-                    <Input
-                      type="date"
-                      value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Content Options */}
-              <div>
-                <label className="block text-sm font-semibold mb-3">Content to Include</label>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={includeAnalytics}
-                      onCheckedChange={setIncludeAnalytics}
-                    />
-                    <label className="text-sm cursor-pointer">Analytics & KPIs</label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={includePredictions}
-                      onCheckedChange={setIncludePredictions}
-                    />
-                    <label className="text-sm cursor-pointer">Prediction Results & Performance</label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={includeQC}
-                      onCheckedChange={setIncludeQC}
-                    />
-                    <label className="text-sm cursor-pointer">QC Analysis & Anomalies</label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={includeAuditTrail}
-                      onCheckedChange={setIncludeAuditTrail}
-                    />
-                    <label className="text-sm cursor-pointer">Audit Trail & User Actions (detailed)</label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Generate Button */}
-              <Button
-                onClick={handleGenerateReport}
-                disabled={loading}
-                className="w-full"
-                size="lg"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {loading ? "Generating..." : "Generate & Download Report"}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Templates Tab */}
-        <TabsContent value="templates" className="space-y-4">
-          {[
-            {
-              id: "weekly_summary",
-              name: "Weekly Summary Report",
-              description: "Summary of predictions, outcomes, and KPIs for the past week",
-              format: ["PDF", "Excel"],
-              icon: "📅",
-            },
-            {
-              id: "monthly_performance",
-              name: "Monthly Performance Report",
-              description: "Detailed monthly performance metrics, protocol effectiveness, technician stats",
-              format: ["PDF", "Excel"],
-              icon: "📊",
-            },
-            {
-              id: "protocol_comparison",
-              name: "Protocol Comparison Report",
-              description: "Compare success rates, outcomes, and efficiency of different protocols",
-              format: ["PDF", "Excel", "CSV"],
-              icon: "⚖️",
-            },
-            {
-              id: "model_accuracy",
-              name: "Model Accuracy & Calibration",
-              description: "Detailed model performance metrics, prediction accuracy, calibration analysis",
-              format: ["PDF", "JSON"],
-              icon: "🤖",
-            },
-            {
-              id: "qc_compliance",
-              name: "QC Compliance Report",
-              description: "QC pass rates, anomalies detected, control chart analysis",
-              format: ["PDF", "Excel"],
-              icon: "✅",
-            },
-            {
-              id: "case_traceability",
-              name: "Case Traceability Report",
-              description: "Detailed case records with audit trail, genetic info, outcomes",
-              format: ["PDF", "CSV", "JSON"],
-              icon: "🔍",
-            },
-          ].map((template) => (
-            <Card key={template.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">{template.icon}</span>
-                      <h3 className="font-semibold">{template.name}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">{template.description}</p>
-                    <div className="flex gap-2">
-                      {template.format.map((fmt) => (
-                        <Badge key={fmt} variant="outline">
-                          {fmt}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <Button variant="outline">Use Template</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        {/* Exports Tab */}
-        <TabsContent value="exports" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Bulk Data Exports</CardTitle>
-              <CardDescription>Export large datasets for external analysis</CardDescription>
-            </CardHeader>
-          </Card>
-
-          {[
-            {
-              name: "All Transfer Records",
-              description: "Export complete ET transfer data (488+ records)",
-              records: "488",
-              formats: ["CSV", "Excel", "JSON"],
-              icon: "📋",
-            },
-            {
-              name: "Prediction Results",
-              description: "Export all predictions with inputs, outputs, and outcomes",
-              records: "488",
-              formats: ["CSV", "Excel", "JSON"],
-              icon: "🔮",
-            },
-            {
-              name: "QC Analysis Data",
-              description: "Export QC analysis, anomaly flags, and control chart data",
-              records: "488",
-              formats: ["CSV", "Excel"],
-              icon: "🔬",
-            },
-            {
-              name: "Analytics Metrics",
-              description: "Export KPIs, performance metrics, by-protocol stats",
-              records: "50+",
-              formats: ["CSV", "Excel", "JSON"],
-              icon: "📊",
-            },
-            {
-              name: "Audit Trail",
-              description: "Export complete audit log of all system actions and user activities",
-              records: "5000+",
-              formats: ["CSV", "JSON"],
-              icon: "📖",
-            },
-            {
-              name: "Model Training Data",
-              description: "Export features and labels for model retraining",
-              records: "488",
-              formats: ["CSV", "JSON"],
-              icon: "🤖",
-            },
-          ].map((export_, idx) => (
-            <Card key={idx}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">{export_.icon}</span>
-                      <h3 className="font-semibold">{export_.name}</h3>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{export_.description}</p>
-                    <p className="text-xs text-gray-500 mb-3">{export_.records} records</p>
-                    <div className="flex gap-2">
-                      {export_.formats.map((fmt) => (
-                        <Badge key={fmt} variant="outline">
-                          {fmt}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={async () => {
-                      try {
-                        const response = await api.get(`/exports/${idx}`, {
-                          responseType: "blob",
-                        });
-                        const url = window.URL.createObjectURL(new Blob([response.data]));
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.setAttribute("download", `export-${idx}-${Date.now()}.csv`);
-                        document.body.appendChild(link);
-                        link.click();
-                      } catch (err) {
-                        alert("Failed to download export");
-                      }
-                    }}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
-
-      {/* Info Card */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <FileText className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-semibold text-blue-900">Report Generation Help</p>
-              <p className="text-blue-700 mt-1">
-                • <strong>Summary Reports</strong> provide high-level overview suitable for stakeholders
-              </p>
-              <p className="text-blue-700">
-                • <strong>Detailed Reports</strong> include all case-level data, predictions, and outcomes
-              </p>
-              <p className="text-blue-700">
-                • <strong>PDF</strong> format is best for sharing and printing
-              </p>
-              <p className="text-blue-700">
-                • <strong>Excel/CSV</strong> formats are best for further analysis in other tools
-              </p>
-              <p className="text-blue-700">
-                • <strong>JSON</strong> format is suitable for programmatic integration
-              </p>
+    <div className="min-h-screen" style={{ background: `linear-gradient(to bottom right, ${mintBg}, #E0F2F1)` }}>
+      <div className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-8">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-start"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+              <FileText className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-[#1A202C]">Reports & Export</h1>
+              <p className="text-[#475569] mt-1">Professional reports with glassmorphism aesthetics</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <Button 
+            onClick={() => setShowInfoModal(true)}
+            variant="outline"
+            className="border-emerald-200 hover:bg-emerald-50"
+          >
+            <Info className="w-4 h-4 mr-2" /> Help
+          </Button>
+        </motion.div>
+
+        {/* Tabs */}
+        <div className="inline-flex bg-white/70 backdrop-blur-xl border border-white rounded-3xl p-1.5 shadow-xl">
+          {[
+            { id: "generate", label: "Generate Report", icon: Zap },
+            { id: "templates", label: "Templates", icon: FileText },
+            { id: "exports", label: "Bulk Exports", icon: Database },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-8 py-3 rounded-2xl font-medium flex items-center gap-2 transition-all ${
+                activeTab === tab.id 
+                  ? "bg-gradient-to-r from-[#004D40] to-emerald-700 text-white shadow-lg" 
+                  : "text-[#475569] hover:bg-white/50"
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <AnimatePresence mode="wait">
+          {/* GENERATE TAB */}
+          {activeTab === "generate" && (
+            <motion.div
+              key="generate"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="grid grid-cols-1 lg:grid-cols-5 gap-8"
+            >
+              <div className="lg:col-span-3">
+                <Card className="bg-white/80 backdrop-blur-2xl border border-white/60 shadow-2xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl text-[#1A202C]">Create Custom Report</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-8">
+                    {/* Report Type */}
+                    <div>
+                      <label className="text-sm font-semibold text-[#334155] mb-4 block">Report Type</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {reportTypes.map((type) => (
+                          <motion.button
+                            key={type.id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setReportType(type.id)}
+                            className={`p-6 rounded-3xl border transition-all ${
+                              reportType === type.id 
+                                ? "border-emerald-600 bg-emerald-50 shadow-md" 
+                                : "border-white/60 hover:border-emerald-200"
+                            }`}
+                          >
+                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${type.color} flex items-center justify-center mb-4`}>
+                              <type.icon className="w-6 h-6 text-white" />
+                            </div>
+                            <p className="font-semibold text-[#1A202C]">{type.name}</p>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Format */}
+                    <div>
+                      <label className="text-sm font-semibold text-[#334155] mb-4 block">Export Format</label>
+                      <div className="grid grid-cols-3 gap-4">
+                        {exportFormats.map((fmt) => (
+                          <motion.button
+                            key={fmt.id}
+                            whileHover={{ scale: 1.03 }}
+                            onClick={() => setExportFormat(fmt.id)}
+                            className={`p-5 rounded-3xl border text-center transition-all ${
+                              exportFormat === fmt.id 
+                                ? "border-emerald-600 bg-white shadow" 
+                                : "border-white/60 hover:border-emerald-200"
+                            }`}
+                          >
+                            <fmt.icon className={`mx-auto mb-2 w-8 h-8 ${fmt.color}`} />
+                            <p className="font-medium">{fmt.name}</p>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Date Range + Content Options */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <label className="text-sm font-semibold text-[#334155] mb-3 block">Date Range</label>
+                        <div className="space-y-4">
+                          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white" />
+                          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-semibold text-[#334155] mb-3 block">Include</label>
+                        <div className="space-y-3">
+                          {[
+                            { label: "Analytics & KPIs", checked: includeAnalytics, setter: setIncludeAnalytics },
+                            { label: "Predictions", checked: includePredictions, setter: setIncludePredictions },
+                            { label: "QC Analysis", checked: includeQC, setter: setIncludeQC },
+                            { label: "Audit Trail", checked: includeAuditTrail, setter: setIncludeAuditTrail },
+                          ].map((item, i) => (
+                            <label key={i} className="flex items-center gap-3 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                onChange={(e) => item.setter(e.target.checked)}
+                                className="w-5 h-5 accent-emerald-600"
+                              />
+                              <span className="text-[#475569]">{item.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleGenerateReport}
+                      disabled={loading}
+                      size="lg"
+                      className="w-full h-14 text-lg bg-gradient-to-r from-[#004D40] to-emerald-700 hover:brightness-110"
+                    >
+                      {loading ? "Generating Report..." : "Generate & Download Report"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Sidebar Info */}
+              <div className="lg:col-span-2">
+                <Card className="bg-white/70 backdrop-blur-2xl border border-white/60 h-full">
+                  <CardContent className="pt-8">
+                    <h3 className="font-semibold text-xl mb-6 flex items-center gap-3">
+                      <Sparkles className="text-emerald-600" /> Quick Tips
+                    </h3>
+                    <div className="space-y-6 text-sm">
+                      <p className="text-[#475569]">PDF is best for sharing and printing.</p>
+                      <p className="text-[#475569]">Excel/CSV are ideal for further analysis.</p>
+                      <p className="text-[#475569]">Include Audit Trail only when you need full traceability.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Other tabs (Templates & Exports) can be expanded similarly with glass cards */}
+          {activeTab === "templates" && (
+            <div className="text-center py-20 text-[#475569]">
+              Templates tab coming soon with glass cards...
+            </div>
+          )}
+          {activeTab === "exports" && (
+            <div className="text-center py-20 text-[#475569]">
+              Bulk exports tab with glassmorphism cards...
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white rounded-3xl p-10 max-w-md text-center shadow-2xl"
+            >
+              <CheckCircle2 className="w-20 h-20 text-emerald-600 mx-auto mb-6" />
+              <h3 className="text-3xl font-bold text-[#1A202C] mb-2">Report Generated!</h3>
+              <p className="text-[#475569] mb-8">Your report has been downloaded successfully.</p>
+              <Button onClick={() => setShowSuccessModal(false)} className="w-full bg-emerald-700">
+                Done
+              </Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

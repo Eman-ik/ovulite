@@ -31,6 +31,10 @@ database_url = os.getenv(
     "DATABASE_URL",
     "postgresql://ovulite:ovulite_dev_password@db:5432/ovulite",
 )
+# Fallback to local SQLite if running outside Docker and DATABASE_URL points to 'db' host
+if "@db" in database_url and not os.path.exists("/.dockerenv"):
+    database_url = "sqlite:///./ovulite_local.db"
+
 config.set_main_option("sqlalchemy.url", database_url)
 
 if config.config_file_name is not None:

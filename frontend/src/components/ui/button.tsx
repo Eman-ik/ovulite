@@ -10,19 +10,19 @@ export interface ButtonProps
 const buttonVariants = {
   variant: {
     default:
-      "bg-gradient-to-r from-primary to-emerald-300 text-primary-foreground shadow-[0_10px_24px_rgba(126,242,177,0.22)] hover:brightness-110",
-    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+      "bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
+    destructive: "bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
     outline:
-      "border border-white/20 bg-white/10 text-foreground hover:bg-white/15 hover:text-foreground",
-    secondary: "bg-secondary/70 text-secondary-foreground hover:bg-secondary",
-    ghost: "text-foreground hover:bg-white/10 hover:text-foreground",
-    link: "text-primary underline-offset-4 hover:underline",
+      "border border-[rgba(255,255,255,0.24)] bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
+    secondary: "bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
+    ghost: "bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
+    link: "bg-[#00483D] text-white shadow-[0_8px_16px_rgba(0,72,61,0.4)] hover:brightness-110",
   },
   size: {
-    default: "h-10 px-4 py-2",
-    sm: "h-9 rounded-md px-3",
-    lg: "h-11 rounded-md px-8",
-    icon: "h-10 w-10",
+    default: "h-10 px-4 py-2 text-sm sm:text-base",
+    sm: "h-8 sm:h-9 rounded-md px-2 sm:px-3 text-xs sm:text-sm",
+    lg: "h-10 sm:h-11 rounded-md px-4 sm:px-8 text-sm sm:text-base",
+    icon: "h-9 w-9 sm:h-10 sm:w-10",
   },
 };
 
@@ -31,7 +31,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center whitespace-nowrap rounded-lg !text-white text-[10px] sm:text-xs font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 touch-manipulation hover:scale-[1.25] hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(0,72,61,0.5),0_0_20px_rgba(0,72,61,0.3)]",
           buttonVariants.variant[variant],
           buttonVariants.size[size],
           className

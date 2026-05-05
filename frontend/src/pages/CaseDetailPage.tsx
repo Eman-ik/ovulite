@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, Print, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Download, Printer, AlertCircle, CheckCircle } from "lucide-react";
 
 interface CaseDetail {
   id: string;
@@ -193,7 +193,7 @@ export default function CaseDetailPage() {
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={handlePrint}>
-            <Print className="w-4 h-4 mr-2" />
+            <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
           <Button onClick={handleDownloadPDF}>

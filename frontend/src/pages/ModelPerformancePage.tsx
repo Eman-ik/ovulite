@@ -1,96 +1,19 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, AlertCircle, CheckCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertCircle, CheckCircle, Award, Target } from "lucide-react";
 
-interface ModelMetrics {
-  accuracy: number;
-  precision: number;
-  recall: number;
-  f1_score: number;
-  auc_roc: number;
-  calibration_error: number;
-}
-
-interface ModelPerformance {
-  model_name: string;
-  model_version: string;
-  last_trained: string;
-  total_predictions: number;
-  prediction_accuracy: number;
-  
-  train_metrics: ModelMetrics;
-  test_metrics: ModelMetrics;
-  validation_metrics: ModelMetrics;
-  
-  confusion_matrix: {
-    tp: number;
-    fp: number;
-    tn: number;
-    fn: number;
-  };
-  
-  performance_by_risk_band: Array<{
-    risk_band: string;
-    count: number;
-    accuracy: number;
-  }>;
-  
-  performance_by_protocol: Array<{
-    protocol_name: string;
-    count: number;
-    accuracy: number;
-  }>;
-  
-  performance_by_technician: Array<{
-    technician_name: string;
-    count: number;
-    accuracy: number;
-  }>;
-  
-  prediction_distribution: {
-    low_risk: number;
-    medium_risk: number;
-    high_risk: number;
-  };
-  
-  outcome_distribution: {
-    pregnant: number;
-    open: number;
-    recheck: number;
-  };
-  
-  calibration_curve: Array<{
-    predicted_prob: number;
-    actual_freq: number;
-  }>;
-  
-  top_important_features: Array<{
-    feature: string;
-    importance: number;
-  }>;
-  
-  performance_trend: Array<{
-    month: string;
-    accuracy: number;
-    count: number;
-  }>;
-}
-
-interface CombinedPerformance {
-  pregnancy_model: ModelPerformance;
-  grading_model: ModelPerformance;
-  qc_model: ModelPerformance;
-  overall_system_accuracy: number;
-}
+interface ModelMetrics { /* ... keep your interfaces unchanged ... */ }
+interface ModelPerformance { /* ... keep your interfaces unchanged ... */ }
+interface CombinedPerformance { /* ... keep your interfaces unchanged ... */ }
 
 export default function ModelPerformancePage() {
   const [performance, setPerformance] = useState<CombinedPerformance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeModel, setActiveModel] = useState("pregnancy");
+  const [activeModel, setActiveModel] = useState<"pregnancy" | "grading" | "qc">("pregnancy");
 
   useEffect(() => {
     fetchModelPerformance();
@@ -109,280 +32,263 @@ export default function ModelPerformancePage() {
   };
 
   const getMetricsColor = (value: number) => {
-    if (value >= 0.8) return "text-green-600";
-    if (value >= 0.6) return "text-yellow-600";
+    if (value >= 0.85) return "text-emerald-600";
+    if (value >= 0.75) return "text-teal-600";
+    if (value >= 0.65) return "text-amber-600";
     return "text-red-600";
   };
 
   const MetricsCard = ({ model, label }: { model: ModelPerformance; label: string }) => (
-    <Card>
+    <Card className="bg-white/80 backdrop-blur-2xl border border-white/60 shadow-xl">
       <CardHeader>
-        <CardTitle className="text-sm">{label}</CardTitle>
-        <CardDescription>{model.model_version}</CardDescription>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+            <Target className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <CardTitle className="text-xl text-[#1A202C]">{label}</CardTitle>
+            <CardDescription className="text-sm">{model.model_version} • Last trained: {model.last_trained}</CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="text-xs text-gray-600">Test Accuracy</p>
-            <p className={`text-xl font-bold ${getMetricsColor(model.test_metrics.accuracy)}`}>
-              {(model.test_metrics.accuracy * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="text-xs text-gray-600">AUC-ROC</p>
-            <p className={`text-xl font-bold ${getMetricsColor(model.test_metrics.auc_roc)}`}>
-              {(model.test_metrics.auc_roc * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="text-xs text-gray-600">Precision</p>
-            <p className={`text-xl font-bold ${getMetricsColor(model.test_metrics.precision)}`}>
-              {(model.test_metrics.precision * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded">
-            <p className="text-xs text-gray-600">Recall</p>
-            <p className={`text-xl font-bold ${getMetricsColor(model.test_metrics.recall)}`}>
-              {(model.test_metrics.recall * 100).toFixed(1)}%
-            </p>
-          </div>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { label: "Test Accuracy", value: model.test_metrics.accuracy },
+            { label: "AUC-ROC", value: model.test_metrics.auc_roc },
+            { label: "Precision", value: model.test_metrics.precision },
+            { label: "Recall", value: model.test_metrics.recall },
+          ].map((metric, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ scale: 1.02 }}
+              className="bg-white/70 border border-white/70 p-5 rounded-3xl"
+            >
+              <p className="text-sm text-[#475569]">{metric.label}</p>
+              <p className={`text-3xl font-bold mt-1 ${getMetricsColor(metric.value)}`}>
+                {(metric.value * 100).toFixed(1)}%
+              </p>
+            </motion.div>
+          ))}
         </div>
 
         {/* Calibration */}
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-          <p className="text-sm font-semibold text-blue-900">Calibration Error</p>
-          <p className="text-lg font-bold text-blue-600">{(model.test_metrics.calibration_error * 100).toFixed(2)}%</p>
-          <p className="text-xs text-blue-700 mt-1">Lower is better (well-calibrated model)</p>
+        <div className="bg-emerald-50/80 border border-emerald-100 p-5 rounded-3xl">
+          <p className="font-semibold text-emerald-900">Calibration Error</p>
+          <p className="text-2xl font-bold text-emerald-700 mt-1">
+            {(model.test_metrics.calibration_error * 100).toFixed(2)}%
+          </p>
+          <p className="text-xs text-emerald-600 mt-1">Lower is better • Well calibrated model</p>
         </div>
 
         {/* Confusion Matrix */}
-        <div className="p-3 bg-gray-50 rounded">
-          <p className="text-sm font-semibold mb-2">Confusion Matrix</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <p className="text-gray-600">True Positive</p>
-              <p className="text-lg font-bold text-green-600">{model.confusion_matrix.tp}</p>
+        <div className="bg-white/70 border border-white/70 p-5 rounded-3xl">
+          <p className="font-semibold mb-4 text-[#1A202C]">Confusion Matrix</p>
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="bg-green-50 rounded-2xl p-4">
+              <p className="text-xs text-green-700">True Positive</p>
+              <p className="text-2xl font-bold text-green-700">{model.confusion_matrix.tp}</p>
             </div>
-            <div>
-              <p className="text-gray-600">False Positive</p>
-              <p className="text-lg font-bold text-red-600">{model.confusion_matrix.fp}</p>
+            <div className="bg-red-50 rounded-2xl p-4">
+              <p className="text-xs text-red-700">False Positive</p>
+              <p className="text-2xl font-bold text-red-700">{model.confusion_matrix.fp}</p>
             </div>
-            <div>
-              <p className="text-gray-600">True Negative</p>
-              <p className="text-lg font-bold text-green-600">{model.confusion_matrix.tn}</p>
+            <div className="bg-green-50 rounded-2xl p-4">
+              <p className="text-xs text-green-700">True Negative</p>
+              <p className="text-2xl font-bold text-green-700">{model.confusion_matrix.tn}</p>
             </div>
-            <div>
-              <p className="text-gray-600">False Negative</p>
-              <p className="text-lg font-bold text-red-600">{model.confusion_matrix.fn}</p>
+            <div className="bg-red-50 rounded-2xl p-4">
+              <p className="text-xs text-red-700">False Negative</p>
+              <p className="text-2xl font-bold text-red-700">{model.confusion_matrix.fn}</p>
             </div>
           </div>
-        </div>
-
-        {/* Predictions Made */}
-        <div className="p-3 bg-blue-50 rounded">
-          <p className="text-xs text-gray-600">Total Predictions Made</p>
-          <p className="text-2xl font-bold text-blue-600">{model.total_predictions}</p>
         </div>
       </CardContent>
     </Card>
   );
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-600">Loading model performance data...</p>
+      <div className="flex items-center justify-center h-screen bg-[#F0F4F4]">
+        <p className="text-[#475569]">Loading model performance...</p>
       </div>
     );
+  }
 
-  if (error)
+  if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
+      <div className="p-8">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-800">
+          {error}
         </div>
       </div>
     );
+  }
 
-  if (!performance) return <div className="p-6">No performance data available</div>;
+  if (!performance) return <div className="p-8">No data available</div>;
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Model Performance & Outcome Learning</h1>
-        <p className="text-gray-600">Monitor AI model accuracy, learn from outcomes, improve predictions</p>
-      </div>
+    <div className="min-h-screen" style={{ background: "linear-gradient(to bottom right, #F0F4F4, #E0F2F1)" }}>
+      <div className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-10">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex items-center gap-4 mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center">
+              <Award className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-[#1A202C]">Model Performance</h1>
+              <p className="text-[#475569]">Continuous learning • Outcome feedback • Model improvement</p>
+            </div>
+          </div>
+        </motion.div>
 
-      {/* Overall System Accuracy */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <p className="text-sm text-gray-600 mb-2">Overall System Accuracy</p>
-              <p className={`text-4xl font-bold ${getMetricsColor(performance.overall_system_accuracy)}`}>
-                {(performance.overall_system_accuracy * 100).toFixed(1)}%
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-2">Status</p>
-              {performance.overall_system_accuracy >= 0.8 ? (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                  <span className="text-lg font-bold text-green-600">High Performance</span>
+        {/* Overall System Accuracy */}
+        <Card className="bg-white/80 backdrop-blur-2xl border border-white/60 shadow-2xl">
+          <CardContent className="pt-8 pb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+              <div>
+                <p className="text-sm text-[#475569]">Overall System Accuracy</p>
+                <p className={`text-5xl font-bold mt-2 ${getMetricsColor(performance.overall_system_accuracy)}`}>
+                  {(performance.overall_system_accuracy * 100).toFixed(1)}%
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                {performance.overall_system_accuracy >= 0.8 ? (
+                  <CheckCircle className="w-10 h-10 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="w-10 h-10 text-amber-600" />
+                )}
+                <div>
+                  <p className="font-semibold text-lg">
+                    {performance.overall_system_accuracy >= 0.8 ? "High Performance" : "Monitoring Required"}
+                  </p>
+                  <p className="text-sm text-[#475569]">AI System Status</p>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-6 h-6 text-yellow-600" />
-                  <span className="text-lg font-bold text-yellow-600">Review Needed</span>
-                </div>
-              )}
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-2">Recommendation</p>
-              <p className="text-sm">
+              </div>
+              <div className="text-sm text-[#475569]">
                 {performance.overall_system_accuracy >= 0.85
-                  ? "System ready for clinical deployment"
-                  : "Continue monitoring and refinement"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Model Tabs */}
-      <Tabs value={activeModel} onValueChange={setActiveModel}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pregnancy">Pregnancy Model</TabsTrigger>
-          <TabsTrigger value="grading">Grading Model</TabsTrigger>
-          <TabsTrigger value="qc">QC Model</TabsTrigger>
-        </TabsList>
-
-        {/* Pregnancy Model Tab */}
-        <TabsContent value="pregnancy" className="space-y-4">
-          <MetricsCard model={performance.pregnancy_model} label="Pregnancy Prediction Model" />
-
-          {/* Performance by Protocol */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Performance by Protocol</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {performance.pregnancy_model.performance_by_protocol.map((protocol, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <p className="font-medium text-sm">{protocol.protocol_name}</p>
-                      <p className="text-xs text-gray-500">{protocol.count} predictions</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {protocol.accuracy >= 0.8 ? (
-                        <TrendingUp className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <TrendingDown className="w-4 h-4 text-red-600" />
-                      )}
-                      <span className={`font-bold ${getMetricsColor(protocol.accuracy)}`}>
-                        {(protocol.accuracy * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ? "✅ Ready for full clinical deployment"
+                  : "⚠️ Continue collecting outcome feedback for further improvement"}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Performance by Technician */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Performance by Technician</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {performance.pregnancy_model.performance_by_technician.map((tech, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <p className="font-medium text-sm">{tech.technician_name}</p>
-                      <p className="text-xs text-gray-500">{tech.count} predictions</p>
-                    </div>
-                    <span className={`font-bold ${getMetricsColor(tech.accuracy)}`}>
-                      {(tech.accuracy * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Top Features */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Top Important Features</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {performance.pregnancy_model.top_important_features.map((feature, idx) => (
-                  <div key={idx}>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm font-medium">{feature.feature}</span>
-                      <span className="text-sm text-gray-600">{(feature.importance * 100).toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${feature.importance * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Grading Model Tab */}
-        <TabsContent value="grading" className="space-y-4">
-          <MetricsCard model={performance.grading_model} label="Embryo Grading Model" />
-        </TabsContent>
-
-        {/* QC Model Tab */}
-        <TabsContent value="qc" className="space-y-4">
-          <MetricsCard model={performance.qc_model} label="QC Anomaly Detection Model" />
-        </TabsContent>
-      </Tabs>
-
-      {/* Learning from Outcomes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Learning from Outcomes</CardTitle>
-          <CardDescription>How actual results compare to predictions</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-green-50 rounded">
-              <p className="text-sm text-gray-600">Correct Predictions</p>
-              <p className="text-2xl font-bold text-green-600">
-                {(
-                  performance.pregnancy_model.confusion_matrix.tp +
-                  performance.pregnancy_model.confusion_matrix.tn
-                ).toLocaleString()}
-              </p>
             </div>
-            <div className="p-4 bg-red-50 rounded">
-              <p className="text-sm text-gray-600">Misclassifications</p>
-              <p className="text-2xl font-bold text-red-600">
-                {(
-                  performance.pregnancy_model.confusion_matrix.fp +
-                  performance.pregnancy_model.confusion_matrix.fn
-                ).toLocaleString()}
-              </p>
+          </CardContent>
+        </Card>
+
+        {/* Model Tabs */}
+        <Tabs value={activeModel} onValueChange={(v) => setActiveModel(v as any)}>
+          <TabsList className="bg-white/70 backdrop-blur-xl border border-white rounded-3xl p-1.5 w-fit">
+            <TabsTrigger value="pregnancy" className="rounded-2xl px-8">Pregnancy Prediction</TabsTrigger>
+            <TabsTrigger value="grading" className="rounded-2xl px-8">Embryo Grading</TabsTrigger>
+            <TabsTrigger value="qc" className="rounded-2xl px-8">QC Anomaly Detection</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="pregnancy" className="mt-8 space-y-8">
+            <MetricsCard model={performance.pregnancy_model} label="Pregnancy Prediction Model" />
+
+            {/* Performance by Protocol & Technician */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/80 backdrop-blur-2xl border border-white/60">
+                <CardHeader>
+                  <CardTitle>Performance by Protocol</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {performance.pregnancy_model.performance_by_protocol.map((p, i) => (
+                    <div key={i} className="flex justify-between items-center py-3 border-b last:border-0">
+                      <div>
+                        <p className="font-medium">{p.protocol_name}</p>
+                        <p className="text-xs text-[#475569]">{p.count} transfers</p>
+                      </div>
+                      <div className={`font-bold text-lg ${getMetricsColor(p.accuracy)}`}>
+                        {(p.accuracy * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 backdrop-blur-2xl border border-white/60">
+                <CardHeader>
+                  <CardTitle>Performance by Technician</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {performance.pregnancy_model.performance_by_technician.map((t, i) => (
+                    <div key={i} className="flex justify-between items-center py-3 border-b last:border-0">
+                      <div>
+                        <p className="font-medium">{t.technician_name}</p>
+                        <p className="text-xs text-[#475569]">{t.count} predictions</p>
+                      </div>
+                      <div className={`font-bold text-lg ${getMetricsColor(t.accuracy)}`}>
+                        {(t.accuracy * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <p className="text-sm text-gray-600">
-            Over time, models learn from outcome feedback to improve prediction accuracy. This dashboard tracks continuous
-            improvement cycles.
-          </p>
-        </CardContent>
-      </Card>
+
+            {/* Top Features */}
+            <Card className="bg-white/80 backdrop-blur-2xl border border-white/60">
+              <CardHeader>
+                <CardTitle>Top Important Features</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-5">
+                  {performance.pregnancy_model.top_important_features.map((f, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="font-medium text-[#1A202C]">{f.feature}</span>
+                        <span className="text-emerald-700">{(f.importance * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="h-2 bg-white/70 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${f.importance * 100}%` }}
+                          className="h-full bg-gradient-to-r from-emerald-600 to-teal-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="grading" className="mt-8">
+            <MetricsCard model={performance.grading_model} label="Embryo Grading Model" />
+          </TabsContent>
+
+          <TabsContent value="qc" className="mt-8">
+            <MetricsCard model={performance.qc_model} label="QC Anomaly Detection Model" />
+          </TabsContent>
+        </Tabs>
+
+        {/* Learning from Outcomes */}
+        <Card className="bg-white/80 backdrop-blur-2xl border border-white/60">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <Target className="text-emerald-600" /> Learning from Outcomes
+            </CardTitle>
+            <CardDescription>Real-world feedback loop improving model accuracy</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-emerald-50 rounded-3xl p-6">
+                <p className="text-emerald-700">Correct Predictions</p>
+                <p className="text-4xl font-bold text-emerald-700 mt-2">
+                  {(performance.pregnancy_model.confusion_matrix.tp + performance.pregnancy_model.confusion_matrix.tn).toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-red-50 rounded-3xl p-6">
+                <p className="text-red-700">Misclassifications</p>
+                <p className="text-4xl font-bold text-red-700 mt-2">
+                  {(performance.pregnancy_model.confusion_matrix.fp + performance.pregnancy_model.confusion_matrix.fn).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

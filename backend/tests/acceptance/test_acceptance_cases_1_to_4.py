@@ -153,9 +153,9 @@ class TestAT3PredictionWithCIAndSHAP:
         assert isinstance(data.get("model_version"), str)
 
     def test_prediction_missing_required_field(self, client: TestClient, auth_headers: dict):
-        # Current schema allows optional inputs; endpoint should still handle request.
+        # Business rule: missing required fields must fail validation.
         response = client.post("/predict/pregnancy", json={}, headers=auth_headers)
-        assert response.status_code in (200, 503), response.text
+        assert response.status_code == 422
 
 
 @pytest.mark.acceptance
@@ -218,3 +218,4 @@ class TestAT4EmbryoGrading:
 @pytest.mark.acceptance
 def test_suite_complete():
     assert True
+

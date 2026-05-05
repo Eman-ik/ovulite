@@ -12,15 +12,29 @@ const TabsContext = React.createContext<TabsContextType>({
 })
 
 interface TabsProps {
-  value: string
-  onValueChange: (value: string) => void
+  value?: string
+  onValueChange?: (value: string) => void
   children: React.ReactNode
   defaultValue?: string
 }
 
 const Tabs = ({ value, onValueChange, children, defaultValue }: TabsProps) => {
+  const [internalValue, setInternalValue] = React.useState<string>(defaultValue ?? "")
+
+  React.useEffect(() => {
+    if (value !== undefined) return
+    if (defaultValue !== undefined) setInternalValue(defaultValue)
+  }, [value, defaultValue])
+
+  const currentValue = value ?? internalValue
+
+  const handleChange = (v: string) => {
+    if (onValueChange) onValueChange(v)
+    else setInternalValue(v)
+  }
+
   return (
-    <TabsContext.Provider value={{ value, onValueChange }}>
+    <TabsContext.Provider value={{ value: currentValue, onValueChange: handleChange }}>
       <div>{children}</div>
     </TabsContext.Provider>
   )
@@ -99,4 +113,3 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
 TabsContent.displayName = "TabsContent"
 
 export { Tabs, TabsList, TabsTrigger, TabsContent }
-

@@ -3,8 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, ThumbsUp, ThumbsDown } from "lucide-react";
+import { AlertCircle, CheckCircle, AlertTriangle, Lightbulb, ThumbsUp } from "lucide-react";
 
 interface DecisionSupportEntry {
   id: string;

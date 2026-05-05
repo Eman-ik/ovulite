@@ -1,9 +1,9 @@
 """Bulk CSV import endpoint — upload CSV and ingest into database."""
 
-import io
 import logging
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user, require_role
@@ -22,7 +22,7 @@ router = APIRouter()
     dependencies=[Depends(require_role("admin", "embryologist"))],
 )
 async def import_csv(
-    file: UploadFile,
+    file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -34,14 +34,9 @@ async def import_csv(
     if not file.filename or not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
-    # Check if data already exists
-    existing = db.query(ETTransfer).count()
-    if existing > 0:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Database already has {existing} transfer records. "
-            "Truncate first or use individual CRUD endpoints.",
-        )
+    # Replace the existing transfer table contents so imports are repeatable.
+    db.query(ETTransfer).delete(synchronize_session=False)
+    db.commit()
 
     content = await file.read()
     try:
@@ -51,7 +46,6 @@ async def import_csv(
 
     # Import the ingestion function
     import sys
-    from pathlib import Path
 
     scripts_dir = str(Path(__file__).resolve().parent.parent.parent / "scripts")
     if scripts_dir not in sys.path:
@@ -71,6 +65,22 @@ async def import_csv(
         stats = ingest_et_data(tmp_path, db)
     finally:
         os.unlink(tmp_path)
+
+    # Keep the browser-facing CSV in sync so the dashboard updates on reload.
+    project_root = Path(__file__).resolve().parents[3]
+    public_csv_path = project_root / "frontend" / "public" / "datasets" / "ET Summary - ET Data.csv"
+    docs_csv_path = project_root / "docs" / "dataset" / "ET Summary - ET Data.csv"
+    public_csv_path.write_text(text, encoding="utf-8")
+    if docs_csv_path.exists():
+        docs_csv_path.write_text(text, encoding="utf-8")
+
+    # Rebuild analytics artifacts so backend analytics endpoints stay in sync.
+    try:
+        from ml.analytics.run_analytics import run_analytics
+
+        run_analytics()
+    except Exception:
+        logger.exception("Analytics refresh failed after CSV import")
 
     logger.info(
         "CSV import by user '%s': %d rows ingested, %d skipped",
