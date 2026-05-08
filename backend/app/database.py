@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 DATABASE_URL = os.getenv(
@@ -13,7 +13,8 @@ if "@db" in DATABASE_URL and not os.path.exists("/.dockerenv"):
     DATABASE_URL = "sqlite:///./ovulite_local.db"
 
 engine_args = {
-    "pool_pre_ping": True,
+    "pool_pre_ping": False,  # Disable ping - can cause hangs
+    "connect_args": {}
 }
 
 if "sqlite" in DATABASE_URL:
@@ -21,8 +22,8 @@ if "sqlite" in DATABASE_URL:
     engine_args["connect_args"] = {"check_same_thread": False}
 else:
     engine_args.update({
-        "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
-        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "10")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "20")),
         "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "3600")),
     })
 

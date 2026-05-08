@@ -4,7 +4,7 @@ export function getRoleLandingPath(role: string | null | undefined): string {
   if (!normalized) return "/app";
   
   // Admin dashboard
-  if (normalized.includes("admin")) return "/app/analytics";
+  if (normalized.includes("admin")) return "/app";
   
   // Lab/Embryologist dashboard
   if (normalized.includes("embryologist")) return "/app/embryo-grading";

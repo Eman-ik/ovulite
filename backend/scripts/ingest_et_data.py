@@ -98,7 +98,15 @@ def parse_date(val: str) -> date | None:
         return datetime.strptime(s, "%m/%d/%Y").date()
     except ValueError:
         # Try other formats
-        for fmt in ("%m-%d-%Y", "%Y-%m-%d", "%d/%m/%Y"):
+        for fmt in (
+    "%m-%d-%Y",
+    "%Y-%m-%d",
+    "%d/%m/%Y",
+    "%Y/%m/%d",
+    "%d-%m-%Y",
+    "%m/%d/%y",
+    "%d/%m/%y",
+):
             try:
                 return datetime.strptime(s, fmt).date()
             except ValueError:
@@ -193,6 +201,14 @@ def normalize_donor_tag(val: str) -> str | None:
     return s
 
 
+def get_row_value(row: list, col_key: str, col_dict: dict) -> str:
+    """Safely get value from row by column name, returning empty string if out of range."""
+    col_index = col_dict.get(col_key, -1)
+    if col_index >= 0 and col_index < len(row):
+        return row[col_index]
+    return ""
+
+
 def get_or_create_donor(db: Session, tag_id: str, breed: str | None, bw_epd: Decimal | None) -> Donor:
     """Find existing donor by tag or create new one."""
     donor = db.query(Donor).filter(Donor.tag_id == tag_id).first()
@@ -276,11 +292,35 @@ def ingest_et_data(csv_path: str, db: Session) -> dict:
 
     with open(csv_path, encoding="utf-8-sig") as f:
         reader = csv.reader(f)
-        header = next(reader)  # skip header
-        logger.info("CSV header: %d columns", len(header))
-
-        for row_num, row in enumerate(reader, start=2):
+        
+        # Skip header rows and find the actual data header
+        header = None
+        raw_row_num = 0
+        for row in reader:
+            raw_row_num += 1
             # Skip empty rows
+            if not row or all(cell.strip() == "" for cell in row):
+                continue
+            # Check if this looks like a data header
+            if any(h.lower() in row[i].lower() for i, h in enumerate(["Sr. No", "ET Date", "ET Number", "DAM", "SIRE"]) if i < len(row)):
+                header = row
+                logger.info("Found data header at row %d: %d columns", raw_row_num, len(header))
+                break
+        
+        if not header:
+            logger.error("Could not find data header in CSV file")
+            return stats
+        
+        for raw_row_num, row in enumerate(reader, start=raw_row_num+1):
+            # Skip empty rows
+            if not row or all(cell.strip() == "" for cell in row):
+                continue
+            
+            # Skip rows that don't have enough columns or have invalid data
+            if len(row) < len(COL) - 10:  # Allow some column variance
+                stats["rows_skipped"] += 1
+                continue
+            
             et_num_str = row[COL["et_number"]].strip() if len(row) > COL["et_number"] else ""
             if not et_num_str:
                 continue
@@ -291,42 +331,42 @@ def ingest_et_data(csv_path: str, db: Session) -> dict:
                 et_number = parse_int(et_num_str)
 
                 # --- Donor ---
-                donor_tag = normalize_donor_tag(row[COL["donor"]])
+                donor_tag = normalize_donor_tag(row[COL["donor"]] if len(row) > COL["donor"] else "")
                 donor = None
                 if donor_tag:
-                    donor_breed = clean_str(row[COL["donor_breed"]])
-                    donor_bw_epd = parse_decimal(row[COL["donor_bw_epd"]])
+                    donor_breed = clean_str(row[COL["donor_breed"]] if len(row) > COL["donor_breed"] else "")
+                    donor_bw_epd = parse_decimal(row[COL["donor_bw_epd"]] if len(row) > COL["donor_bw_epd"] else "")
                     # Filter out dirty breed values (dates, IDs)
                     if donor_breed and ("/" in donor_breed or donor_breed.isdigit()):
-                        logger.warning("Row %d: dirty donor breed %r for donor %s, setting to None", row_num, donor_breed, donor_tag)
+                        logger.warning("Row %d: dirty donor breed %r for donor %s, setting to None", raw_row_num, donor_breed, donor_tag)
                         donor_breed = None
                     donor = get_or_create_donor(db, donor_tag, donor_breed, donor_bw_epd)
 
                 # --- Sire ---
-                sire_name = clean_str(row[COL["sire_name"]])
+                sire_name = clean_str(get_row_value(row, "sire_name", COL))
                 sire = None
                 if sire_name:
-                    sire_breed = clean_str(row[COL["sire_breed"]])
-                    sire_bw_epd = parse_decimal(row[COL["sire_bw_epd"]])
-                    semen_type = normalize_semen_type(row[COL["semen_type"]])
+                    sire_breed = clean_str(get_row_value(row, "sire_breed", COL))
+                    sire_bw_epd = parse_decimal(get_row_value(row, "sire_bw_epd", COL))
+                    semen_type = normalize_semen_type(get_row_value(row, "semen_type", COL))
                     sire = get_or_create_sire(db, sire_name, sire_breed, sire_bw_epd, semen_type)
 
                 # --- Recipient ---
-                recip_tag = clean_str(row[COL["recipient_id_1"]])
+                recip_tag = clean_str(get_row_value(row, "recipient_id_1", COL))
                 recipient = None
                 if recip_tag:
-                    farm = clean_str(row[COL["farm_location"]])
-                    cow_heifer = clean_str(row[COL["cow_or_heifer"]])
+                    farm = clean_str(get_row_value(row, "farm_location", COL))
+                    cow_heifer = clean_str(get_row_value(row, "cow_or_heifer", COL))
                     recipient = get_or_create_recipient(db, recip_tag, farm, cow_heifer)
 
                 # --- Technician ---
-                tech_name = clean_str(row[COL["et_tech"]])
+                tech_name = clean_str(get_row_value(row, "et_tech", COL))
                 technician = None
                 if tech_name:
                     technician = get_or_create_technician(db, tech_name)
 
                 # --- Protocol ---
-                proto_name = clean_str(row[COL["protocol"]])
+                proto_name = clean_str(get_row_value(row, "protocol", COL))
                 protocol = None
                 if proto_name:
                     protocol = get_or_create_protocol(db, proto_name)
@@ -335,46 +375,47 @@ def ingest_et_data(csv_path: str, db: Session) -> dict:
                 embryo = Embryo(
                     donor_id=donor.donor_id if donor else None,
                     sire_id=sire.sire_id if sire else None,
-                    opu_date=parse_date(row[COL["opu_date"]]),
-                    stage=parse_int(row[COL["embryo_stage"]]),
-                    grade=parse_int(row[COL["embryo_grade"]]),
-                    fresh_or_frozen=clean_str(row[COL["fresh_or_frozen"]]),
-                    cane_number=clean_str(row[COL["cane_number"]]),
-                    freezing_date=parse_date(row[COL["freezing_date"]]),
+                    opu_date=parse_date(get_row_value(row, "opu_date", COL)),
+                    stage=parse_int(get_row_value(row, "embryo_stage", COL)),
+                    grade=parse_int(get_row_value(row, "embryo_grade", COL)),
+                    fresh_or_frozen=clean_str(get_row_value(row, "fresh_or_frozen", COL)),
+                    cane_number=clean_str(get_row_value(row, "cane_number", COL)),
+                    freezing_date=parse_date(get_row_value(row, "freezing_date", COL)),
                 )
                 db.add(embryo)
                 db.flush()
 
                 # --- ET Transfer ---
-                et_date = parse_date(row[COL["et_date"]])
+                et_date = parse_date(get_row_value(row, "et_date", COL))
                 if et_date is None:
+                    raw_date = get_row_value(row, "et_date", COL)
                     stats["rows_skipped"] += 1
-                    stats["errors"].append(f"Row {row_num}: missing ET date")
+                    stats["errors"].append(f"Row {raw_row_num}: invalid or missing ET date: {raw_date}")
                     continue
 
                 transfer = ETTransfer(
                     et_number=et_number,
-                    lab=clean_str(row[COL["lab"]]),
-                    satellite=clean_str(row[COL["satellite"]]),
-                    customer_id=clean_str(row[COL["customer_id"]]),
+                    lab=clean_str(get_row_value(row, "lab", COL)),
+                    satellite=clean_str(get_row_value(row, "satellite", COL)),
+                    customer_id=clean_str(get_row_value(row, "customer_id", COL)),
                     et_date=et_date,
-                    farm_location=clean_str(row[COL["farm_location"]]),
+                    farm_location=clean_str(get_row_value(row, "farm_location", COL)),
                     recipient_id=recipient.recipient_id if recipient else None,
-                    bc_score=parse_decimal(row[COL["bc_score"]]),
-                    cl_side=normalize_cl_side(row[COL["cl_side"]]),
-                    cl_measure_mm=parse_decimal(row[COL["cl_measure_mm"]]),
+                    bc_score=parse_decimal(get_row_value(row, "bc_score", COL)),
+                    cl_side=normalize_cl_side(get_row_value(row, "cl_side", COL)),
+                    cl_measure_mm=parse_decimal(get_row_value(row, "cl_measure_mm", COL)),
                     protocol_id=protocol.protocol_id if protocol else None,
-                    heat_observed=parse_bool_heat(row[COL["heat_1"]]),
-                    heat_day=parse_int(row[COL["heat_day"]]),
+                    heat_observed=parse_bool_heat(get_row_value(row, "heat_1", COL)),
+                    heat_day=parse_int(get_row_value(row, "heat_day", COL)),
                     embryo_id=embryo.embryo_id,
                     technician_id=technician.technician_id if technician else None,
-                    assistant_name=clean_str(row[COL["et_assistant"]]),
-                    pc1_date=parse_date(row[COL["pc1_date"]]),
-                    pc1_result=normalize_pc_result(row[COL["pc1_result"]]),
-                    pc2_date=parse_date(row[COL["pc2_date"]]),
-                    pc2_result=normalize_pc_result(row[COL["pc2_result"]]),
-                    fetal_sexing=clean_str(row[COL["fetal_sexing"]]),
-                    days_in_pregnancy=parse_int(row[COL["dip_1"]]),
+                    assistant_name=clean_str(get_row_value(row, "et_assistant", COL)),
+                    pc1_date=parse_date(get_row_value(row, "pc1_date", COL)),
+                    pc1_result=normalize_pc_result(get_row_value(row, "pc1_result", COL)),
+                    pc2_date=parse_date(get_row_value(row, "pc2_date", COL)),
+                    pc2_result=normalize_pc_result(get_row_value(row, "pc2_result", COL)),
+                    fetal_sexing=clean_str(get_row_value(row, "fetal_sexing", COL)),
+                    days_in_pregnancy=parse_int(get_row_value(row, "dip_1", COL)),
                 )
                 db.add(transfer)
                 stats["rows_ingested"] += 1

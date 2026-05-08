@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import type { PaginatedResponse, Technician, Protocol } from "@/lib/types";
 import PredictionAssistantChatbox from "@/components/PredictionAssistantChatbox";
@@ -147,7 +148,10 @@ export default function PredictionPage() {
   const [resultVisible, setResultVisible] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
-  // Load reference data and model info
+  const { token } = useAuth();
+
+  // Load reference data and model info. Re-run when auth token changes so
+  // protocols/technicians populate after user logs in.
   useEffect(() => {
     let cancelled = false;
     const loadInitialData = async () => {
@@ -172,9 +176,10 @@ export default function PredictionPage() {
         if (!cancelled) setInitLoading(false);
       }
     };
-    void loadInitialData();
+    // Only attempt loading reference data when we have an auth token (or on mount).
+    if (token !== null) void loadInitialData();
     return () => { cancelled = true; };
-  }, []);
+  }, [token]);
 
   const handlePredict = async () => {
     setError("");
@@ -465,7 +470,7 @@ export default function PredictionPage() {
               <div className="pp-panel pp-stagger" style={{ width: "100%" }}>
                 <div className="pp-panel-header" style={{ padding: "30px 40px" }}>
                   <div>
-                    <div className="pp-panel-title" style={{ fontSize: "22px", gap: "12px" }}>
+                    <div  id="transferFeaturesTitle" className="pp-panel-title" style={{ fontSize: "22px", gap: "12px" }}>
                       <BarChart3 size={24} color="#FFC107" />
                       Transfer Features
                     </div>
@@ -558,6 +563,7 @@ export default function PredictionPage() {
               </div>
 
               <button
+              id="predictBtn"
                 className="pp-btn"
                 onClick={handlePredict}
                 disabled={loading}

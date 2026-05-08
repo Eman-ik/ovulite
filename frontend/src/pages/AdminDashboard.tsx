@@ -8,6 +8,8 @@ import {
   Users,
   Activity,
 } from "lucide-react";
+import api from "@/lib/api";
+import type { PaginatedResponse, ETTransferDetail } from "@/lib/types";
 import KpiCard from "../components/dashboard/KpiCard";
 import {
   Area,
@@ -392,7 +394,16 @@ function buildDashboardData(records: RawRecord[]): DashboardData {
   };
 }
 
-const GRADE_COLORS = ["#2563EB", "#8B5CF6", "#EF4444", "#F97316", "#3B82F6", "#A855F7", "#F43F5E", "#FB923C"];
+const GRADE_COLORS = [
+  "#10b981", // Green - Excellent
+  "#3b82f6", // Blue - Good
+  "#8b5cf6", // Violet - Acceptable
+  "#f59e0b", // Amber - Fair
+  "#ef4444", // Red - Poor
+  "#ec4899", // Pink - Critical
+  "#06b6d4", // Cyan - Alternative
+  "#f97316", // Orange - Alternative
+];
 
 export default function AdminDashboard() {
   const [records, setRecords] = useState<RawRecord[]>([]);
@@ -406,13 +417,49 @@ export default function AdminDashboard() {
       try {
         setIsLoading(true);
         setLoadError(null);
-        const response = await fetch("/datasets/ET%20Summary%20-%20ET%20Data.csv?t=" + Date.now());
-        if (!response.ok) throw new Error(`Failed to load dataset (${response.status})`);
-        const text = await response.text();
-        setRecords(buildRecords(text));
+        // Fetch all transfers from API with pagination
+        const allRecords: ETTransferDetail[] = [];
+        let page = 1;
+        let hasMore = true;
+        
+        while (hasMore) {
+          const response = await api.get<PaginatedResponse<ETTransferDetail>>("/transfers/", {
+            params: { page, page_size: 100 }
+          });
+          allRecords.push(...response.data.items);
+          hasMore = response.data.page < response.data.pages;
+          page++;
+        }
+        
+        // Convert to RawRecord format for compatibility with existing dashboard logic
+        // Use exact field names that dashboard functions expect via pickFirst()
+        const records: RawRecord[] = allRecords.map(t => ({
+          "ET Date": t.et_date || "",
+          "Protocol": t.protocol_name || "",
+          "ET Tech": t.technician_name || "",
+          "ET assistant": t.assistant_name || "",
+          "1st PC Result": t.pc1_result || "",
+          "BC Score": t.bc_score?.toString() || "",
+          "CL measure (mm)": t.cl_measure_mm?.toString() || "",
+          "Embryo Stage": t.embryo_stage?.toString() || "",
+          "Embryo Grade": t.embryo_grade?.toString() || "",
+          "Donor": t.donor_tag || "",
+          "Sire Name": t.sire_name || "",
+          "SIRE Name": t.sire_name || "",
+          "Fresh or Frozen": t.fresh_or_frozen || "",
+          "Recipient ID": t.recipient_tag || "",
+          "ET Location (recipient farm)": t.farm_location || "",
+          "Cow/Heifer": t.recipient_tag || "",
+          "Pregnant Y/N": t.pc1_result?.toLowerCase() === "pregnant" ? "Pregnant" : "",
+          "Heat": t.heat_observed ? "Yes" : "No",
+          "Heat Day": t.heat_day?.toString() || "",
+          "ET Number": t.et_number?.toString() || "",
+        }));
+        
+        setRecords(records);
       } catch (error) {
-        console.error("Failed to load ET dataset", error);
-        setLoadError("Unable to load the ET dataset from /datasets/ET Summary - ET Data.csv.");
+        console.error("Failed to load ET transfers from API", error);
+        setLoadError("Unable to load the ET transfer data from the server.");
         setRecords([]);
       } finally {
         setIsLoading(false);
@@ -526,8 +573,8 @@ export default function AdminDashboard() {
                 <AreaChart data={dashboard.pregnancyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="pregnancyTrendFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.02} />
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
@@ -543,9 +590,9 @@ export default function AdminDashboard() {
                   <Area
                     type="monotone"
                     dataKey="pregnancyRate"
-                    stroke="#58b883"
+                    stroke="#059669"
                     strokeWidth={3}
-                    dot={{ r: 5 } as any}
+                    dot={{ r: 5, fill: "#10b981" }}
                     fill="url(#pregnancyTrendFill)"
                   />
                 </AreaChart>
@@ -593,8 +640,8 @@ export default function AdminDashboard() {
                 <AreaChart data={dashboard.confidenceTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="confidenceTrendFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.02} />
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.01} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
@@ -610,8 +657,9 @@ export default function AdminDashboard() {
                   <Area
                     type="monotone"
                     dataKey="confidence"
-                    stroke="#f59e0b"
+                    stroke="#7c3aed"
                     strokeWidth={3}
+                    dot={{ r: 5, fill: "#8b5cf6" }}
                     fill="url(#confidenceTrendFill)"
                   />
                 </AreaChart>

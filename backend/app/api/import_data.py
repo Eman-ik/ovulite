@@ -67,20 +67,24 @@ async def import_csv(
         os.unlink(tmp_path)
 
     # Keep the browser-facing CSV in sync so the dashboard updates on reload.
+     # Keep the browser-facing CSV in sync so the dashboard updates on reload.
     project_root = Path(__file__).resolve().parents[3]
     public_csv_path = project_root / "frontend" / "public" / "datasets" / "ET Summary - ET Data.csv"
     docs_csv_path = project_root / "docs" / "dataset" / "ET Summary - ET Data.csv"
+
+    public_csv_path.parent.mkdir(parents=True, exist_ok=True)
+    docs_csv_path.parent.mkdir(parents=True, exist_ok=True)
+
     public_csv_path.write_text(text, encoding="utf-8")
-    if docs_csv_path.exists():
-        docs_csv_path.write_text(text, encoding="utf-8")
+    docs_csv_path.write_text(text, encoding="utf-8")
 
     # Rebuild analytics artifacts so backend analytics endpoints stay in sync.
-    try:
-        from ml.analytics.run_analytics import run_analytics
+    # try:
+      #  from ml.analytics.run_analytics import run_analytics
 
-        run_analytics()
-    except Exception:
-        logger.exception("Analytics refresh failed after CSV import")
+      #  run_analytics()
+    #except Exception:
+       # logger.exception("Analytics refresh failed after CSV import")
 
     logger.info(
         "CSV import by user '%s': %d rows ingested, %d skipped",
@@ -94,14 +98,13 @@ async def import_csv(
         "rows_read": stats["rows_read"],
         "rows_ingested": stats["rows_ingested"],
         "rows_skipped": stats["rows_skipped"],
-        "errors": stats["errors"][:20],  # limit error output
+        "errors": stats["errors"][:100],
     }
-
 
 @router.post(
     "/seed-from-disk",
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(require_role("admin"))],
+    dependencies=[Depends(require_role("admin", "embryologist"))],
 )
 def seed_from_disk(
     db: Session = Depends(get_db),
@@ -152,5 +155,5 @@ def seed_from_disk(
         "rows_read": stats["rows_read"],
         "rows_ingested": stats["rows_ingested"],
         "rows_skipped": stats["rows_skipped"],
-        "errors": stats["errors"][:20],
+        "errors": stats["errors"][:100],
     }

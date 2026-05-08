@@ -9,7 +9,10 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-
+from sqlalchemy import create_engine
+from app.models import user
+from app.models.user import User
+from sqlalchemy.orm import sessionmaker
 from app.api.auth import router as auth_router
 from app.api.auth import ensure_default_admin
 from app.api.analytics import router as analytics_router
@@ -69,24 +72,29 @@ def _warm_qc_cache():
         logger.warning("Failed to warm QC cache: %s", e)
 
 
+from app.database import Base, engine, SessionLocal
+
+
+def init_db():
+    """Initialize database."""
+    pass
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    """Lifespan context for the FastAPI app."""
+    init_db()
+    Base.metadata.create_all(bind=engine)
     logger.info("Ovulite API started")
 
     # Seed the default admin for local/dev databases when no users exist.
-    # This keeps the default login working without requiring a separate bootstrap step.
-    from app.database import SessionLocal
-
     db = SessionLocal()
     try:
-      seeded = ensure_default_admin(db)
-      if seeded:
-          logger.info("Seeded default admin user during startup")
+        seeded = ensure_default_admin(db)
+        if seeded:
+            logger.info("Seeded default admin user during startup")
     finally:
         db.close()
-    
-    # Skip cache warming - causes startup delays
-    # The caches will be computed on-demand when endpoints are called
     
     yield
     

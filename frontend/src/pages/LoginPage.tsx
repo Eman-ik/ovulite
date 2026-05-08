@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, Lock, Mail, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
+
 import { getRoleLandingPath } from "@/lib/roleRoutes";
 
 /* ---------------------------------------------
@@ -551,7 +552,7 @@ export function LoginPage() {
               </span>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#FFFFFF" }} />
-                <input type="text" required placeholder="name@company.com" value={username} onChange={(e) => setUsername(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
+                <input id="email" type="text" required placeholder="name@company.com" value={username} onChange={(e) => setUsername(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
               </div>
             </label>
 
@@ -561,7 +562,7 @@ export function LoginPage() {
               </span>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
-                <input type={showPassword ? "text" : "password"} required placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
+                <input id="password" type={showPassword ? "text" : "password"} required placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
                 <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors" style={{ color: isDark ? "#52525b" : "#94a3b8" }} aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -590,7 +591,7 @@ export function LoginPage() {
               </div>
             )}
 
-            <button type="submit" disabled={isLoading} className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70" style={{
+            <button id="loginBtn" type="submit" disabled={isLoading} className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70" style={{
               background: isDark ? "linear-gradient(to right, #FF6B00, #FFAA00)" : "#000000",
               color: isDark ? "#0a0a0a" : "#ffffff",
               boxShadow: isDark

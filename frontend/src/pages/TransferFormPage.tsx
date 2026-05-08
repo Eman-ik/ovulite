@@ -635,7 +635,8 @@ export default function TransferFormPage() {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={saving}>
+        
+          <Button id="saveBtn" type="submit" disabled={saving}>
             <Save className="mr-2 h-4 w-4" />
             {saving ? "Saving..." : isEdit ? "Update Transfer" : "Create Transfer"}
           </Button>

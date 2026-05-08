@@ -1,6 +1,6 @@
 """Seed script to create demo users for role-based access control testing."""
 import os
-os.environ["DATABASE_URL"] = "postgresql://ovulite:ovulite_dev_password@localhost:5432/ovulite"
+os.environ["DATABASE_URL"] = "sqlite:///./ovulite_local.db"
 
 from app.auth.security import hash_password
 from app.database import SessionLocal

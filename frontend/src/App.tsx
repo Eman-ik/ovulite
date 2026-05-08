@@ -31,20 +31,96 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/login/debug" element={<LoginDebugPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            
+            
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
-                <Route path="data-entry" element={<DataEntryPage />} />
-                <Route path="data-entry/new" element={<TransferFormPage />} />
-                <Route path="data-entry/:id" element={<TransferFormPage />} />
-                <Route path="predictions" element={<PredictionPage />} />
-                <Route path="embryo-grading" element={<GradingPage />} />
-                <Route path="lab-qc" element={<QCDashboardPage />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
-                <Route path="cases" element={<CaseRecordsPage />} />
-                <Route path="cases/:id" element={<CaseDetailPage />} />
-                <Route path="model-performance" element={<ModelPerformancePage />} />
-                <Route path="reports" element={<ReportsExportPage />} />
+
+<Route
+  path="data-entry"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+      <DataEntryPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="data-entry/new"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+      <TransferFormPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="data-entry/:id"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+      <TransferFormPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="predictions"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+      <PredictionPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="embryo-grading"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+      <GradingPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="lab-qc"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+      <QCDashboardPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="analytics"
+  element={
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AnalyticsPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="cases" element={<CaseRecordsPage />} />
+<Route path="cases/:id" element={<CaseDetailPage />} />
+
+<Route
+  path="model-performance"
+  element={
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <ModelPerformancePage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="reports"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "embryologist", "et team"]}>
+      <ReportsExportPage />
+    </ProtectedRoute>
+  }
+/>
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

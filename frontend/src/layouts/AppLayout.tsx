@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useMemo, useState } from "react";
+import { ROLE_PERMISSIONS } from "@/lib/roleRoutes";
 import {
   LayoutDashboard,
   FileInput,
@@ -38,6 +39,8 @@ export default function AppLayout() {
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const role = user?.role?.toLowerCase() || "viewer";
+const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS];
 
   const displayName = useMemo(() => {
     if (!user) return "Guest";
@@ -46,7 +49,17 @@ export default function AppLayout() {
 
   const NavItems = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="space-y-1.5">
-      {navItems.map((item) => (
+      {navItems
+  .filter((item) => {
+    if (item.to === "analytics") return permissions?.canViewAnalytics;
+    if (item.to === "data-entry") return permissions?.canEnterETData;
+    if (item.to === "predictions") return permissions?.canEnterETData;
+    if (item.to === "embryo-grading") return permissions?.canGradeEmbryos;
+    if (item.to === "lab-qc") return permissions?.canEnterLabData;
+    if (item.to === "reports") return permissions?.canExportReports;
+    return true;
+  })
+  .map((item) => (
         <NavLink
           key={item.to}
           to={item.to}

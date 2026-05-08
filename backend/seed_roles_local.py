@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from app.auth.security import hash_password
 
 # Database connection
-DB_URL = "postgresql://ovulite:ovulite_dev_password@localhost:5432/ovulite"
+DB_URL = "sqlite:///./ovulite_local.db"
 
 def create_users_table(cursor):
     """Create users table if it doesn't exist."""
