@@ -18,8 +18,8 @@ pipeline {
         stage('Start Ovulite Application') {
             steps {
                 sh '''
-                docker-compose down || true
-                docker-compose up -d --build
+                docker compose down || true
+                docker compose up -d --build
                 sleep 60
                 '''
             }
@@ -70,7 +70,7 @@ pipeline {
             )
 
             sh '''
-            docker-compose down || true
+            docker compose down || true
             '''
         }
     }
