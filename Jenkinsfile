@@ -66,7 +66,7 @@ pipeline {
                 Build Number: ${env.BUILD_NUMBER}
                 """,
                 to: "emanmalik164@gmail.com",
-                from: "${SENDER_EMAIL}"
+                from: "${env.SENDER_EMAIL}"
             )
 
             sh '''
