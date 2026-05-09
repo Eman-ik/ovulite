@@ -55,20 +55,30 @@ pipeline {
 
         always {
 
-            emailext(
-                subject: "Ovulite Jenkins Test Results - ${currentBuild.currentResult}",
-                body: """
-                Build Result: ${currentBuild.currentResult}
+            script {
+    def collaboratorEmail = sh(
+        script: "git log -1 --pretty=format:'%ae'",
+        returnStdout: true
+    ).trim()
 
-                Jenkins pipeline executed successfully.
+    emailext(
+        subject: "Ovulite Jenkins Test Results - ${currentBuild.currentResult}",
+        body: """
+        Build Result: ${currentBuild.currentResult}
 
-                Project: ${env.JOB_NAME}
-                Build Number: ${env.BUILD_NUMBER}
-                """,
-                to: "emanmalik164@gmail.com",
-                from: "${env.SENDER_EMAIL}"
-            )
+        Jenkins pipeline executed for your recent push.
 
+        Project: ${env.JOB_NAME}
+        Build Number: ${env.BUILD_NUMBER}
+        Commit Author Email: ${collaboratorEmail}
+
+        Console Output:
+        ${env.BUILD_URL}console
+        """,
+        to: collaboratorEmail,
+        from: "${env.SENDER_EMAIL}"
+    )
+}
             sh '''
             docker compose down || true
             '''
