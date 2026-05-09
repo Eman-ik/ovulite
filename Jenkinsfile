@@ -14,6 +14,19 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Create Env File') {
+    steps {
+        sh '''
+        cat > .env <<EOF
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=ovulite
+DATABASE_URL=postgresql://postgres:postgres@db:5432/ovulite
+SECRET_KEY=ovulite-secret-key
+EOF
+        '''
+    }
+}
 
         stage('Start Ovulite Application') {
             steps {
