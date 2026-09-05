@@ -18,6 +18,7 @@ import {
   LifeBuoy,
   Sun,
   Moon,
+  FlaskConical,
 } from "lucide-react";
 import ovuliteLogo from "../pages/icon.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +29,7 @@ const navItems = [
   { to: "data-entry", icon: FileInput, label: "Data Entry" },
   { to: "predictions", icon: Brain, label: "Predictions" },
   { to: "embryo-grading", icon: Microscope, label: "Embryo Grading" },
+  { to: "opu-ivf", icon: FlaskConical, label: "OPU & IVF Batches" },
   { to: "lab-qc", icon: Shield, label: "Lab QC" },
   { to: "analytics", icon: BarChart3, label: "Analytics" },
   { to: "cases", icon: FolderOpen, label: "Case Records" },
@@ -50,6 +52,7 @@ const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS];
     if (item.to === "data-entry") return permissions?.canEnterETData;
     if (item.to === "predictions") return permissions?.canEnterETData;
     if (item.to === "embryo-grading") return permissions?.canGradeEmbryos;
+    if (item.to === "opu-ivf") return permissions?.canEnterLabData;
     if (item.to === "lab-qc") return permissions?.canEnterLabData;
     if (item.to === "reports") return permissions?.canExportReports;
     return true;

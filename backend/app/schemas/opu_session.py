@@ -50,6 +50,8 @@ class OPUSessionUpdate(BaseModel):
 
 class OPUSessionResponse(OPUSessionBase):
     opu_id: int
+    donor_tag: Optional[str] = None
+    technician_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

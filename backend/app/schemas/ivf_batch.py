@@ -62,6 +62,10 @@ class IVFBatchUpdate(BaseModel):
 
 class IVFBatchResponse(IVFBatchBase):
     ivf_batch_id: int
+    opu_donor_tag: Optional[str] = None
+    opu_date: Optional[date] = None
+    sire_name: Optional[str] = None
+    embryologist_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

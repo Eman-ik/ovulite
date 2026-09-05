@@ -59,8 +59,10 @@ export interface Protocol {
 export interface OPUSession {
   opu_id: number;
   donor_id: number;
+  donor_tag: string | null;
   opu_date: string;
   technician_id: number | null;
+  technician_name: string | null;
   farm_location: string | null;
   total_follicles: number | null;
   oocytes_recovered: number | null;
@@ -74,7 +76,10 @@ export interface OPUSession {
 export interface IVFBatch {
   ivf_batch_id: number;
   opu_id: number;
+  opu_donor_tag: string | null;
+  opu_date: string | null;
   sire_id: number | null;
+  sire_name: string | null;
   ivf_date: string | null;
   oocytes_used: number | null;
   mature_oocytes: number | null;
@@ -83,6 +88,7 @@ export interface IVFBatch {
   degenerated_embryos: number | null;
   culture_media: string | null;
   embryologist_id: number | null;
+  embryologist_name: string | null;
   cleavage_rate: number | null;
   blastocyst_rate: number | null;
   notes: string | null;

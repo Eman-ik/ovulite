@@ -12,6 +12,7 @@ import TransferFormPage from "@/pages/TransferFormPage";
 import PredictionPage from "@/pages/PredictionPage";
 import DecisionSupportPage from "@/pages/DecisionSupportPage";
 import GradingPage from "@/pages/GradingPage";
+import OPUIVFPage from "@/pages/OPUIVFPage";
 import QCDashboardPage from "@/pages/QCDashboardPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import CaseRecordsPage from "@/pages/CaseRecordsPage";
@@ -97,6 +98,15 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <QCDashboardPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="opu-ivf"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+      <OPUIVFPage />
     </ProtectedRoute>
   }
 />
