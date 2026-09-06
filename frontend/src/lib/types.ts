@@ -304,3 +304,152 @@ export interface AnalyticsBiomarkersResponse {
   bc_score: AnalyticsBiomarkerResult | null;
   heat_day: AnalyticsBiomarkerResult | null;
 }
+
+/* Homepage Dashboard API Types (backend/app/schemas/dashboard.py) — live-queried, not cached */
+
+export interface DashboardFilterValues {
+  date_from?: string;
+  date_to?: string;
+  farm_location?: string;
+  breed?: string;
+  donor_id?: number;
+  sire_id?: number;
+  embryologist_id?: number;
+  technician_id?: number;
+  protocol_id?: number;
+  fresh_or_frozen?: string;
+}
+
+export interface LabeledOption {
+  id: number;
+  label: string;
+}
+
+export interface DashboardFilterOptions {
+  donors: LabeledOption[];
+  sires: LabeledOption[];
+  technicians: LabeledOption[];
+  protocols: LabeledOption[];
+  breeds: string[];
+  farm_locations: string[];
+  fresh_or_frozen: string[];
+}
+
+export interface DashboardSparklinePoint {
+  bucket: string;
+  value: number | null;
+}
+
+export interface DashboardKpiItem {
+  key: string;
+  label: string;
+  value: number | null;
+  unit: "count" | "percent";
+  delta_pct: number | null;
+  delta_direction: "up" | "down" | "flat" | null;
+  sparkline: DashboardSparklinePoint[];
+  comparison_label: string;
+}
+
+export interface DashboardKpiResponse {
+  kpis: DashboardKpiItem[];
+  date_from: string;
+  date_to: string;
+}
+
+export interface DashboardFunnelStage {
+  name: string;
+  value: number;
+  conversion_pct_from_previous: number | null;
+  conversion_pct_from_first: number | null;
+}
+
+export interface DashboardOmittedStage {
+  name: string;
+  reason: string;
+}
+
+export interface DashboardFunnelResponse {
+  stages: DashboardFunnelStage[];
+  omitted_stages: DashboardOmittedStage[];
+}
+
+export interface DashboardTrendPoint {
+  bucket_label: string;
+  value: number | null;
+  n: number;
+}
+
+export interface DashboardTrendResponse {
+  metric: string;
+  granularity: "day" | "week" | "month";
+  points: DashboardTrendPoint[];
+}
+
+export interface DashboardOperationsResponse {
+  opu_sessions_today: number;
+  ivf_batches_in_culture: number;
+  embryos_pending_grading: number;
+  transfers_scheduled_today: number;
+  pregnancy_checks_due: number;
+  predictions_pending_outcome: number;
+  estimated_fields: string[];
+}
+
+export interface DashboardPipelineRow {
+  stage: "opu" | "ivf" | "grading" | "transfer_scheduled" | "pending_pc";
+  entity_id: number;
+  label: string;
+  date: string | null;
+  detail: string | null;
+}
+
+export interface DashboardAlertItem {
+  severity: "critical" | "warning" | "info";
+  title: string;
+  detail: string;
+  metric_key: string;
+}
+
+export interface DashboardAlertsResponse {
+  alerts: DashboardAlertItem[];
+}
+
+export interface DashboardPerformanceRow {
+  id: number;
+  label: string;
+  n_transfers: number;
+  pregnancy_rate: number | null;
+  insufficient_data: boolean;
+}
+
+export interface DashboardPerformanceResponse {
+  dimension: "donor" | "sire" | "protocol" | "technician";
+  rows: DashboardPerformanceRow[];
+}
+
+export interface DashboardDataQualityRow {
+  table: string;
+  field: string;
+  total: number;
+  missing: number;
+  missing_pct: number;
+  stale: boolean;
+}
+
+export interface DashboardDataQualityResponse {
+  rows: DashboardDataQualityRow[];
+}
+
+export interface DashboardHighRiskTransfer {
+  transfer_id: number;
+  et_date: string | null;
+  probability: number;
+  risk_band: string | null;
+  predicted_at: string;
+}
+
+export interface DashboardAISummaryResponse {
+  pending_predictions_count: number;
+  high_risk_transfers: DashboardHighRiskTransfer[];
+}

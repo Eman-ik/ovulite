@@ -17,6 +17,7 @@ from app.api.auth import router as auth_router
 from app.api.auth import ensure_default_admin, ensure_default_organization
 from app.api.analytics import router as analytics_router
 from app.api.autonomous_agent import router as autonomous_agent_router
+from app.api.dashboard import router as dashboard_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
@@ -142,6 +143,7 @@ app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 app.include_router(grading_router, prefix="/grade", tags=["grading"])
 app.include_router(qc_router, prefix="/qc", tags=["qc"])
 app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
+app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(organizations_router)
 app.include_router(health_router, tags=["health"])
 
