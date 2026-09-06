@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.ivf_batch import IVFBatch
 from app.models.opu_session import OPUSession
@@ -69,7 +69,7 @@ def get_ivf_batch(ivf_batch_id: int, db: Session = Depends(get_db), current_user
 
 @router.post("/", response_model=IVFBatchResponse, status_code=status.HTTP_201_CREATED)
 def create_ivf_batch(
-    payload: IVFBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: IVFBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     b = IVFBatch(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(b)
@@ -80,7 +80,7 @@ def create_ivf_batch(
 
 @router.put("/{ivf_batch_id}", response_model=IVFBatchResponse)
 def update_ivf_batch(
-    ivf_batch_id: int, payload: IVFBatchUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    ivf_batch_id: int, payload: IVFBatchUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     b = db.query(IVFBatch).filter(
         IVFBatch.ivf_batch_id == ivf_batch_id, IVFBatch.organization_id == current_user.organization_id
@@ -95,7 +95,7 @@ def update_ivf_batch(
 
 
 @router.delete("/{ivf_batch_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_ivf_batch(ivf_batch_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_ivf_batch(ivf_batch_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     b = db.query(IVFBatch).filter(
         IVFBatch.ivf_batch_id == ivf_batch_id, IVFBatch.organization_id == current_user.organization_id
     ).first()

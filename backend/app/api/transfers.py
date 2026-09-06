@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.donor import Donor
 from app.models.embryo import Embryo
@@ -126,7 +126,7 @@ def get_transfer(
 def create_transfer(
     payload: ETTransferCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     """Create a new ET transfer record."""
     transfer = ETTransfer(
@@ -143,7 +143,7 @@ def update_transfer(
     transfer_id: int,
     payload: ETTransferUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     t = (
         db.query(ETTransfer)
@@ -166,7 +166,7 @@ def update_transfer(
 def delete_transfer(
     transfer_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     t = (
         db.query(ETTransfer)

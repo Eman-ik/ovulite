@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.recipient import Recipient
 from app.models.user import User
@@ -49,7 +49,7 @@ def get_recipient(recipient_id: int, db: Session = Depends(get_db), current_user
 
 @router.post("/", response_model=RecipientResponse, status_code=status.HTTP_201_CREATED)
 def create_recipient(
-    payload: RecipientCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: RecipientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     r = Recipient(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(r)
@@ -60,7 +60,7 @@ def create_recipient(
 
 @router.put("/{recipient_id}", response_model=RecipientResponse)
 def update_recipient(
-    recipient_id: int, payload: RecipientUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    recipient_id: int, payload: RecipientUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     r = db.query(Recipient).filter(
         Recipient.recipient_id == recipient_id, Recipient.organization_id == current_user.organization_id
@@ -75,7 +75,7 @@ def update_recipient(
 
 
 @router.delete("/{recipient_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_recipient(recipient_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_recipient(recipient_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES))):
     r = db.query(Recipient).filter(
         Recipient.recipient_id == recipient_id, Recipient.organization_id == current_user.organization_id
     ).first()

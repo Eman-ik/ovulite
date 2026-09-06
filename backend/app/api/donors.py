@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.donor import Donor
 from app.models.user import User
@@ -58,7 +58,7 @@ def get_donor(
 def create_donor(
     payload: DonorCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Create a new donor."""
     existing = db.query(Donor).filter(
@@ -78,7 +78,7 @@ def update_donor(
     donor_id: int,
     payload: DonorUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Update a donor."""
     donor = db.query(Donor).filter(
@@ -98,7 +98,7 @@ def update_donor(
 def delete_donor(
     donor_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Delete a donor."""
     donor = db.query(Donor).filter(

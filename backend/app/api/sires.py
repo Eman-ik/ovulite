@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.sire import Sire
 from app.models.user import User
@@ -47,7 +47,7 @@ def get_sire(sire_id: int, db: Session = Depends(get_db), current_user: User = D
 
 @router.post("/", response_model=SireResponse, status_code=status.HTTP_201_CREATED)
 def create_sire(
-    payload: SireCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: SireCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     sire = Sire(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(sire)
@@ -58,7 +58,7 @@ def create_sire(
 
 @router.put("/{sire_id}", response_model=SireResponse)
 def update_sire(
-    sire_id: int, payload: SireUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    sire_id: int, payload: SireUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     sire = db.query(Sire).filter(
         Sire.sire_id == sire_id, Sire.organization_id == current_user.organization_id
@@ -73,7 +73,7 @@ def update_sire(
 
 
 @router.delete("/{sire_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_sire(sire_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_sire(sire_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     sire = db.query(Sire).filter(
         Sire.sire_id == sire_id, Sire.organization_id == current_user.organization_id
     ).first()

@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.opu_session import OPUSession
 from app.models.user import User
@@ -61,7 +61,7 @@ def get_opu_session(opu_id: int, db: Session = Depends(get_db), current_user: Us
 
 @router.post("/", response_model=OPUSessionResponse, status_code=status.HTTP_201_CREATED)
 def create_opu_session(
-    payload: OPUSessionCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: OPUSessionCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     s = OPUSession(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(s)
@@ -72,7 +72,7 @@ def create_opu_session(
 
 @router.put("/{opu_id}", response_model=OPUSessionResponse)
 def update_opu_session(
-    opu_id: int, payload: OPUSessionUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    opu_id: int, payload: OPUSessionUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     s = db.query(OPUSession).filter(
         OPUSession.opu_id == opu_id, OPUSession.organization_id == current_user.organization_id
@@ -87,7 +87,7 @@ def update_opu_session(
 
 
 @router.delete("/{opu_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_opu_session(opu_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_opu_session(opu_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     s = db.query(OPUSession).filter(
         OPUSession.opu_id == opu_id, OPUSession.organization_id == current_user.organization_id
     ).first()

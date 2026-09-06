@@ -5,7 +5,7 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.protocol import Protocol
 from app.models.user import User
@@ -43,7 +43,7 @@ def get_protocol(protocol_id: int, db: Session = Depends(get_db), current_user: 
 
 @router.post("/", response_model=ProtocolResponse, status_code=status.HTTP_201_CREATED)
 def create_protocol(
-    payload: ProtocolCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: ProtocolCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     existing = db.query(Protocol).filter(
         Protocol.name == payload.name, Protocol.organization_id == current_user.organization_id
@@ -59,7 +59,7 @@ def create_protocol(
 
 @router.put("/{protocol_id}", response_model=ProtocolResponse)
 def update_protocol(
-    protocol_id: int, payload: ProtocolUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    protocol_id: int, payload: ProtocolUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     p = db.query(Protocol).filter(
         Protocol.protocol_id == protocol_id, Protocol.organization_id == current_user.organization_id

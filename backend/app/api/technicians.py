@@ -5,7 +5,7 @@ import math
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.technician import Technician
 from app.models.user import User
@@ -43,7 +43,7 @@ def get_technician(technician_id: int, db: Session = Depends(get_db), current_us
 
 @router.post("/", response_model=TechnicianResponse, status_code=status.HTTP_201_CREATED)
 def create_technician(
-    payload: TechnicianCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: TechnicianCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     existing = db.query(Technician).filter(
         Technician.name == payload.name, Technician.organization_id == current_user.organization_id
@@ -59,7 +59,7 @@ def create_technician(
 
 @router.put("/{technician_id}", response_model=TechnicianResponse)
 def update_technician(
-    technician_id: int, payload: TechnicianUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    technician_id: int, payload: TechnicianUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     t = db.query(Technician).filter(
         Technician.technician_id == technician_id, Technician.organization_id == current_user.organization_id

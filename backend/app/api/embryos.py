@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.embryo import Embryo
 from app.models.user import User
@@ -53,7 +53,7 @@ def get_embryo(embryo_id: int, db: Session = Depends(get_db), current_user: User
 
 @router.post("/", response_model=EmbryoResponse, status_code=status.HTTP_201_CREATED)
 def create_embryo(
-    payload: EmbryoCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    payload: EmbryoCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     e = Embryo(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(e)
@@ -64,7 +64,7 @@ def create_embryo(
 
 @router.put("/{embryo_id}", response_model=EmbryoResponse)
 def update_embryo(
-    embryo_id: int, payload: EmbryoUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),
+    embryo_id: int, payload: EmbryoUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     e = db.query(Embryo).filter(
         Embryo.embryo_id == embryo_id, Embryo.organization_id == current_user.organization_id
@@ -79,7 +79,7 @@ def update_embryo(
 
 
 @router.delete("/{embryo_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_embryo(embryo_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def delete_embryo(embryo_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     e = db.query(Embryo).filter(
         Embryo.embryo_id == embryo_id, Embryo.organization_id == current_user.organization_id
     ).first()

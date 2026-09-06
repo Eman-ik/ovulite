@@ -76,6 +76,15 @@ def get_current_organization(current_user: User = Depends(get_current_user)) -> 
     return organization
 
 
+# Write/delete role groups for the core clinical CRUD routers. Read access
+# (list/get) stays open to any authenticated role; only mutation is
+# restricted, split along the lab-side / ET-side line the SRS describes:
+# embryologist owns lab data entry, et team/veterinarian own recipient and
+# transfer entry. admin and organization_admin can write everywhere.
+LAB_WRITE_ROLES = ("admin", "organization_admin", "embryologist")
+ET_WRITE_ROLES = ("admin", "organization_admin", "et team", "veterinarian")
+
+
 def require_role(*allowed_roles: str) -> Callable:
     """Return a dependency that restricts access to users with specific roles.
 
