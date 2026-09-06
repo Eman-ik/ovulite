@@ -12,6 +12,7 @@ underlying data are returned as `None`/empty, never fabricated as 0 or NaN.
 """
 
 import math
+import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
@@ -948,8 +949,22 @@ def get_performance(
             id=key, label=labels[key], n_transfers=len(items),
             pregnancy_rate=rate, insufficient_data=insufficient,
         ))
+    # Select the most relevant rows by transfer volume, but DISPLAY them
+    # grouped by label type (numeric-tagged donors/sires first in numeric
+    # order, then name-tagged ones alphabetically) rather than interleaved
+    # by transfer count — mixed numeric/alpha tags in one rank-ordered list
+    # read as inconsistent even though the underlying tags are legitimate.
     rows.sort(key=lambda r: r.n_transfers, reverse=True)
-    return PerformanceResponse(dimension=dimension, rows=rows[:limit])
+    top_rows = rows[:limit]
+    top_rows.sort(key=_natural_label_key)
+    return PerformanceResponse(dimension=dimension, rows=top_rows)
+
+
+def _natural_label_key(row: PerformanceRow) -> tuple:
+    match = re.match(r"^(\d+)", row.label)
+    if match:
+        return (0, int(match.group(1)), row.label)
+    return (1, 0, row.label.lower())
 
 
 def _dq_row(table: str, field: str, total: int, missing: int, stale: bool) -> DataQualityRow:
