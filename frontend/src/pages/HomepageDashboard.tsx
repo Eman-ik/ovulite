@@ -54,7 +54,7 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       funnelStages: ["Oocytes Recovered", "Mature Oocytes", "Cleaved Embryos", "Blastocysts"],
       operationsTiles: ["opu_sessions_today", "ivf_batches_in_culture", "embryos_pending_grading"],
       pipelineStages: ["opu", "ivf", "grading"],
-      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: "#5fbf9f" }],
+      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: "#c3a6e0" }],
       performanceDimensions: ["donor", "sire"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -68,7 +68,7 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       funnelStages: ["Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"],
       operationsTiles: ["transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"],
       pipelineStages: ["transfer_scheduled", "pending_pc"],
-      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#a8cba0" }],
+      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#e79a9a" }],
       performanceDimensions: ["protocol", "technician"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -79,8 +79,8 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
   // admin and viewer see everything
   return {
     trendMetrics: [
-      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#a8cba0" },
-      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#5fbf9f" },
+      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#e79a9a" },
+      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#8fb8de" },
     ],
     performanceDimensions: ["donor", "sire", "protocol", "technician"],
     showIntelligence: canViewAnalytics,
@@ -207,24 +207,24 @@ export default function HomepageDashboard() {
             className="relative h-full min-h-[220px] p-7"
             style={{
               background:
-                "radial-gradient(120% 140% at 100% 0%, rgba(207,227,184,0.30) 0%, rgba(127,176,105,0.16) 38%, rgba(10,16,12,0) 72%), linear-gradient(135deg, #16241b 0%, #0e1712 60%)",
+                "radial-gradient(110% 130% at 100% 0%, rgba(255,255,255,0.75) 0%, rgba(246,223,174,0.55) 40%, rgba(246,223,174,0) 74%), linear-gradient(135deg, #f7e9c8 0%, #efd9a8 55%, #e8cf9c 100%)",
             }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-black/25 px-3 py-1.5 text-[11px] font-medium tracking-wide dash-muted">
-              <Sparkles className="h-3.5 w-3.5 text-[var(--primary)]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(22,24,26,0.12)] bg-white/70 px-3 py-1.5 text-[11px] font-medium tracking-wide text-[#6b5b33]">
+              <Sparkles className="h-3.5 w-3.5 text-[#a97a1e]" />
               Live data · updates with your filters
             </div>
 
-            <h2 className="hero-serif mt-5 max-w-[18ch] text-[42px] text-[#eef5ea] sm:text-[52px]">
-              Explore your <em className="text-[var(--primary)]">program</em>
+            <h2 className="hero-serif mt-5 max-w-[18ch] text-[42px] text-[#1d1c17] sm:text-[52px]">
+              Explore your <em className="text-[#a97a1e]">program</em>
             </h2>
-            <p className="mt-3 max-w-md text-sm dash-muted">
+            <p className="mt-3 max-w-md text-sm text-[#5f5540]">
               Track oocyte recovery through to confirmed pregnancies, and see exactly where the losses happen.
             </p>
 
             <Link
               to={heroLink}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition hover:brightness-110"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[0_10px_24px_-14px_rgba(22,24,26,0.7)] transition hover:bg-[#25292d]"
             >
               {heroLinkLabel}
               <ArrowUpRight className="h-4 w-4" />
@@ -244,7 +244,7 @@ export default function HomepageDashboard() {
       <FilterBar filters={filters} options={filterOptions} onChange={setFilters} visibleFields={roleConfig.filterFields} />
 
       {loadError && (
-        <div className="rounded-2xl border border-[rgba(224,101,111,0.3)] bg-[rgba(224,101,111,0.12)] p-4 text-sm text-[#f0a4aa]">
+        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
           {loadError}
         </div>
       )}

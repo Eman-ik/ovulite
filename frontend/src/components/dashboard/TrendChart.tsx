@@ -12,7 +12,7 @@ import type { DashboardTrendResponse } from "@/lib/types";
 export default function TrendChart({
   data,
   title,
-  color = "#a8cba0",
+  color = "#8fb8de",
 }: {
   data: DashboardTrendResponse | null;
   title: string;
@@ -37,10 +37,10 @@ export default function TrendChart({
                 <stop offset="95%" stopColor={color} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-            <XAxis dataKey="label" stroke="#8ba392" tickLine={false} axisLine={false} fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" vertical={false} />
+            <XAxis dataKey="label" stroke="#9aa1aa" tickLine={false} axisLine={false} fontSize={11} />
             <YAxis
-              stroke="#8ba392"
+              stroke="#9aa1aa"
               tickLine={false}
               axisLine={false}
               fontSize={11}
@@ -55,20 +55,21 @@ export default function TrendChart({
               }
               contentStyle={{
                 borderRadius: 14,
-                border: "1px solid rgba(168,203,160,0.2)",
-                background: "#0f1512",
-                color: "#e9f1ea",
+                border: "1px solid rgba(22,24,26,0.1)",
+                background: "#ffffff",
+                boxShadow: "0 12px 32px -18px rgba(22,24,26,0.35)",
+                color: "#16181a",
               }}
-              labelStyle={{ color: "#8ba392" }}
-              cursor={{ stroke: "rgba(168,203,160,0.3)" }}
+              labelStyle={{ color: "#6f7680" }}
+              cursor={{ stroke: "rgba(22,24,26,0.18)" }}
             />
             <Area
               type="monotone"
               dataKey="value"
               stroke={color}
               strokeWidth={2.5}
-              dot={{ r: 3, fill: color, stroke: "#070a08", strokeWidth: 1.5 }}
-              activeDot={{ r: 5, fill: color, stroke: "#070a08", strokeWidth: 2 }}
+              dot={{ r: 3, fill: color, stroke: "#ffffff", strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: color, stroke: "#ffffff", strokeWidth: 2 }}
               fill={`url(#${gradientId})`}
               connectNulls
             />

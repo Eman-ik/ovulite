@@ -9,11 +9,11 @@ const STAGE_LABEL: Record<DashboardPipelineRow["stage"], string> = {
 };
 
 const STAGE_COLOR: Record<DashboardPipelineRow["stage"], string> = {
-  opu: "#5fbf9f",
-  ivf: "#35836d",
-  grading: "#4f9d69",
-  transfer_scheduled: "#7fb069",
-  pending_pc: "#a8cba0",
+  opu: "#8fb8de",
+  ivf: "#79c6bb",
+  grading: "#c3a6e0",
+  transfer_scheduled: "#eaba6b",
+  pending_pc: "#e3a3c4",
 };
 
 export default function ActivePipelineTable({
@@ -42,7 +42,7 @@ export default function ActivePipelineTable({
         </thead>
         <tbody>
           {filtered.map((r) => (
-            <tr key={`${r.stage}-${r.entity_id}`} className="border-b border-white/[0.04] last:border-0">
+            <tr key={`${r.stage}-${r.entity_id}`} className="border-b border-[var(--border)] last:border-0">
               <td className="py-2.5 pr-3">
                 <span
                   className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium"

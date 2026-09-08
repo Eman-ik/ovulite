@@ -142,7 +142,7 @@ export default function AppLayout() {
       <div className="flex items-center gap-3 px-5 py-5">
         <div
           className="ov-pulse-ring flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl"
-          style={{ background: "linear-gradient(135deg, #a8cba0, #7fb069)" }}
+          style={{ background: "linear-gradient(135deg, #f6dfae, #e0ab35)" }}
         >
           <img src={ovuliteLogo} alt="" className="h-full w-full object-cover" />
         </div>
@@ -175,11 +175,11 @@ export default function AppLayout() {
       </nav>
 
       <div className="border-t border-[var(--sidebar-border)] p-3">
-        <div className="flex items-center gap-3 rounded-2xl border border-[var(--sidebar-border)] bg-white/[0.04] p-2.5">
+        <div className="flex items-center gap-3 rounded-2xl border border-[var(--sidebar-border)] bg-white p-2.5 shadow-sm">
           <img
             src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || "guest"}`}
             alt=""
-            className="h-9 w-9 shrink-0 rounded-full bg-white/10"
+            className="h-9 w-9 shrink-0 rounded-full bg-black/[0.06]"
           />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium leading-tight text-[var(--sidebar-text)]">
@@ -193,7 +193,7 @@ export default function AppLayout() {
             onClick={logout}
             title="Log out"
             aria-label="Log out"
-            className="shrink-0 rounded-lg p-2 text-[var(--sidebar-muted)] transition hover:bg-white/[0.07] hover:text-[var(--sidebar-text)]"
+            className="shrink-0 rounded-lg p-2 text-[var(--sidebar-muted)] transition hover:bg-black/[0.05] hover:text-[var(--sidebar-text)]"
           >
             <LogOut className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -211,14 +211,14 @@ export default function AppLayout() {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)}>
           <aside
             className="flex h-full w-[280px] max-w-[85vw] flex-col border-r border-[var(--sidebar-border)] bg-[var(--sidebar-bg)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              className="absolute right-4 top-5 rounded-lg p-2 text-[var(--sidebar-muted)] hover:bg-white/10"
+              className="absolute right-4 top-5 rounded-lg p-2 text-[var(--sidebar-muted)] hover:bg-black/[0.05]"
               onClick={() => setMobileOpen(false)}
               aria-label="Close menu"
             >
@@ -268,7 +268,7 @@ export default function AppLayout() {
                   <button
                     key={item.to}
                     onClick={() => go(item.to)}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-[var(--foreground)] hover:bg-white/[0.06]"
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm text-[var(--foreground)] hover:bg-black/[0.04]"
                   >
                     <item.icon className="h-4 w-4 text-[var(--primary)]" strokeWidth={1.75} />
                     <span className="flex-1">{item.label}</span>

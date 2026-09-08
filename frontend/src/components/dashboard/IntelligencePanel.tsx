@@ -72,7 +72,7 @@ export default function IntelligencePanel() {
                 {summary.high_risk_transfers.slice(0, 5).map((t) => (
                   <li
                     key={t.transfer_id}
-                    className="flex items-center justify-between rounded-xl border border-[rgba(224,101,111,0.25)] bg-[rgba(224,101,111,0.1)] px-3 py-2 text-xs text-[#f0a4aa]"
+                    className="flex items-center justify-between rounded-xl border border-[rgba(210,86,79,0.26)] bg-[rgba(231,154,154,0.15)] px-3 py-2 text-xs text-[#b8433d]"
                   >
                     <span>Transfer #{t.transfer_id} {t.et_date ? `(${t.et_date})` : ""}</span>
                     <span className="font-semibold">{(t.probability * 100).toFixed(0)}% predicted</span>

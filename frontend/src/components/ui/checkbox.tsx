@@ -27,7 +27,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         <div
           className={cn(
             "h-4 w-4 rounded border border-[var(--border)] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center transition-colors",
-            checked ? "bg-primary text-primary-foreground shadow-[0_0_0_4px_rgba(168,203,160,0.16)]" : "bg-white/[0.07]",
+            checked ? "bg-primary text-primary-foreground shadow-[0_0_0_4px_rgba(22,24,26,0.08)]" : "bg-[var(--input)]",
             className
           )}
         >

@@ -14,7 +14,7 @@ const DIMENSION_LABEL: Record<Dimension, string> = {
 };
 
 /** Green shades cycled across bars so rows stay separable. */
-const BAR_COLORS = ["#cfe3b8", "#a8cba0", "#8aa872", "#7fb069", "#5fbf9f", "#4f9d69", "#35836d", "#2f7d5c"];
+const BAR_COLORS = ["#e79a9a", "#8fb8de", "#86c5a4", "#c3a6e0", "#eaba6b", "#79c6bb", "#e3a3c4", "#adbb84"];
 
 export default function PerformancePanel({
   filters,
@@ -57,9 +57,9 @@ export default function PerformancePanel({
 
   return (
     <Tabs value={active} onValueChange={(v) => setActive(v as Dimension)}>
-      <TabsList className="bg-white/[0.05]">
+      <TabsList className="bg-black/[0.045]">
         {dimensions.map((d) => (
-          <TabsTrigger key={d} value={d} className="data-[state=active]:bg-white/[0.1]">
+          <TabsTrigger key={d} value={d} className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {DIMENSION_LABEL[d]}
           </TabsTrigger>
         ))}
@@ -79,7 +79,7 @@ export default function PerformancePanel({
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
                       <XAxis
                         type="number"
-                        stroke="#8ba392"
+                        stroke="#9aa1aa"
                         tickLine={false}
                         axisLine={false}
                         fontSize={11}
@@ -89,7 +89,7 @@ export default function PerformancePanel({
                         type="category"
                         dataKey="label"
                         width={92}
-                        stroke="#8ba392"
+                        stroke="#9aa1aa"
                         tickLine={false}
                         axisLine={false}
                         fontSize={11}
@@ -98,9 +98,10 @@ export default function PerformancePanel({
                         formatter={((value: unknown) => [`${value}%`, "Pregnancy Rate"]) as (value: unknown) => [string, string]}
                         contentStyle={{
                           borderRadius: 14,
-                          border: "1px solid rgba(168,203,160,0.2)",
-                          background: "#0f1512",
-                          color: "#e9f1ea",
+                          border: "1px solid rgba(22,24,26,0.1)",
+                          background: "#ffffff",
+                          boxShadow: "0 12px 32px -18px rgba(22,24,26,0.35)",
+                          color: "#16181a",
                         }}
                         cursor={{ fill: "rgba(255,255,255,0.04)" }}
                       />
@@ -124,7 +125,7 @@ export default function PerformancePanel({
                 </thead>
                 <tbody>
                   {current.rows.map((r) => (
-                    <tr key={r.id} className="border-b border-white/[0.04] last:border-0">
+                    <tr key={r.id} className="border-b border-[var(--border)] last:border-0">
                       <td className="py-2.5 pr-3 font-medium dash-heading">{r.label}</td>
                       <td className="py-2.5 pr-3 dash-muted">{r.n_transfers}</td>
                       <td className="py-2.5 pr-3">

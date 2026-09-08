@@ -36,7 +36,7 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
             type="date"
             value={filters.date_from ?? ""}
             onChange={(e) => set({ date_from: e.target.value || undefined })}
-            className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-2.5 text-sm text-[var(--foreground)] [color-scheme:dark]"
+            className="h-9 rounded-xl border border-[var(--border)] bg-[var(--input)] px-2.5 text-sm text-[var(--foreground)]"
           />
         </div>
       )}
@@ -47,7 +47,7 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
             type="date"
             value={filters.date_to ?? ""}
             onChange={(e) => set({ date_to: e.target.value || undefined })}
-            className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-2.5 text-sm text-[var(--foreground)] [color-scheme:dark]"
+            className="h-9 rounded-xl border border-[var(--border)] bg-[var(--input)] px-2.5 text-sm text-[var(--foreground)]"
           />
         </div>
       )}
@@ -173,7 +173,7 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       <button
         onClick={() => onChange({})}
-        className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-3 text-xs font-medium dash-muted transition hover:bg-white/[0.09] hover:text-[var(--foreground)]"
+        className="h-9 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-xs font-medium dash-muted transition hover:bg-black/[0.05] hover:text-[var(--foreground)]"
       >
         Clear filters
       </button>

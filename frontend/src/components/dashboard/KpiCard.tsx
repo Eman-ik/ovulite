@@ -3,16 +3,16 @@ import type { ReactNode } from "react";
 export type KpiSparklinePoint = { bucket: string; value: number | null };
 export type KpiDelta = { pct: number; direction: "up" | "down" | "flat"; suffix?: string };
 
-/** Shades of green, distinct enough to give each metric its own identity. */
+/** Soft pastels — each metric gets its own identity without shouting. */
 export const KPI_COLORS = {
-  sage: { solid: "#a8cba0", soft: "rgba(168, 203, 160, 0.14)" },
-  leaf: { solid: "#7fb069", soft: "rgba(127, 176, 105, 0.14)" },
-  emerald: { solid: "#4f9d69", soft: "rgba(79, 157, 105, 0.14)" },
-  pine: { solid: "#2f7d5c", soft: "rgba(47, 125, 92, 0.18)" },
-  lime: { solid: "#cfe3b8", soft: "rgba(207, 227, 184, 0.14)" },
-  mint: { solid: "#5fbf9f", soft: "rgba(95, 191, 159, 0.14)" },
-  olive: { solid: "#8aa872", soft: "rgba(138, 168, 114, 0.16)" },
-  teal: { solid: "#35836d", soft: "rgba(53, 131, 109, 0.18)" },
+  rose: { solid: "#e79a9a", soft: "rgba(231, 154, 154, 0.18)", ink: "#b25f5f" },
+  blue: { solid: "#8fb8de", soft: "rgba(143, 184, 222, 0.18)", ink: "#4d7ba6" },
+  green: { solid: "#86c5a4", soft: "rgba(134, 197, 164, 0.18)", ink: "#3f8a68" },
+  violet: { solid: "#c3a6e0", soft: "rgba(195, 166, 224, 0.18)", ink: "#8663a8" },
+  amber: { solid: "#eaba6b", soft: "rgba(234, 186, 107, 0.22)", ink: "#a97a1e" },
+  teal: { solid: "#79c6bb", soft: "rgba(121, 198, 187, 0.18)", ink: "#3d8a80" },
+  pink: { solid: "#e3a3c4", soft: "rgba(227, 163, 196, 0.18)", ink: "#ac6489" },
+  olive: { solid: "#adbb84", soft: "rgba(173, 187, 132, 0.22)", ink: "#74814d" },
 } as const;
 
 export type KpiColor = keyof typeof KPI_COLORS;
@@ -79,7 +79,7 @@ export default function KpiCard({
   delta,
   sparkline,
   comparisonLabel,
-  color = "sage",
+  color = "green",
 }: KpiCardProps) {
   const palette = KPI_COLORS[color];
 
@@ -88,7 +88,7 @@ export default function KpiCard({
       <div className="flex items-start justify-between">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: palette.soft, color: palette.solid }}
+          style={{ background: palette.soft, color: palette.ink }}
         >
           {icon}
         </div>
@@ -96,10 +96,10 @@ export default function KpiCard({
           <span
             className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-semibold ${
               delta.direction === "up"
-                ? "bg-[rgba(127,176,105,0.16)] text-[#a8cba0]"
+                ? "bg-[rgba(134,197,164,0.22)] text-[#2f7d5c]"
                 : delta.direction === "down"
-                ? "bg-[rgba(224,101,111,0.15)] text-[#f0a4aa]"
-                : "bg-white/[0.06] text-[var(--muted-foreground)]"
+                ? "bg-[rgba(231,154,154,0.24)] text-[#b8433d]"
+                : "bg-black/[0.05] text-[var(--muted-foreground)]"
             }`}
           >
             {delta.direction === "up" ? "↑" : delta.direction === "down" ? "↓" : "→"}
@@ -112,7 +112,7 @@ export default function KpiCard({
       <p className="mt-5 text-xs font-medium uppercase tracking-wide dash-muted">{title}</p>
       <h2 className="mt-1.5 text-[32px] font-semibold leading-none dash-heading">{value}</h2>
       <p className="mt-2 text-xs dash-muted">{comparisonLabel ?? subtitle}</p>
-      {sparkline && sparkline.length > 1 ? <Sparkline points={sparkline} color={palette.solid} /> : null}
+      {sparkline && sparkline.length > 1 ? <Sparkline points={sparkline} color={palette.ink} /> : null}
     </div>
   );
 }

@@ -1,15 +1,15 @@
 import type { DashboardFunnelResponse } from "@/lib/types";
 
-/** Light sage → deep pine as the funnel narrows. */
+/** Warm gold → cool teal as the funnel narrows, so each stage reads distinctly. */
 const STAGE_GRADIENTS = [
-  "linear-gradient(90deg, #cfe3b8, #a8cba0)",
-  "linear-gradient(90deg, #a8cba0, #8aa872)",
-  "linear-gradient(90deg, #8aa872, #7fb069)",
-  "linear-gradient(90deg, #7fb069, #5fbf9f)",
-  "linear-gradient(90deg, #5fbf9f, #4f9d69)",
-  "linear-gradient(90deg, #4f9d69, #35836d)",
-  "linear-gradient(90deg, #35836d, #2f7d5c)",
-  "linear-gradient(90deg, #2f7d5c, #24614a)",
+  "linear-gradient(90deg, #f6dfae, #eaba6b)",
+  "linear-gradient(90deg, #eaba6b, #e3b48a)",
+  "linear-gradient(90deg, #e6b0a0, #e79a9a)",
+  "linear-gradient(90deg, #e79a9a, #e3a3c4)",
+  "linear-gradient(90deg, #e3a3c4, #c3a6e0)",
+  "linear-gradient(90deg, #c3a6e0, #a8b6e4)",
+  "linear-gradient(90deg, #8fb8de, #79c6bb)",
+  "linear-gradient(90deg, #79c6bb, #86c5a4)",
 ];
 
 export default function ReproductiveFunnel({
@@ -44,9 +44,9 @@ export default function ReproductiveFunnel({
               </span>
             </div>
 
-            <div className="relative h-9 min-w-0 flex-1 rounded-xl bg-white/[0.04]">
+            <div className="relative h-9 min-w-0 flex-1 rounded-xl bg-black/[0.045]">
               <div
-                className="flex h-9 items-center rounded-xl px-3 text-[13px] font-semibold text-[#0b140d] transition-all"
+                className="flex h-9 items-center rounded-xl px-3 text-[13px] font-semibold text-[#22262a] transition-all"
                 style={{
                   width: `${widthPct}%`,
                   background: STAGE_GRADIENTS[globalIndex % STAGE_GRADIENTS.length],

@@ -19,7 +19,7 @@ const Badge = React.forwardRef<
             variant === "secondary",
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80":
             variant === "destructive",
-          "border-white/20 bg-white/10 text-foreground": variant === "outline",
+          "border-[var(--border)] bg-[var(--card)] text-foreground": variant === "outline",
           "border-transparent bg-primary/25 text-primary":
             variant === "success",
         },

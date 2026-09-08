@@ -280,7 +280,7 @@ export default function GradingPage() {
                 className={`
                   border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
                   transition-colors duration-200
-                  ${isDragging ? "border-primary bg-primary/10" : "border-white/25 hover:border-primary/60"}
+                  ${isDragging ? "border-primary bg-primary/10" : "border-black/15 hover:border-primary/60"}
                   ${imagePreview ? "border-primary bg-primary/10" : ""}
                 `}
                 onDrop={handleDrop}
@@ -485,7 +485,7 @@ export default function GradingPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-5">
-                    <div className="flex items-center justify-between rounded-lg border border-white/10 p-4">
+                    <div className="flex items-center justify-between rounded-lg border border-[var(--border)] p-4">
                       <div>
                         <p className="text-sm text-muted-foreground">Predicted Grade</p>
                         <p className="text-2xl font-bold">{gradeResult.predicted_label}</p>
@@ -507,10 +507,10 @@ export default function GradingPage() {
                                 {(p.probability * 100).toFixed(1)}%
                               </span>
                             </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-white/15">
+                            <div className="h-2 overflow-hidden rounded-full bg-black/[0.07]">
                               <div
                                 className={`h-full rounded-full transition-all duration-700 ${
-                                  p.grade === gradeResult.predicted_grade ? "bg-primary" : "bg-white/30"
+                                  p.grade === gradeResult.predicted_grade ? "bg-primary" : "bg-black/20"
                                 }`}
                                 style={{ width: `${Math.max(0, Math.min(1, p.probability)) * 100}%` }}
                               />
@@ -559,7 +559,7 @@ export default function GradingPage() {
                       </div>
                     )}
 
-                    <div className="space-y-1 border-t border-white/10 pt-3">
+                    <div className="space-y-1 border-t border-[var(--border)] pt-3">
                       {gradeResult.caveats.map((c, i) => (
                         <p key={i} className="text-xs text-muted-foreground italic">
                           {c}
@@ -600,7 +600,7 @@ export default function GradingPage() {
                   {result.matches.map((match) => (
                     <div
                       key={match.filename}
-                      className="rounded-lg border border-white/10 p-4 space-y-3"
+                      className="rounded-lg border border-[var(--border)] p-4 space-y-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -614,7 +614,7 @@ export default function GradingPage() {
                             className={
                               match.metadata.pregnancy_outcome === "Pregnant"
                                 ? "bg-primary text-white"
-                                : "bg-white/15"
+                                : "bg-black/[0.07]"
                             }
                           >
                             {match.metadata.pregnancy_outcome}
@@ -629,7 +629,7 @@ export default function GradingPage() {
                             {(match.similarity * 100).toFixed(1)}%
                           </span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-white/15">
+                        <div className="h-2 overflow-hidden rounded-full bg-black/[0.07]">
                           <div
                             className="h-full rounded-full bg-primary transition-all duration-700"
                             style={{ width: `${Math.max(0, Math.min(1, match.similarity)) * 100}%` }}

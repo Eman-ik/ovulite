@@ -7,7 +7,7 @@ export default function DataQualityPanel({ data }: { data: DashboardDataQualityR
     <div className="space-y-2">
       {data.rows.map((row) => {
         const tone =
-          row.missing_pct > 20 ? "#f0a4aa" : row.missing_pct > 0 ? "#ddc07a" : "#a8cba0";
+          row.missing_pct > 20 ? "#d2564f" : row.missing_pct > 0 ? "#dfa53a" : "#4f9d69";
         return (
           <div
             key={`${row.table}.${row.field}`}
@@ -17,7 +17,7 @@ export default function DataQualityPanel({ data }: { data: DashboardDataQualityR
               <p className="truncate text-sm font-medium dash-heading">
                 {row.table}.{row.field}
                 {row.stale && (
-                  <span className="ml-2 rounded-full bg-[rgba(214,178,92,0.16)] px-1.5 py-0.5 text-[9px] font-semibold text-[#ddc07a]">
+                  <span className="ml-2 rounded-full bg-[rgba(234,186,107,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#a1741c]">
                     stale &gt;45d
                   </span>
                 )}
@@ -28,7 +28,7 @@ export default function DataQualityPanel({ data }: { data: DashboardDataQualityR
             </div>
 
             <div className="flex shrink-0 items-center gap-2">
-              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/[0.07]">
+              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-black/[0.07]">
                 <div
                   className="h-full rounded-full"
                   style={{ width: `${Math.min(100, row.missing_pct)}%`, background: tone }}

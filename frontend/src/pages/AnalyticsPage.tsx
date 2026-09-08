@@ -138,7 +138,7 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
+    <div className="rounded-3xl bg-white p-6 shadow-sm border border-[var(--border)]">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
@@ -182,9 +182,9 @@ function EmptyBlock({ message }: { message: string }) {
 /** Pill showing a rate together with its sample size — never a bare percentage. */
 function RatePill({ rate, n, pregnant }: { rate: number | null | undefined; n: number; pregnant?: number }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(234,186,107,0.16)] px-3 py-1 text-xs font-medium text-[#a97a1e]">
       {fmtPct(rate)}
-      <span className="text-emerald-500">
+      <span className="text-[#a97a1e]">
         ({pregnant !== undefined ? `${fmtNum(pregnant)}/` : ""}
         n={n})
       </span>
@@ -194,13 +194,14 @@ function RatePill({ rate, n, pregnant }: { rate: number | null | undefined; n: n
 
 const CHART_TOOLTIP_STYLE = {
   borderRadius: 14,
-  border: "1px solid rgba(168,203,160,0.2)",
-  background: "#0f1512",
-  color: "#e9f1ea",
+  border: "1px solid rgba(22,24,26,0.1)",
+  background: "#ffffff",
+  boxShadow: "0 12px 32px -18px rgba(22,24,26,0.35)",
+  color: "#16181a",
   fontSize: 13,
 };
 
-const CATEGORY_COLORS = ["#a8cba0", "#7fb069", "#5fbf9f", "#4f9d69", "#cfe3b8", "#35836d", "#8aa872", "#2f7d5c"];
+const CATEGORY_COLORS = ["#e79a9a", "#8fb8de", "#86c5a4", "#c3a6e0", "#eaba6b", "#79c6bb", "#e3a3c4", "#adbb84"];
 
 /** Minimal, loosely-typed shape for recharts' custom Tooltip `content` render-prop.
  *  Recharts injects `active`/`payload` at render time via cloneElement, so a
@@ -262,10 +263,10 @@ export default function AnalyticsPage() {
     <div className="min-h-screen p-1">
       <div className="space-y-8">
         {/* Header */}
-        <div className="rounded-3xl bg-white p-8 shadow-sm border border-emerald-50">
+        <div className="rounded-3xl bg-white p-8 shadow-sm border border-[var(--border)]">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <div className="inline-flex items-center rounded-full border border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50">
+              <div className="inline-flex items-center rounded-full border border-[rgba(224,171,53,0.35)] px-4 py-2 text-xs font-semibold text-[#a97a1e] bg-[rgba(234,186,107,0.16)]">
                 OVULITE ANALYTICS
               </div>
               <h1 className="mt-4 text-4xl font-bold text-gray-900">Analytics</h1>
@@ -280,7 +281,7 @@ export default function AnalyticsPage() {
               <button
                 onClick={handleRefresh}
                 disabled={isRunningPipeline}
-                className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-black/[0.04] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw className={`h-4 w-4 ${isRunningPipeline ? "animate-spin" : ""}`} />
                 {isRunningPipeline ? "Recomputing…" : "Recompute analytics"}
@@ -294,15 +295,15 @@ export default function AnalyticsPage() {
         <KpiRow kpis={kpis} />
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 rounded-3xl bg-white p-2 shadow-sm border border-emerald-50 w-fit">
+        <div className="flex flex-wrap gap-2 rounded-3xl bg-white p-2 shadow-sm border border-[var(--border)] w-fit">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`rounded-2xl px-5 py-2.5 text-sm font-medium transition-colors ${
                 activeTab === tab.key
-                  ? "bg-emerald-700 text-white"
-                  : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-700"
+                  ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                  : "text-[var(--muted-foreground)] hover:bg-black/[0.05] hover:text-[var(--foreground)]"
               }`}
             >
               {tab.label}
@@ -335,7 +336,7 @@ function KpiRow({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-[176px] animate-pulse rounded-3xl bg-white border border-emerald-50 shadow-sm"
+            className="h-[176px] animate-pulse rounded-3xl bg-white border border-[var(--border)] shadow-sm"
           />
         ))}
       </div>
@@ -395,7 +396,7 @@ function KpiRow({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) {
         />
       </div>
 
-      <div className="rounded-3xl bg-white p-5 shadow-sm border border-emerald-50">
+      <div className="rounded-3xl bg-white p-5 shadow-sm border border-[var(--border)]">
         <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
           <EntityCount label="Donors" value={d.entity_counts.donors} icon={<Users className="h-3.5 w-3.5" />} />
           <EntityCount label="Recipients" value={d.entity_counts.recipients} icon={<Users className="h-3.5 w-3.5" />} />
@@ -419,7 +420,7 @@ function KpiRow({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) {
 function EntityCount({ label, value, icon }: { label: string; value: number; icon: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-2 text-gray-600">
-      <span className="text-emerald-500">{icon}</span>
+      <span className="text-[#a97a1e]">{icon}</span>
       <span className="font-semibold text-gray-900">{fmtNum(value)}</span>
       {label}
     </span>
@@ -443,7 +444,7 @@ function TrendTooltip({ active, payload }: ChartTooltipProps) {
   return (
     <div style={CHART_TOOLTIP_STYLE} className="px-3 py-2">
       <p className="font-semibold text-gray-900">{row.month}</p>
-      <p className="text-emerald-700">
+      <p className="dash-muted">
         {row.pregnancy_rate_pct.toFixed(1)}% pregnancy rate (n={row.n_transfers}, {row.n_pregnant} pregnant)
       </p>
       {row.avg_cl !== null ? <p className="text-gray-500">Avg CL: {row.avg_cl.toFixed(1)} mm</p> : null}
@@ -491,14 +492,14 @@ function OverviewTab({
                     <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="analyticsTrendFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#a8cba0" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#a8cba0" stopOpacity={0.01} />
+                          <stop offset="5%" stopColor="#8fb8de" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#8fb8de" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                      <XAxis dataKey="month" stroke="#8ba392" tickLine={false} axisLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" />
+                      <XAxis dataKey="month" stroke="#9aa1aa" tickLine={false} axisLine={false} />
                       <YAxis
-                        stroke="#8ba392"
+                        stroke="#9aa1aa"
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value: number) => `${value}%`}
@@ -507,9 +508,9 @@ function OverviewTab({
                       <Area
                         type="monotone"
                         dataKey="pregnancy_rate_pct"
-                        stroke="#a8cba0"
+                        stroke="#8fb8de"
                         strokeWidth={3}
-                        dot={{ r: 5, fill: "#a8cba0" }}
+                        dot={{ r: 5, fill: "#8fb8de" }}
                         fill="url(#analyticsTrendFill)"
                       />
                     </AreaChart>
@@ -576,10 +577,10 @@ function FreshFrozenPanel({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) 
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey="label" stroke="#8ba392" tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" />
+            <XAxis dataKey="label" stroke="#9aa1aa" tickLine={false} axisLine={false} />
             <YAxis
-              stroke="#8ba392"
+              stroke="#9aa1aa"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) => `${value}%`}
@@ -604,9 +605,9 @@ function FreshFrozenPanel({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) 
         {entries.map(([label, stats]) => (
           <div
             key={label}
-            className="flex items-center justify-between rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm"
+            className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[#faf9f6] px-4 py-2 text-sm"
           >
-            <span className="font-medium text-emerald-900">{label}</span>
+            <span className="font-medium dash-heading">{label}</span>
             <RatePill rate={stats.rate} n={stats.n} pregnant={stats.pregnant} />
           </div>
         ))}
@@ -673,7 +674,7 @@ function ProtocolTooltip({ active, payload }: ChartTooltipProps) {
   return (
     <div style={CHART_TOOLTIP_STYLE} className="px-3 py-2">
       <p className="font-semibold text-gray-900">{row.protocol_name}</p>
-      <p className="text-emerald-700">
+      <p className="dash-muted">
         {row.rate_pct.toFixed(1)}% (n={row.n_transfers}, {row.n_pregnant} pregnant)
       </p>
       <p className="text-gray-500">
@@ -742,10 +743,10 @@ function ProtocolsTab({
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" />
                   <XAxis
                     dataKey="protocol_name"
-                    stroke="#8ba392"
+                    stroke="#9aa1aa"
                     tickLine={false}
                     axisLine={false}
                     angle={-25}
@@ -755,14 +756,14 @@ function ProtocolsTab({
                     tick={{ fontSize: 11 }}
                   />
                   <YAxis
-                    stroke="#8ba392"
+                    stroke="#9aa1aa"
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value: number) => `${value}%`}
                     domain={[0, 100]}
                   />
                   <Tooltip content={<ProtocolTooltip />} />
-                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#7fb069">
+                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#86c5a4">
                     {chartData.map((entry, index) => (
                       <Cell key={entry.protocol_name} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                     ))}
@@ -773,7 +774,7 @@ function ProtocolsTab({
                       ]}
                       width={4}
                       strokeWidth={1.5}
-                      stroke="#8ba392"
+                      stroke="#9aa1aa"
                     />
                   </Bar>
                 </BarChart>
@@ -783,7 +784,7 @@ function ProtocolsTab({
             <div className="mt-6 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-emerald-50 text-gray-600">
+                  <tr className="bg-[#faf9f6] text-[var(--muted-foreground)]">
                     <SortHeader label="Protocol" sortKey="protocol_name" sort={sort} onSort={toggleSort} />
                     <SortHeader label="n Transfers" sortKey="n_transfers" sort={sort} onSort={toggleSort} />
                     <th className="px-4 py-3 text-left font-medium">n Pregnant</th>
@@ -793,7 +794,7 @@ function ProtocolsTab({
                 </thead>
                 <tbody>
                   {sortedRows.map((p) => (
-                    <tr key={p.protocol_name} className="border-b last:border-0 hover:bg-emerald-50/30">
+                    <tr key={p.protocol_name} className="border-b last:border-0 hover:bg-black/[0.03]">
                       <td className="px-4 py-3">{p.protocol_name}</td>
                       <td className="px-4 py-3">{p.n_transfers}</td>
                       <td className="px-4 py-3">{fmtNum(p.n_pregnant)}</td>
@@ -843,7 +844,7 @@ function SortHeader<K extends string>({
   const active = sort.key === sortKey;
   return (
     <th className="px-4 py-3 text-left font-medium">
-      <button onClick={() => onSort(sortKey)} className="inline-flex items-center gap-1 hover:text-emerald-700">
+      <button onClick={() => onSort(sortKey)} className="inline-flex items-center gap-1 hover:text-[var(--foreground)]">
         {label}
         {active ? (
           sort.dir === "asc" ? (
@@ -872,7 +873,7 @@ function RegressionPanel({ regression }: { regression: FetchState<AnalyticsProto
       {entries.map(([feature, oddsRatio]) => (
         <div key={feature} className="flex items-center justify-between rounded-xl border border-gray-100 px-3 py-2 text-sm">
           <span className="text-gray-700">{feature}</span>
-          <span className={`font-semibold ${oddsRatio >= 1 ? "text-emerald-700" : "text-rose-600"}`}>
+          <span className={`font-semibold ${oddsRatio >= 1 ? "text-[#2f7d5c]" : "text-[#b8433d]"}`}>
             {oddsRatio.toFixed(3)}×
           </span>
         </div>
@@ -902,7 +903,7 @@ function ImportancePanel({ importance }: { importance: FetchState<AnalyticsProto
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
             <div
-              className="h-full rounded-full bg-emerald-500"
+              className="h-full rounded-full bg-[#86c5a4]"
               style={{ width: `${Math.max(2, (v.mean / maxMean) * 100)}%` }}
             />
           </div>
@@ -969,10 +970,10 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topByVolume} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" />
                 <XAxis
                   dataKey="donor_tag"
-                  stroke="#8ba392"
+                  stroke="#9aa1aa"
                   tickLine={false}
                   axisLine={false}
                   angle={-40}
@@ -982,7 +983,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
                   tick={{ fontSize: 11 }}
                 />
                 <YAxis
-                  stroke="#8ba392"
+                  stroke="#9aa1aa"
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value: number) => `${value}%`}
@@ -999,7 +1000,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
                     ];
                   }}
                 />
-                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#5fbf9f" />
+                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#c3a6e0" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1015,7 +1016,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-emerald-50 text-gray-600">
+                <tr className="bg-[#faf9f6] text-[var(--muted-foreground)]">
                   <SortHeader label="Donor" sortKey="donor_tag" sort={sort} onSort={toggleSort} />
                   <th className="px-4 py-3 text-left font-medium">Breed</th>
                   <SortHeader label="n Transfers" sortKey="n_transfers" sort={sort} onSort={toggleSort} />
@@ -1028,7 +1029,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
               </thead>
               <tbody>
                 {sortedRows.map((donor) => (
-                  <tr key={donor.donor_tag} className="border-b last:border-0 hover:bg-emerald-50/30">
+                  <tr key={donor.donor_tag} className="border-b last:border-0 hover:bg-black/[0.03]">
                     <td className="px-4 py-3 font-medium text-gray-900">{donor.donor_tag}</td>
                     <td className="px-4 py-3">{donor.breed ?? "—"}</td>
                     <td className="px-4 py-3">{donor.n_transfers}</td>
@@ -1109,7 +1110,7 @@ function BiomarkerTooltip({ active, payload }: ChartTooltipProps) {
       <p className="font-semibold text-gray-900">
         {row.range} {row.isOptimal ? "★ optimal" : ""}
       </p>
-      <p className="text-emerald-700">
+      <p className="dash-muted">
         {row.rate_pct.toFixed(1)}% pregnancy rate (n={row.n})
       </p>
       {row.ci_lower_pct !== null && row.ci_upper_pct !== null ? (
@@ -1145,10 +1146,10 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-            <XAxis dataKey="range" stroke="#8ba392" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" />
+            <XAxis dataKey="range" stroke="#9aa1aa" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis
-              stroke="#8ba392"
+              stroke="#9aa1aa"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) => `${value}%`}
@@ -1157,7 +1158,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
             <Tooltip content={<BiomarkerTooltip />} />
             <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]}>
               {chartData.map((entry) => (
-                <Cell key={entry.range} fill={entry.isOptimal ? "#059669" : "#3c5a48"} />
+                <Cell key={entry.range} fill={entry.isOptimal ? "#86c5a4" : "#d8d4cb"} />
               ))}
               {hasCI ? (
                 <ErrorBar
@@ -1167,7 +1168,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
                   ]}
                   width={4}
                   strokeWidth={1.5}
-                  stroke="#8ba392"
+                  stroke="#9aa1aa"
                 />
               ) : null}
             </Bar>
@@ -1190,7 +1191,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
             {result.bins.map((bin) => (
               <tr
                 key={bin.range}
-                className={`border-t border-gray-100 ${bin.range === optimalRange ? "bg-emerald-50 font-medium" : ""}`}
+                className={`border-t border-gray-100 ${bin.range === optimalRange ? "bg-[rgba(134,197,164,0.16)] font-medium" : ""}`}
               >
                 <td className="px-2 py-1">
                   {bin.range}
