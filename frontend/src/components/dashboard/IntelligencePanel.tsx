@@ -35,42 +35,45 @@ export default function IntelligencePanel() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Brain className="h-5 w-5 text-emerald-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Ovulite Intelligence</h3>
+        <Brain className="h-[18px] w-[18px] text-[var(--primary)]" strokeWidth={1.75} />
+        <h3 className="text-base font-semibold dash-heading">Ovulite Intelligence</h3>
       </div>
 
       {error && !modelInfo ? (
-        <p className="text-sm text-gray-500">{error}</p>
+        <p className="text-sm dash-muted">{error}</p>
       ) : modelInfo ? (
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm">
-          <p className="font-medium text-emerald-900">
+        <div className="dash-tile p-3.5 text-sm">
+          <p className="font-medium text-[var(--primary)]">
             {modelInfo.model_name} · {modelInfo.model_version}
           </p>
-          <p className="text-xs text-emerald-700">
+          <p className="mt-0.5 text-xs dash-muted">
             {modelInfo.n_features} features · best model: {modelInfo.best_model_key} ·{" "}
             {modelInfo.artifact_integrity_verified ? "integrity verified" : "integrity unverified"}
           </p>
         </div>
       ) : (
-        <p className="text-sm text-gray-400">Loading model info…</p>
+        <p className="text-sm dash-muted">Loading model info…</p>
       )}
 
       {summary ? (
-        <div className="space-y-2">
-          <p className="text-sm text-gray-700">
-            <span className="font-semibold">{summary.pending_predictions_count}</span> predictions have no recorded
-            outcome yet.
+        <div className="space-y-3">
+          <p className="text-sm dash-muted">
+            <span className="font-semibold dash-heading">{summary.pending_predictions_count}</span> predictions have no
+            recorded outcome yet.
           </p>
           <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide dash-muted">
               High-Risk Transfers ({summary.high_risk_transfers.length})
             </p>
             {summary.high_risk_transfers.length === 0 ? (
-              <p className="text-sm text-gray-400">No high-risk pending transfers flagged.</p>
+              <p className="text-sm dash-muted opacity-70">No high-risk pending transfers flagged.</p>
             ) : (
-              <ul className="space-y-1">
+              <ul className="space-y-1.5">
                 {summary.high_risk_transfers.slice(0, 5).map((t) => (
-                  <li key={t.transfer_id} className="flex items-center justify-between rounded-lg bg-rose-50 px-3 py-1.5 text-xs text-rose-800">
+                  <li
+                    key={t.transfer_id}
+                    className="flex items-center justify-between rounded-xl border border-[rgba(224,101,111,0.25)] bg-[rgba(224,101,111,0.1)] px-3 py-2 text-xs text-[#f0a4aa]"
+                  >
                     <span>Transfer #{t.transfer_id} {t.et_date ? `(${t.et_date})` : ""}</span>
                     <span className="font-semibold">{(t.probability * 100).toFixed(0)}% predicted</span>
                   </li>

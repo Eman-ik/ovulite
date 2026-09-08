@@ -7,18 +7,29 @@ import {
   HeartPulse,
   Brain,
 } from "lucide-react";
-import KpiCard from "@/components/dashboard/KpiCard";
+import KpiCard, { type KpiColor } from "@/components/dashboard/KpiCard";
 import type { DashboardKpiItem } from "@/lib/types";
 
 const ICONS: Record<string, React.ReactNode> = {
-  oocytes_recovered: <Droplets className="h-6 w-6" />,
-  maturation_rate: <FlaskConical className="h-6 w-6" />,
-  cleavage_rate: <Dna className="h-6 w-6" />,
-  blastocyst_rate: <Sparkles className="h-6 w-6" />,
-  transferable_embryos: <Dna className="h-6 w-6" />,
-  transfers_completed: <ArrowRightLeft className="h-6 w-6" />,
-  pregnancy_rate: <HeartPulse className="h-6 w-6" />,
-  model_auc: <Brain className="h-6 w-6" />,
+  oocytes_recovered: <Droplets className="h-5 w-5" strokeWidth={1.75} />,
+  maturation_rate: <FlaskConical className="h-5 w-5" strokeWidth={1.75} />,
+  cleavage_rate: <Dna className="h-5 w-5" strokeWidth={1.75} />,
+  blastocyst_rate: <Sparkles className="h-5 w-5" strokeWidth={1.75} />,
+  transferable_embryos: <Dna className="h-5 w-5" strokeWidth={1.75} />,
+  transfers_completed: <ArrowRightLeft className="h-5 w-5" strokeWidth={1.75} />,
+  pregnancy_rate: <HeartPulse className="h-5 w-5" strokeWidth={1.75} />,
+  model_auc: <Brain className="h-5 w-5" strokeWidth={1.75} />,
+};
+
+const COLORS: Record<string, KpiColor> = {
+  oocytes_recovered: "mint",
+  maturation_rate: "teal",
+  cleavage_rate: "emerald",
+  blastocyst_rate: "leaf",
+  transferable_embryos: "sage",
+  transfers_completed: "olive",
+  pregnancy_rate: "lime",
+  model_auc: "pine",
 };
 
 function formatValue(kpi: DashboardKpiItem): string {
@@ -39,6 +50,7 @@ export default function KpiRow({ kpis, keys }: { kpis: DashboardKpiItem[]; keys?
           subtitle={kpi.comparison_label}
           comparisonLabel={kpi.value === null ? "No data for this selection" : kpi.comparison_label}
           icon={ICONS[kpi.key]}
+          color={COLORS[kpi.key]}
           delta={
             kpi.delta_pct !== null && kpi.delta_direction
               ? { pct: kpi.delta_pct, direction: kpi.delta_direction, suffix: kpi.unit === "percent" ? "pp" : "%" }

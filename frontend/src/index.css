@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,57 +6,61 @@
 
 @layer base {
   :root {
-    --font-display: "Plus Jakarta Sans", "Poppins", "Axiforma", "Gotham Pro", "Montserrat", "Segoe UI", sans-serif;
-    --font-body: "Inter", "Gotham Pro", "Axiforma", "Avenir Next", "Segoe UI", sans-serif;
+    --font-display: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+    --font-body: "Inter", "Segoe UI", sans-serif;
+    --font-serif: "Instrument Serif", "Georgia", serif;
     --font-mono: "JetBrains Mono", "SFMono-Regular", "Consolas", monospace;
 
-    /* Light Theme (Default) */
-    --background: #01453a;
-    --foreground: #000000;
-    --card: #daf1de;
-    --card-foreground: #000000;
-    --primary: #004D40;
-    --primary-foreground: #FFFFFF;
-    --secondary: #E6F7EF;
-    --secondary-foreground: #1A202C;
-    --muted: #EEF4F3;
-    --muted-foreground: #667085;
-    --accent: #66BB6A;
-    --accent-foreground: #0F172A;
-    --destructive: #D94A4A;
-    --destructive-foreground: #FFFFFF;
-    --border: rgba(15, 23, 42, 0.08);
-    --input: rgba(255, 255, 255, 0.9);
-    --ring: #66BB6A;
-    --radius: 1rem;
-    --sidebar-bg: #63b38d;
-    --sidebar-border: rgba(15, 23, 42, 0.06);
-    --sidebar-text: #000000;
-    --sidebar-muted: #000000;
-    --sidebar-active: #004D40;
-    --sidebar-active-text: #000000;
-    --panel-bg: #daf1de;
-    --panel-border: rgba(15, 23, 42, 0.06);
-    --surface-bg: #daf1de;
-    --surface-border: rgba(15, 23, 42, 0.06);
-  }
-  
+    /* Ovulite theme — near-black base with sage/leaf greens. */
+    --background: #070a08;
+    --foreground: #e9f1ea;
+    --card: #0f1512;
+    --card-foreground: #e9f1ea;
+    --primary: #a8cba0;
+    --primary-foreground: #08100a;
+    --secondary: #17201a;
+    --secondary-foreground: #cfe0d1;
+    --muted: #131a16;
+    --muted-foreground: #8ba392;
+    --accent: #7fb069;
+    --accent-foreground: #06120a;
+    --destructive: #e0656f;
+    --destructive-foreground: #ffffff;
+    --border: rgba(168, 203, 160, 0.12);
+    --input: rgba(255, 255, 255, 0.05);
+    --ring: #a8cba0;
+    --radius: 1.25rem;
 
+    --sidebar-bg: #0b100d;
+    --sidebar-border: rgba(168, 203, 160, 0.10);
+    --sidebar-text: #e9f1ea;
+    --sidebar-muted: #7d9585;
+    --sidebar-active: #d8ead4;
+    --sidebar-active-text: #0b140d;
+
+    --panel-bg: rgba(255, 255, 255, 0.035);
+    --panel-border: rgba(168, 203, 160, 0.11);
+    --surface-bg: #0f1512;
+    --surface-border: rgba(168, 203, 160, 0.11);
+
+    /* Chart palette — all greens, separated by hue and lightness so series
+       stay distinguishable without leaving the green identity. */
+    --chart-1: #a8cba0;
+    --chart-2: #7fb069;
+    --chart-3: #4f9d69;
+    --chart-4: #2f7d5c;
+    --chart-5: #cfe3b8;
+    --chart-6: #5fbf9f;
+    --chart-7: #8aa872;
+    --chart-8: #35836d;
+  }
+
+  /* The light/dark toggle keeps the same identity; dark deepens the base. */
   [data-theme="dark"] {
-    --background: #01453a;
-    --foreground: #000000;
-    --card: #63b38d;
-    --card-foreground: #000000;
-    --primary: #BEB69B;
-    --secondary: #235347;
-    --muted: #163832;
-    --accent: #BEB69B;
-    --border: #235347;
-    --input: #000000;
-    --ring: #BEB69B;
-    --sidebar-bg: #63b38d;
-    --panel-bg: #63b38d;
-    --panel-border: #235347;
+    --background: #040605;
+    --card: #0c110e;
+    --sidebar-bg: #080c09;
+    --surface-bg: #0c110e;
   }
 }
 
@@ -78,38 +82,36 @@
     background: var(--background);
   }
 
+  /* Ambient green glow + faint grid, sitting behind everything. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.5;
     background-image:
-      linear-gradient(rgba(26, 32, 44, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(26, 32, 44, 0.03) 1px, transparent 1px);
-    background-size: 34px 34px;
+      radial-gradient(55rem 38rem at 12% -8%, rgba(127, 176, 105, 0.16), transparent 60%),
+      radial-gradient(45rem 34rem at 100% 4%, rgba(95, 191, 159, 0.10), transparent 58%),
+      radial-gradient(40rem 36rem at 20% 100%, rgba(47, 125, 92, 0.12), transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: auto, auto, auto, 36px 36px, 36px 36px;
     z-index: -1;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.015em;
     color: var(--foreground);
   }
 
   body,
   body * {
-    font-family: var(--font-body) !important;
+    font-family: var(--font-body);
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-display) !important;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
   }
 
   code,
@@ -117,29 +119,110 @@
   kbd,
   samp,
   .font-mono {
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-mono);
   }
 
   ::selection {
-    background: rgba(102, 187, 106, 0.28);
-    color: #0F172A;
+    background: rgba(168, 203, 160, 0.32);
+    color: #ffffff;
   }
 }
 
 @layer components {
-  /* Mint glass panel */
+  /* ---- Surfaces ---- */
+
   .glass-panel, .ov-glass {
     background: var(--panel-bg);
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid var(--panel-border);
     box-shadow:
-      0 22px 70px -34px rgba(15, 23, 42, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      0 24px 60px -34px rgba(0, 0, 0, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* The workhorse card used across the dashboard. */
+  .dash-card {
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: 0 22px 55px -34px rgba(0, 0, 0, 0.95);
+  }
+
+  .dash-card-tight {
+    border-radius: 1.25rem;
+    padding: 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+
+  /* Soft inset tile — for small metric tiles inside a card. */
+  .dash-tile {
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--border);
+  }
+
+  .dash-heading {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .dash-muted {
+    color: var(--muted-foreground);
+  }
+
+  /* Editorial serif used for hero headlines, as in the reference layouts. */
+  .hero-serif {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.02;
+  }
+
+  /* ---- Sidebar ---- */
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    border-radius: 0.8rem;
+    padding: 0.48rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--sidebar-muted);
+    transition: background 160ms ease, color 160ms ease;
+  }
+
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text);
+  }
+
+  .nav-item-active {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+    font-weight: 600;
+    box-shadow: 0 8px 22px -12px rgba(168, 203, 160, 0.75);
+  }
+
+  .nav-item-active:hover {
+    background: var(--sidebar-active);
+    color: var(--sidebar-active-text);
+  }
+
+  .nav-section-label {
+    padding: 0 0.75rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(125, 149, 133, 0.75);
   }
 
   .ov-soft-border {
-    border: 1px solid rgba(15, 23, 42, 0.06);
+    border: 1px solid var(--border);
   }
 
   .ov-pulse-ring {
@@ -164,57 +247,43 @@
 
   .ov-hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 34px rgba(0, 77, 64, 0.12);
-    border-color: rgba(0, 77, 64, 0.18);
+    box-shadow: 0 16px 40px -24px rgba(127, 176, 105, 0.55);
+    border-color: rgba(168, 203, 160, 0.3);
   }
 }
 
 @layer utilities {
-  .text-glow-amber {
-    text-shadow: 0 0 10px rgba(102, 187, 106, 0.38);
-  }
-  .text-glow-peach {
-    text-shadow: 0 0 10px rgba(209, 250, 229, 0.9);
-  }
-  .text-glow-coffee {
-    text-shadow: 0 0 8px rgba(15, 23, 42, 0.16);
-  }
+  .text-glow-amber { text-shadow: 0 0 10px rgba(168, 203, 160, 0.45); }
+  .text-glow-peach { text-shadow: 0 0 10px rgba(127, 176, 105, 0.45); }
+  .text-glow-coffee { text-shadow: 0 0 8px rgba(0, 0, 0, 0.35); }
+  .text-glow-pink  { text-shadow: 0 0 10px rgba(168, 203, 160, 0.45); }
+  .text-glow-blue  { text-shadow: 0 0 10px rgba(95, 191, 159, 0.45); }
+  .text-glow-cyan  { text-shadow: 0 0 10px rgba(95, 191, 159, 0.45); }
 
-  /* Keep old class names pointing to the mint palette */
-  .text-glow-pink  { text-shadow: 0 0 10px rgba(102, 187, 106, 0.38); }
-  .text-glow-blue  { text-shadow: 0 0 10px rgba(209, 250, 229, 0.9); }
-  .text-glow-cyan  { text-shadow: 0 0 10px rgba(102, 187, 106, 0.38); }
-
-  .glow-shadow-amber {
-    filter: drop-shadow(0px 0px 10px rgba(102, 187, 106, 0.35));
-  }
-  .glow-shadow-peach {
-    filter: drop-shadow(0px 0px 10px rgba(209, 250, 229, 0.8));
-  }
-
-  /* Keep old class names pointing to the mint palette */
-  .glow-shadow-pink  { filter: drop-shadow(0px 0px 10px rgba(102, 187, 106, 0.32)); }
-  .glow-shadow-blue  { filter: drop-shadow(0px 0px 10px rgba(209, 250, 229, 0.72)); }
-  .glow-shadow-cyan  { filter: drop-shadow(0px 0px 10px rgba(102, 187, 106, 0.32)); }
+  .glow-shadow-amber { filter: drop-shadow(0px 0px 10px rgba(168, 203, 160, 0.4)); }
+  .glow-shadow-peach { filter: drop-shadow(0px 0px 10px rgba(127, 176, 105, 0.4)); }
+  .glow-shadow-pink  { filter: drop-shadow(0px 0px 10px rgba(168, 203, 160, 0.4)); }
+  .glow-shadow-blue  { filter: drop-shadow(0px 0px 10px rgba(95, 191, 159, 0.4)); }
+  .glow-shadow-cyan  { filter: drop-shadow(0px 0px 10px rgba(95, 191, 159, 0.4)); }
 
   .cyber-gradient-text {
-    background: linear-gradient(to right, #004D40, #66BB6A);
+    background: linear-gradient(to right, #cfe3b8, #7fb069);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 77, 64, 0.22);
+    background: rgba(168, 203, 160, 0.3);
     border-radius: 4px;
   }
 }
 
 @keyframes ovPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(102, 187, 106, 0.32); }
-  50%       { box-shadow: 0 0 0 8px rgba(102, 187, 106, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 203, 160, 0.35); }
+  50%      { box-shadow: 0 0 0 8px rgba(168, 203, 160, 0); }
 }
 
 @keyframes ovReveal {
@@ -227,33 +296,88 @@
   isolation: isolate;
 }
 
-.sidebar-glow::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.15),
-    transparent 45%,
-    rgba(255, 255, 255, 0.65)
-  );
-  filter: blur(8px);
-  opacity: 0.75;
-  z-index: -1;
-  pointer-events: none;
-}
-
 .sidebar-glow::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
-    0 0 20px rgba(255, 255, 255, 0.35),
-    0 0 45px rgba(255, 255, 255, 0.18);
+    inset 0 0 0 1px rgba(168, 203, 160, 0.10),
+    0 0 40px -20px rgba(127, 176, 105, 0.5);
   pointer-events: none;
   z-index: 20;
 }
+
+/* ------------------------------------------------------------------
+   Legacy page compatibility layer.
+
+   Several pages (Grading, Analytics, Predictions, Reports, Model
+   Performance, Case Records/Detail, Decision Support) were written against
+   a light palette with hardcoded Tailwind utilities — bg-white, text-gray-900,
+   pastel badge fills. Rather than rewrite each of those pages, map those
+   utilities onto the dark palette inside the authenticated app shell only,
+   so nothing punches a white hole in the UI. Login/landing pages sit outside
+   `.ov-app` and keep their own styling. Pages can be migrated off this layer
+   individually over time.
+   ------------------------------------------------------------------ */
+.ov-app .bg-white { background-color: var(--card) !important; }
+.ov-app .bg-gray-50,
+.ov-app .bg-gray-100,
+.ov-app .bg-slate-50 { background-color: rgba(255, 255, 255, 0.04) !important; }
+
+.ov-app .text-gray-900,
+.ov-app .text-gray-800,
+.ov-app .text-slate-900 { color: var(--foreground) !important; }
+.ov-app .text-gray-700,
+.ov-app .text-gray-600,
+.ov-app .text-gray-500,
+.ov-app .text-gray-400,
+.ov-app .text-slate-600 { color: var(--muted-foreground) !important; }
+
+.ov-app .border-gray-100,
+.ov-app .border-gray-200,
+.ov-app .border-gray-300,
+.ov-app .border-slate-200,
+.ov-app .border-emerald-50,
+.ov-app .border-emerald-100 { border-color: var(--border) !important; }
+
+.ov-app .hover\:bg-gray-50:hover,
+.ov-app .hover\:bg-gray-100:hover { background-color: rgba(255, 255, 255, 0.06) !important; }
+
+/* Emerald accents in legacy pages become the sage palette. */
+.ov-app .bg-emerald-50,
+.ov-app .bg-emerald-100,
+.ov-app .bg-green-50,
+.ov-app .bg-green-100 { background-color: rgba(127, 176, 105, 0.14) !important; }
+.ov-app .text-emerald-600,
+.ov-app .text-emerald-700,
+.ov-app .text-emerald-800,
+.ov-app .text-emerald-900,
+.ov-app .text-green-600,
+.ov-app .text-green-700,
+.ov-app .text-green-800 { color: var(--primary) !important; }
+
+/* Semantic status fills — keep the meaning, lose the pastel-on-dark glare. */
+.ov-app .bg-red-50,
+.ov-app .bg-red-100,
+.ov-app .bg-rose-50,
+.ov-app .bg-rose-100 { background-color: rgba(224, 101, 111, 0.15) !important; }
+.ov-app .text-red-600,
+.ov-app .text-red-700,
+.ov-app .text-red-800,
+.ov-app .text-rose-700,
+.ov-app .text-rose-800 { color: #f0a4aa !important; }
+
+.ov-app .bg-yellow-50,
+.ov-app .bg-yellow-100,
+.ov-app .bg-amber-50,
+.ov-app .bg-amber-100 { background-color: rgba(214, 178, 92, 0.15) !important; }
+.ov-app .text-yellow-700,
+.ov-app .text-yellow-800,
+.ov-app .text-yellow-900,
+.ov-app .text-amber-700,
+.ov-app .text-amber-800 { color: #ddc07a !important; }
+
+.ov-app .border-yellow-200,
+.ov-app .border-red-200,
+.ov-app .border-rose-200 { border-color: var(--border) !important; }

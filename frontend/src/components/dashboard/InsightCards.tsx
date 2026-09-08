@@ -21,17 +21,17 @@ export default function InsightCards({ kpis }: { kpis: DashboardKpiItem[] }) {
 
   if (insights.length === 0) {
     return (
-      <p className="text-sm text-gray-400">
+      <p className="text-sm dash-muted">
         Not enough period-over-period data yet to generate insights for this selection.
       </p>
     );
   }
 
   return (
-    <div className="grid gap-2 sm:grid-cols-3">
+    <div className="grid gap-3 sm:grid-cols-3">
       {insights.map((text, i) => (
-        <div key={i} className="flex items-start gap-2 rounded-xl border border-gray-100 bg-white p-3 text-sm text-gray-700 shadow-sm">
-          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+        <div key={i} className="dash-tile flex items-start gap-2.5 p-3.5 text-sm dash-muted">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" />
           <span>{text}</span>
         </div>
       ))}

@@ -193,13 +193,14 @@ function RatePill({ rate, n, pregnant }: { rate: number | null | undefined; n: n
 }
 
 const CHART_TOOLTIP_STYLE = {
-  borderRadius: 16,
-  border: "1px solid #E5E7EB",
-  background: "rgba(255,255,255,0.98)",
+  borderRadius: 14,
+  border: "1px solid rgba(168,203,160,0.2)",
+  background: "#0f1512",
+  color: "#e9f1ea",
   fontSize: 13,
 };
 
-const CATEGORY_COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#f97316"];
+const CATEGORY_COLORS = ["#a8cba0", "#7fb069", "#5fbf9f", "#4f9d69", "#cfe3b8", "#35836d", "#8aa872", "#2f7d5c"];
 
 /** Minimal, loosely-typed shape for recharts' custom Tooltip `content` render-prop.
  *  Recharts injects `active`/`payload` at render time via cloneElement, so a
@@ -258,7 +259,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#dff4e4] p-8">
+    <div className="min-h-screen p-1">
       <div className="space-y-8">
         {/* Header */}
         <div className="rounded-3xl bg-white p-8 shadow-sm border border-emerald-50">
@@ -490,14 +491,14 @@ function OverviewTab({
                     <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="analyticsTrendFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
+                          <stop offset="5%" stopColor="#a8cba0" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#a8cba0" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                      <XAxis dataKey="month" stroke="#6B7280" tickLine={false} axisLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                      <XAxis dataKey="month" stroke="#8ba392" tickLine={false} axisLine={false} />
                       <YAxis
-                        stroke="#6B7280"
+                        stroke="#8ba392"
                         tickLine={false}
                         axisLine={false}
                         tickFormatter={(value: number) => `${value}%`}
@@ -506,9 +507,9 @@ function OverviewTab({
                       <Area
                         type="monotone"
                         dataKey="pregnancy_rate_pct"
-                        stroke="#059669"
+                        stroke="#a8cba0"
                         strokeWidth={3}
-                        dot={{ r: 5, fill: "#10b981" }}
+                        dot={{ r: 5, fill: "#a8cba0" }}
                         fill="url(#analyticsTrendFill)"
                       />
                     </AreaChart>
@@ -575,10 +576,10 @@ function FreshFrozenPanel({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) 
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="label" stroke="#6B7280" tickLine={false} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+            <XAxis dataKey="label" stroke="#8ba392" tickLine={false} axisLine={false} />
             <YAxis
-              stroke="#6B7280"
+              stroke="#8ba392"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) => `${value}%`}
@@ -741,10 +742,10 @@ function ProtocolsTab({
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                   <XAxis
                     dataKey="protocol_name"
-                    stroke="#6B7280"
+                    stroke="#8ba392"
                     tickLine={false}
                     axisLine={false}
                     angle={-25}
@@ -754,14 +755,14 @@ function ProtocolsTab({
                     tick={{ fontSize: 11 }}
                   />
                   <YAxis
-                    stroke="#6B7280"
+                    stroke="#8ba392"
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value: number) => `${value}%`}
                     domain={[0, 100]}
                   />
                   <Tooltip content={<ProtocolTooltip />} />
-                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#10b981">
+                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#7fb069">
                     {chartData.map((entry, index) => (
                       <Cell key={entry.protocol_name} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                     ))}
@@ -772,7 +773,7 @@ function ProtocolsTab({
                       ]}
                       width={4}
                       strokeWidth={1.5}
-                      stroke="#374151"
+                      stroke="#8ba392"
                     />
                   </Bar>
                 </BarChart>
@@ -968,10 +969,10 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topByVolume} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
                 <XAxis
                   dataKey="donor_tag"
-                  stroke="#6B7280"
+                  stroke="#8ba392"
                   tickLine={false}
                   axisLine={false}
                   angle={-40}
@@ -981,7 +982,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
                   tick={{ fontSize: 11 }}
                 />
                 <YAxis
-                  stroke="#6B7280"
+                  stroke="#8ba392"
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value: number) => `${value}%`}
@@ -998,7 +999,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
                     ];
                   }}
                 />
-                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#3b82f6" />
+                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#5fbf9f" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1144,10 +1145,10 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="range" stroke="#6B7280" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+            <XAxis dataKey="range" stroke="#8ba392" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis
-              stroke="#6B7280"
+              stroke="#8ba392"
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: number) => `${value}%`}
@@ -1156,7 +1157,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
             <Tooltip content={<BiomarkerTooltip />} />
             <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]}>
               {chartData.map((entry) => (
-                <Cell key={entry.range} fill={entry.isOptimal ? "#059669" : "#a7f3d0"} />
+                <Cell key={entry.range} fill={entry.isOptimal ? "#059669" : "#3c5a48"} />
               ))}
               {hasCI ? (
                 <ErrorBar
@@ -1166,7 +1167,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
                   ]}
                   width={4}
                   strokeWidth={1.5}
-                  stroke="#374151"
+                  stroke="#8ba392"
                 />
               ) : null}
             </Bar>

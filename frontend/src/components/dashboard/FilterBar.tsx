@@ -28,36 +28,36 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
   const set = (patch: Partial<DashboardFilterValues>) => onChange({ ...filters, ...patch });
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-emerald-50 bg-white p-4 shadow-sm">
+    <div className="dash-card flex flex-wrap items-end gap-3 !p-4">
       {visible.has("date_from") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">From</Label>
+          <Label className="text-xs dash-muted">From</Label>
           <input
             type="date"
             value={filters.date_from ?? ""}
             onChange={(e) => set({ date_from: e.target.value || undefined })}
-            className="h-9 rounded-lg border border-gray-200 px-2 text-sm"
+            className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-2.5 text-sm text-[var(--foreground)] [color-scheme:dark]"
           />
         </div>
       )}
       {visible.has("date_to") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">To</Label>
+          <Label className="text-xs dash-muted">To</Label>
           <input
             type="date"
             value={filters.date_to ?? ""}
             onChange={(e) => set({ date_to: e.target.value || undefined })}
-            className="h-9 rounded-lg border border-gray-200 px-2 text-sm"
+            className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-2.5 text-sm text-[var(--foreground)] [color-scheme:dark]"
           />
         </div>
       )}
       {visible.has("farm_location") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Farm</Label>
+          <Label className="text-xs dash-muted">Farm</Label>
           <Select
             value={filters.farm_location ?? ""}
             onChange={(e) => set({ farm_location: e.target.value || undefined })}
-            className="min-w-[140px] bg-white text-gray-800"
+            className="min-w-[140px]"
           >
             <option value="">All Farms</option>
             {options?.farm_locations.map((f) => (
@@ -68,11 +68,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("breed") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Breed</Label>
+          <Label className="text-xs dash-muted">Breed</Label>
           <Select
             value={filters.breed ?? ""}
             onChange={(e) => set({ breed: e.target.value || undefined })}
-            className="min-w-[120px] bg-white text-gray-800"
+            className="min-w-[120px]"
           >
             <option value="">All Breeds</option>
             {options?.breeds.map((b) => (
@@ -83,11 +83,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("donor_id") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Donor</Label>
+          <Label className="text-xs dash-muted">Donor</Label>
           <Select
             value={filters.donor_id ?? ""}
             onChange={(e) => set({ donor_id: e.target.value ? Number(e.target.value) : undefined })}
-            className="min-w-[120px] bg-white text-gray-800"
+            className="min-w-[120px]"
           >
             <option value="">All Donors</option>
             {options?.donors.map((d) => (
@@ -98,11 +98,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("sire_id") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Sire</Label>
+          <Label className="text-xs dash-muted">Sire</Label>
           <Select
             value={filters.sire_id ?? ""}
             onChange={(e) => set({ sire_id: e.target.value ? Number(e.target.value) : undefined })}
-            className="min-w-[140px] bg-white text-gray-800"
+            className="min-w-[140px]"
           >
             <option value="">All Sires</option>
             {options?.sires.map((s) => (
@@ -113,11 +113,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("embryologist_id") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Embryologist</Label>
+          <Label className="text-xs dash-muted">Embryologist</Label>
           <Select
             value={filters.embryologist_id ?? ""}
             onChange={(e) => set({ embryologist_id: e.target.value ? Number(e.target.value) : undefined })}
-            className="min-w-[140px] bg-white text-gray-800"
+            className="min-w-[140px]"
           >
             <option value="">All Embryologists</option>
             {options?.technicians.map((t) => (
@@ -128,11 +128,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("technician_id") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">ET Technician</Label>
+          <Label className="text-xs dash-muted">ET Technician</Label>
           <Select
             value={filters.technician_id ?? ""}
             onChange={(e) => set({ technician_id: e.target.value ? Number(e.target.value) : undefined })}
-            className="min-w-[140px] bg-white text-gray-800"
+            className="min-w-[140px]"
           >
             <option value="">All Technicians</option>
             {options?.technicians.map((t) => (
@@ -143,11 +143,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("protocol_id") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Protocol</Label>
+          <Label className="text-xs dash-muted">Protocol</Label>
           <Select
             value={filters.protocol_id ?? ""}
             onChange={(e) => set({ protocol_id: e.target.value ? Number(e.target.value) : undefined })}
-            className="min-w-[160px] bg-white text-gray-800"
+            className="min-w-[160px]"
           >
             <option value="">All Protocols</option>
             {options?.protocols.map((p) => (
@@ -158,11 +158,11 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       {visible.has("fresh_or_frozen") && (
         <div className="flex flex-col gap-1">
-          <Label className="text-xs text-gray-500">Fresh/Frozen</Label>
+          <Label className="text-xs dash-muted">Fresh/Frozen</Label>
           <Select
             value={filters.fresh_or_frozen ?? ""}
             onChange={(e) => set({ fresh_or_frozen: e.target.value || undefined })}
-            className="min-w-[120px] bg-white text-gray-800"
+            className="min-w-[120px]"
           >
             <option value="">Both</option>
             {options?.fresh_or_frozen.map((f) => (
@@ -173,7 +173,7 @@ export default function FilterBar({ filters, options, onChange, visibleFields }:
       )}
       <button
         onClick={() => onChange({})}
-        className="h-9 rounded-lg border border-gray-200 px-3 text-xs font-medium text-gray-600 hover:bg-gray-50"
+        className="h-9 rounded-xl border border-[var(--border)] bg-white/[0.05] px-3 text-xs font-medium dash-muted transition hover:bg-white/[0.09] hover:text-[var(--foreground)]"
       >
         Clear filters
       </button>

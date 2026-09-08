@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { ROLE_PERMISSIONS } from "@/lib/roleRoutes";
+import { ROLE_PERMISSIONS, getRoleDisplayName } from "@/lib/roleRoutes";
 import type {
   DashboardAlertsResponse,
   DashboardDataQualityResponse,
@@ -52,7 +54,7 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       funnelStages: ["Oocytes Recovered", "Mature Oocytes", "Cleaved Embryos", "Blastocysts"],
       operationsTiles: ["opu_sessions_today", "ivf_batches_in_culture", "embryos_pending_grading"],
       pipelineStages: ["opu", "ivf", "grading"],
-      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: "#0ea5e9" }],
+      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: "#5fbf9f" }],
       performanceDimensions: ["donor", "sire"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -66,7 +68,7 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       funnelStages: ["Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"],
       operationsTiles: ["transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"],
       pipelineStages: ["transfer_scheduled", "pending_pc"],
-      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#059669" }],
+      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#a8cba0" }],
       performanceDimensions: ["protocol", "technician"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -77,8 +79,8 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
   // admin and viewer see everything
   return {
     trendMetrics: [
-      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#059669" },
-      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#0ea5e9" },
+      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#a8cba0" },
+      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#5fbf9f" },
     ],
     performanceDimensions: ["donor", "sire", "protocol", "technician"],
     showIntelligence: canViewAnalytics,
@@ -180,39 +182,86 @@ export default function HomepageDashboard() {
         ]
       : [];
 
+  const heroLink = permissions.canViewAnalytics ? "/app/analytics" : "/app/cases";
+  const heroLinkLabel = permissions.canViewAnalytics ? "Explore analytics" : "Browse case records";
+
   return (
-    <div className="space-y-6">
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-        <div className="flex flex-col gap-1">
-          <div className="inline-flex w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700">
-            OVULITE · REPRODUCTIVE INTELLIGENCE
-          </div>
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">
-            Welcome back, {user?.full_name || user?.username}
-          </h1>
-          <p className="text-sm text-gray-500">
-            Signed in as {role} · numbers below reflect the current filter selection
+    <div className="space-y-5">
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-[26px] font-semibold tracking-tight dash-heading">Performance Overview</h1>
+          <p className="mt-1 text-sm dash-muted">
+            Your program's production, transfers and outcomes — all in one place.
           </p>
+        </div>
+        <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-xs dash-muted">
+          Signed in as <span className="text-[var(--primary)]">{getRoleDisplayName(user?.role)}</span>
+        </span>
+      </div>
+
+      {/* Hero + today's snapshot */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="dash-card relative overflow-hidden !p-0 xl:col-span-2">
+          <div
+            className="relative h-full min-h-[220px] p-7"
+            style={{
+              background:
+                "radial-gradient(120% 140% at 100% 0%, rgba(207,227,184,0.30) 0%, rgba(127,176,105,0.16) 38%, rgba(10,16,12,0) 72%), linear-gradient(135deg, #16241b 0%, #0e1712 60%)",
+            }}
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-black/25 px-3 py-1.5 text-[11px] font-medium tracking-wide dash-muted">
+              <Sparkles className="h-3.5 w-3.5 text-[var(--primary)]" />
+              Live data · updates with your filters
+            </div>
+
+            <h2 className="hero-serif mt-5 max-w-[18ch] text-[42px] text-[#eef5ea] sm:text-[52px]">
+              Explore your <em className="text-[var(--primary)]">program</em>
+            </h2>
+            <p className="mt-3 max-w-md text-sm dash-muted">
+              Track oocyte recovery through to confirmed pregnancies, and see exactly where the losses happen.
+            </p>
+
+            <Link
+              to={heroLink}
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] transition hover:brightness-110"
+            >
+              {heroLinkLabel}
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="dash-card flex flex-col">
+          <h3 className="text-base font-semibold dash-heading">Today</h3>
+          <p className="mt-1 text-xs dash-muted">What's happening right now</p>
+          <div className="mt-4 flex-1">
+            <OperationsPanel data={operations} tileKeys={roleConfig.operationsTiles} />
+          </div>
         </div>
       </div>
 
       <FilterBar filters={filters} options={filterOptions} onChange={setFilters} visibleFields={roleConfig.filterFields} />
 
-      {loadError && <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{loadError}</div>}
+      {loadError && (
+        <div className="rounded-2xl border border-[rgba(224,101,111,0.3)] bg-[rgba(224,101,111,0.12)] p-4 text-sm text-[#f0a4aa]">
+          {loadError}
+        </div>
+      )}
 
       <KpiRow kpis={kpis?.kpis ?? []} keys={roleConfig.kpiKeys} />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50 xl:col-span-2">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Reproductive Funnel</h3>
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="dash-card xl:col-span-2">
+          <h3 className="mb-4 text-base font-semibold dash-heading">Reproductive Funnel</h3>
           <ReproductiveFunnel data={funnel} stageNames={roleConfig.funnelStages} />
         </div>
-        <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
+        <div className="dash-card">
           {roleConfig.showIntelligence ? (
             <IntelligencePanel />
           ) : (
             <div>
-              <h3 className="mb-3 text-lg font-semibold text-gray-900">Attention Required</h3>
+              <h3 className="mb-3 text-base font-semibold dash-heading">Attention Required</h3>
               <AlertsPanel alerts={filteredAlerts} />
             </div>
           )}
@@ -220,49 +269,46 @@ export default function HomepageDashboard() {
       </div>
 
       {kpis && (
-        <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-          <h3 className="mb-3 text-lg font-semibold text-gray-900">What Changed</h3>
+        <div className="dash-card">
+          <h3 className="mb-3 text-base font-semibold dash-heading">What Changed</h3>
           <InsightCards kpis={roleConfig.kpiKeys ? kpis.kpis.filter((k) => roleConfig.kpiKeys!.includes(k.key)) : kpis.kpis} />
         </div>
       )}
 
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Today's Operations</h3>
-        <OperationsPanel data={operations} tileKeys={roleConfig.operationsTiles} />
-      </div>
-
-      <div className={`grid grid-cols-1 gap-6 ${roleConfig.trendMetrics.length > 1 ? "xl:grid-cols-2" : ""}`}>
+      <div className={`grid grid-cols-1 gap-5 ${roleConfig.trendMetrics.length > 1 ? "xl:grid-cols-2" : ""}`}>
         {roleConfig.trendMetrics.map((t) => (
-          <div key={t.metric} className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">{t.title} Trend</h3>
+          <div key={t.metric} className="dash-card">
+            <h3 className="mb-2 text-base font-semibold dash-heading">{t.title} Trend</h3>
             <TrendChart data={trends[t.metric] ?? null} title={t.title} color={t.color} />
           </div>
         ))}
       </div>
 
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Performance</h3>
+      <div className="dash-card">
+        <h3 className="mb-4 text-base font-semibold dash-heading">Performance</h3>
         <PerformancePanel filters={filters} dimensions={roleConfig.performanceDimensions} />
       </div>
 
-      <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Active Pipeline</h3>
+      <div className="dash-card">
+        <h3 className="mb-4 text-base font-semibold dash-heading">Active Pipeline</h3>
         <ActivePipelineTable rows={pipeline} stages={roleConfig.pipelineStages} />
       </div>
 
-      {roleConfig.showIntelligence && (
-        <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Attention Required</h3>
-          <AlertsPanel alerts={filteredAlerts} extra={qcExtra} />
-        </div>
-      )}
+      <div className={`grid grid-cols-1 gap-5 ${roleConfig.showIntelligence && roleConfig.showDataQuality ? "xl:grid-cols-2" : ""}`}>
+        {roleConfig.showIntelligence && (
+          <div className="dash-card">
+            <h3 className="mb-4 text-base font-semibold dash-heading">Attention Required</h3>
+            <AlertsPanel alerts={filteredAlerts} extra={qcExtra} />
+          </div>
+        )}
 
-      {roleConfig.showDataQuality && (
-        <div className="rounded-3xl bg-white p-6 shadow-sm border border-emerald-50">
-          <h3 className="mb-4 text-lg font-semibold text-gray-900">Data Quality</h3>
-          <DataQualityPanel data={dataQuality} />
-        </div>
-      )}
+        {roleConfig.showDataQuality && (
+          <div className="dash-card">
+            <h3 className="mb-4 text-base font-semibold dash-heading">Data Quality</h3>
+            <DataQualityPanel data={dataQuality} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
