@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import CheckConstraint, String, Text, func
+from sqlalchemy import CheckConstraint, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -31,5 +31,12 @@ class Recipient(OrganizationScopedMixin, Base):
         CheckConstraint(
             "cow_or_heifer IN ('Cow', 'Heifer')",
             name="ck_recipients_cow_or_heifer",
+        ),
+        # tag_id is unique per organization AND farm, not org-wide — the same
+        # tag number is legitimately reused for a different physical animal
+        # at a different farm (see scripts/ingest_et_data.py's
+        # get_or_create_recipient, which has always matched this way).
+        UniqueConstraint(
+            "organization_id", "tag_id", "farm_location", name="uq_recipients_org_tag_id_farm"
         ),
     )

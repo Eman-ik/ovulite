@@ -1,0 +1,755 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "et_number": {
+      "exclusiveMinimum": 0,
+      "title": "Et Number",
+      "type": "integer"
+    },
+    "et_date": {
+      "format": "date",
+      "title": "Et Date",
+      "type": "string"
+    },
+    "recipient_tag": {
+      "maxLength": 50,
+      "minLength": 1,
+      "title": "Recipient Tag",
+      "type": "string"
+    },
+    "farm_location": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Farm Location",
+      "type": "string"
+    },
+    "donor_tag": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Tag"
+    },
+    "sire_name": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sire Name"
+    },
+    "embryo_stage": {
+      "maximum": 8,
+      "minimum": 4,
+      "title": "Embryo Stage",
+      "type": "integer"
+    },
+    "embryo_grade": {
+      "maximum": 4,
+      "minimum": 1,
+      "title": "Embryo Grade",
+      "type": "integer"
+    },
+    "fresh_or_frozen": {
+      "anyOf": [
+        {
+          "enum": [
+            "Fresh",
+            "Frozen"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fresh Or Frozen"
+    },
+    "bc_score": {
+      "anyOf": [
+        {
+          "maximum": 5,
+          "minimum": 1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Bc Score"
+    },
+    "cl_measure_mm": {
+      "anyOf": [
+        {
+          "maximum": 50,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cl Measure Mm"
+    },
+    "cl_side": {
+      "anyOf": [
+        {
+          "enum": [
+            "Left",
+            "Right"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cl Side"
+    },
+    "pc1_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pc1 Date"
+    },
+    "pc1_result": {
+      "anyOf": [
+        {
+          "enum": [
+            "Pregnant",
+            "Open",
+            "Recheck"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pc1 Result"
+    },
+    "recipient_breed": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recipient Breed"
+    },
+    "recipient_age_years": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recipient Age Years"
+    },
+    "recipient_parity": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recipient Parity"
+    },
+    "cow_or_heifer": {
+      "anyOf": [
+        {
+          "enum": [
+            "Cow",
+            "Heifer"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cow Or Heifer"
+    },
+    "previous_et_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Et Count"
+    },
+    "previous_et_pregnancies": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Et Pregnancies"
+    },
+    "previous_et_failures": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Et Failures"
+    },
+    "prior_pregnancy_loss": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prior Pregnancy Loss"
+    },
+    "donor_breed": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Breed"
+    },
+    "donor_age_years": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Age Years"
+    },
+    "donor_parity": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Parity"
+    },
+    "donor_bcs": {
+      "anyOf": [
+        {
+          "maximum": 5,
+          "minimum": 1,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Donor Bcs"
+    },
+    "sire_breed": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sire Breed"
+    },
+    "semen_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "Conventional",
+            "Sexed",
+            "Unknown"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Semen Type"
+    },
+    "semen_batch": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Semen Batch"
+    },
+    "embryo_identifier": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Embryo Identifier"
+    },
+    "embryo_day": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Embryo Day"
+    },
+    "production_method": {
+      "anyOf": [
+        {
+          "enum": [
+            "IVF",
+            "MOET",
+            "Other"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Production Method"
+    },
+    "cryopreservation_method": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cryopreservation Method"
+    },
+    "freezing_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Freezing Date"
+    },
+    "opu_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opu Date"
+    },
+    "ivf_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ivf Date"
+    },
+    "culture_media": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Culture Media"
+    },
+    "protocol_name": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Protocol Name"
+    },
+    "technician_name": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Technician Name"
+    },
+    "p4_ng_ml": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "P4 Ng Ml"
+    },
+    "cl_quality": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cl Quality"
+    },
+    "estrus_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Estrus Date"
+    },
+    "estrus_type": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Estrus Type"
+    },
+    "days_estrus_to_et": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Days Estrus To Et"
+    },
+    "heat_observed": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Heat Observed"
+    },
+    "transfer_side": {
+      "anyOf": [
+        {
+          "enum": [
+            "Left",
+            "Right"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transfer Side"
+    },
+    "transfer_location": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transfer Location"
+    },
+    "transfer_difficulty": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Transfer Difficulty"
+    },
+    "season": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Season"
+    },
+    "ambient_temperature_c": {
+      "anyOf": [
+        {
+          "maximum": 60,
+          "minimum": -50,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ambient Temperature C"
+    },
+    "relative_humidity_pct": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Relative Humidity Pct"
+    },
+    "pc2_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pc2 Date"
+    },
+    "pc2_result": {
+      "anyOf": [
+        {
+          "enum": [
+            "Pregnant",
+            "Open",
+            "Recheck"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pc2 Result"
+    },
+    "pregnancy_loss": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pregnancy Loss"
+    },
+    "pregnancy_loss_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pregnancy Loss Date"
+    },
+    "calving_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Calving Date"
+    },
+    "calving_outcome": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Calving Outcome"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "maxLength": 5000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "et_number",
+    "et_date",
+    "recipient_tag",
+    "farm_location",
+    "embryo_stage",
+    "embryo_grade"
+  ],
+  "title": "CanonicalET",
+  "type": "object"
+}

@@ -71,3 +71,14 @@ def update_technician(
     db.commit()
     db.refresh(t)
     return t
+
+
+@router.delete("/{technician_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_technician(technician_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES))):
+    t = db.query(Technician).filter(
+        Technician.technician_id == technician_id, Technician.organization_id == current_user.organization_id
+    ).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Technician not found")
+    db.delete(t)
+    db.commit()

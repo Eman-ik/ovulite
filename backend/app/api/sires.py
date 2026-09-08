@@ -49,6 +49,11 @@ def get_sire(sire_id: int, db: Session = Depends(get_db), current_user: User = D
 def create_sire(
     payload: SireCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
+    existing = db.query(Sire).filter(
+        Sire.name == payload.name, Sire.organization_id == current_user.organization_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Sire named '{payload.name}' already exists")
     sire = Sire(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(sire)
     db.commit()

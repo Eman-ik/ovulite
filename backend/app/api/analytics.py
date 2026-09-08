@@ -21,7 +21,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_role
 from app.models.user import User
 
 from app.schemas.analytics import (
@@ -195,7 +195,7 @@ async def get_biomarkers(_current_user: User = Depends(get_current_user)):
 # ── Pipeline Trigger ─────────────────────────────────────
 
 @router.post("/run")
-async def run_pipeline(_current_user: User = Depends(get_current_user)):
+async def run_pipeline(_current_user: User = Depends(require_role("admin", "organization_admin"))):
     """Trigger full analytics pipeline execution."""
     try:
         from ml.analytics.run_analytics import run_analytics

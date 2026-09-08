@@ -19,6 +19,8 @@ import CaseRecordsPage from "@/pages/CaseRecordsPage";
 import CaseDetailPage from "@/pages/CaseDetailPage";
 import ModelPerformancePage from "@/pages/ModelPerformancePage";
 import ReportsExportPage from "@/pages/ReportsExportPage";
+import LiteraturePage from "@/pages/LiteraturePage";
+import IntakePage from "@/pages/IntakePage";
 
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
@@ -38,11 +40,13 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/app" element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
+                <Route path="literature" element={<LiteraturePage />} />
+                <Route path="intake" element={<ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian"]}><IntakePage /></ProtectedRoute>} />
 
 <Route
   path="data-entry"
   element={
-    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <DataEntryPage />
     </ProtectedRoute>
   }
@@ -51,7 +55,7 @@ function App() {
 <Route
   path="data-entry/new"
   element={
-    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <TransferFormPage />
     </ProtectedRoute>
   }
@@ -60,7 +64,7 @@ function App() {
 <Route
   path="data-entry/:id"
   element={
-    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <TransferFormPage />
     </ProtectedRoute>
   }
@@ -69,7 +73,7 @@ function App() {
 <Route
   path="predictions"
   element={
-    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <PredictionPage />
     </ProtectedRoute>
   }
@@ -78,7 +82,7 @@ function App() {
 <Route
   path="predictions/:id/decision-support"
   element={
-    <ProtectedRoute allowedRoles={["admin", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <DecisionSupportPage />
     </ProtectedRoute>
   }
@@ -87,7 +91,7 @@ function App() {
 <Route
   path="embryo-grading"
   element={
-    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
       <GradingPage />
     </ProtectedRoute>
   }
@@ -96,7 +100,7 @@ function App() {
 <Route
   path="lab-qc"
   element={
-    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
       <QCDashboardPage />
     </ProtectedRoute>
   }
@@ -105,7 +109,7 @@ function App() {
 <Route
   path="opu-ivf"
   element={
-    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
       <OPUIVFPage />
     </ProtectedRoute>
   }
@@ -114,20 +118,33 @@ function App() {
 <Route
   path="analytics"
   element={
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
       <AnalyticsPage />
     </ProtectedRoute>
   }
 />
 
 <Route
-  path="cases" element={<CaseRecordsPage />} />
-<Route path="cases/:id" element={<CaseDetailPage />} />
+  path="cases"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "viewer"]}>
+      <CaseRecordsPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="cases/:id"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "viewer"]}>
+      <CaseDetailPage />
+    </ProtectedRoute>
+  }
+/>
 
 <Route
   path="model-performance"
   element={
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
       <ModelPerformancePage />
     </ProtectedRoute>
   }
@@ -136,7 +153,7 @@ function App() {
 <Route
   path="reports"
   element={
-    <ProtectedRoute allowedRoles={["admin", "embryologist", "et team"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian"]}>
       <ReportsExportPage />
     </ProtectedRoute>
   }

@@ -5,6 +5,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.exc import IntegrityError
+from pydantic import ValidationError
+from fastapi.encoders import jsonable_encoder
+from app.models.case_metadata import CaseMetadata, CaseAudit
+from app.models.intake_batch import TransferProvenance
+from app.models.organization import Organization
 
 from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
@@ -25,6 +31,46 @@ from app.schemas.et_transfer import (
 )
 
 router = APIRouter()
+
+
+def _validate_links(db, values, organization_id, transfer_id=None):
+    if organization_id is None:
+        raise HTTPException(403, "An organization is required")
+    db.query(Organization).filter_by(organization_id=organization_id).with_for_update().one()
+    for key, model, pk in (("recipient_id", Recipient, Recipient.recipient_id), ("embryo_id", Embryo, Embryo.embryo_id),
+                          ("protocol_id", Protocol, Protocol.protocol_id), ("technician_id", Technician, Technician.technician_id)):
+        if values.get(key) is not None and not db.query(model).filter(pk == values[key], model.organization_id == organization_id).first():
+            raise HTTPException(422, f"{key} does not identify a record in your organization")
+    if values.get("et_number") is not None:
+        query = db.query(ETTransfer).filter_by(organization_id=organization_id, et_number=values["et_number"])
+        if transfer_id is not None:
+            query = query.filter(ETTransfer.transfer_id != transfer_id)
+        if query.first():
+            raise HTTPException(409, "ET number already exists in your organization")
+
+
+def _audit_snapshot(db, transfer, user, action):
+    metadata = db.query(CaseMetadata).filter_by(transfer_id=transfer.transfer_id, organization_id=user.organization_id).first()
+    previous = dict(metadata.data) if metadata else None
+    core = jsonable_encoder({column.name: getattr(transfer, column.name) for column in transfer.__table__.columns})
+    if transfer.recipient:
+        core.update(recipient_tag=transfer.recipient.tag_id, farm_location=transfer.farm_location)
+    if transfer.embryo:
+        embryo = transfer.embryo
+        core.update(embryo_stage=embryo.stage, embryo_grade=embryo.grade, fresh_or_frozen=embryo.fresh_or_frozen,
+            donor_tag=embryo.donor.tag_id if embryo.donor else None, sire_name=embryo.sire.name if embryo.sire else None)
+    data = {**(previous or {}), **core}
+    if metadata is None:
+        metadata = CaseMetadata(transfer_id=transfer.transfer_id, organization_id=user.organization_id, data=data,
+            source_type="real_internal" if action == "create" else "unclassified_legacy", source_reference="Manual record entry" if action == "create" else "Legacy record; original source not documented",
+            version=1, updated_by=user.username)
+        db.add(metadata)
+    else:
+        metadata.data = data
+        metadata.version += 1
+        metadata.updated_by = user.username
+    db.add(CaseAudit(transfer_id=transfer.transfer_id, organization_id=user.organization_id, action=action, actor=user.username,
+        details={"version": metadata.version, "before": previous, "after": data, "source_type": metadata.source_type}))
 
 
 def _clean_pregnancy_result(value: str | None) -> str | None:
@@ -129,10 +175,13 @@ def create_transfer(
     current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     """Create a new ET transfer record."""
+    _validate_links(db, payload.model_dump(), current_user.organization_id)
     transfer = ETTransfer(
         **payload.model_dump(), organization_id=current_user.organization_id
     )
     db.add(transfer)
+    db.flush()
+    _audit_snapshot(db, transfer, current_user, "create")
     db.commit()
     db.refresh(transfer)
     return transfer
@@ -155,8 +204,18 @@ def update_transfer(
     )
     if not t:
         raise HTTPException(status_code=404, detail="Transfer not found")
+    combined = {key: getattr(t, key) for key in ETTransferCreate.model_fields}
+    combined.update(payload.model_dump(exclude_unset=True))
+    try:
+        ETTransferCreate.model_validate(combined)
+    except ValidationError as error:
+        raise HTTPException(422, detail=jsonable_encoder(error.errors(), custom_encoder={ValueError: str}))
+    _validate_links(db, combined, current_user.organization_id, transfer_id)
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(t, key, value)
+    db.flush()
+    db.expire(t, ["recipient", "embryo", "protocol", "technician"])
+    _audit_snapshot(db, t, current_user, "update")
     db.commit()
     db.refresh(t)
     return t
@@ -178,5 +237,16 @@ def delete_transfer(
     )
     if not t:
         raise HTTPException(status_code=404, detail="Transfer not found")
+    metadata = db.query(CaseMetadata).filter_by(transfer_id=transfer_id, organization_id=current_user.organization_id).first()
+    db.add(CaseAudit(transfer_id=transfer_id, organization_id=current_user.organization_id, action="delete", actor=current_user.username,
+        details={"record": metadata.data if metadata else jsonable_encoder({c.name: getattr(t, c.name) for c in t.__table__.columns})}))
+    db.query(TransferProvenance).filter_by(transfer_id=transfer_id, organization_id=current_user.organization_id).delete()
+    if metadata:
+        db.delete(metadata)
+    db.flush()
     db.delete(t)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "This transfer has dependent records and cannot be deleted")

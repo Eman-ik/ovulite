@@ -17,16 +17,21 @@ from app.api.auth import router as auth_router
 from app.api.auth import ensure_default_admin, ensure_default_organization
 from app.api.analytics import router as analytics_router
 from app.api.autonomous_agent import router as autonomous_agent_router
+from app.api.cases import router as cases_router
 from app.api.dashboard import router as dashboard_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
 from app.api.grading import router as grading_router
 from app.api.health import router as health_router
+from app.api.literature import router as literature_router
+from app.api.canonical_intake import router as canonical_intake_router
+from app.api.case_timeline import router as case_timeline_router
 from app.api.ivf_batches import router as ivf_batches_router
 from app.api.opu_sessions import router as opu_sessions_router
 from app.api.organizations import router as organizations_router
 from app.api.predictions import router as predictions_router
+from app.api.protocol_logs import router as protocol_logs_router
 from app.api.protocols import router as protocols_router
 from app.api.qc import router as qc_router
 from app.api.recipients import router as recipients_router
@@ -129,6 +134,7 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(autonomous_agent_router, tags=["autonomous_agent"])
+app.include_router(cases_router, prefix="/cases", tags=["cases"])
 app.include_router(donors_router, prefix="/donors", tags=["donors"])
 app.include_router(sires_router, prefix="/sires", tags=["sires"])
 app.include_router(recipients_router, prefix="/recipients", tags=["recipients"])
@@ -138,6 +144,7 @@ app.include_router(ivf_batches_router, prefix="/ivf-batches", tags=["ivf_batches
 app.include_router(transfers_router, prefix="/transfers", tags=["transfers"])
 app.include_router(technicians_router, prefix="/technicians", tags=["technicians"])
 app.include_router(protocols_router, prefix="/protocols", tags=["protocols"])
+app.include_router(protocol_logs_router, prefix="/protocol-logs", tags=["protocol_logs"])
 app.include_router(import_router, prefix="/import", tags=["import"])
 app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 app.include_router(grading_router, prefix="/grade", tags=["grading"])
@@ -146,6 +153,9 @@ app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(organizations_router)
 app.include_router(health_router, tags=["health"])
+app.include_router(literature_router, prefix="/literature", tags=["literature"])
+app.include_router(canonical_intake_router, prefix="/intake", tags=["intake"])
+app.include_router(case_timeline_router, prefix="/case-timeline", tags=["cases"])
 
 
 @app.middleware("http")

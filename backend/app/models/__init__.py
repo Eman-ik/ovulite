@@ -16,6 +16,11 @@ from app.models.sire import Sire
 from app.models.technician import Technician
 from app.models.token_blacklist import RevokedToken
 from app.models.user import User
+from app.models.literature import LiteratureDocument
+from app.models.literature_chunk import LiteratureChunk
+from app.models.case_metadata import CaseMetadata, CaseAudit
+from app.models.intake_governance import EmbryoIdentifier, IntakeRevision
+from app.models.intake_batch import IntakeBatch, TransferProvenance
 
 __all__ = [
     "Anomaly",
@@ -36,4 +41,7 @@ __all__ = [
     "Sire",
     "Technician",
     "User",
+    "LiteratureDocument",
+    "IntakeBatch",
+    "TransferProvenance",
 ]

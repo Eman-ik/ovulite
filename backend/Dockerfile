@@ -8,6 +8,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r autonomous_agent_requirements.txt
 
 COPY app/ ./app/
+COPY resources/ ./resources/
+COPY config/ ./config/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./alembic.ini
 
 EXPOSE 8000
 

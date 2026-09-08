@@ -93,7 +93,7 @@ class DataIntakeService:
         for folder in ("raw", "staging/quarantined", "staging/flagged", "processed", "reports", "reports/notifications", "image_raw"):
             (self.root / folder).mkdir(parents=True, exist_ok=True)
 
-    def process(self, filename: str, content: bytes, uploaded_by: str | None = None) -> IntakeResult:
+    def process(self, filename: str, content: bytes, uploaded_by: str | None = None, organization_id: int | None = None) -> IntakeResult:
         now = datetime.now(timezone.utc)
         intake_id = str(uuid.uuid4())
         safe_name = _safe_name(filename)
@@ -110,6 +110,7 @@ class DataIntakeService:
             "checksum": hashlib.sha256(content).hexdigest(), "source_category": _category(safe_name, file_type),
             "raw_path": str(raw_path.relative_to(self.root)), "uploaded_by": uploaded_by,
             "schema_version": self.schema.get("version", "unknown"),
+            "organization_id": organization_id,
         }
         if file_type == "unknown":
             return self._quarantine(content, metadata, "Unsupported file type")

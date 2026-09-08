@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
+import CaseTimeline from "@/components/CaseTimeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,42 +41,47 @@ interface CaseDetail {
   protocol_name: string;
   technician_name: string;
   
-  // AI Predictions
+  // AI Predictions — null when no prediction has ever been generated for
+  // this case (predictions are only made on demand, not backfilled).
   pregnancy_prediction: {
     probability: number;
-    confidence_lower: number;
-    confidence_upper: number;
-    risk_band: string;
-    model_version: string;
-  };
-  grading_prediction: {
-    grade: string;
-    confidence: number;
-    model_version: string;
-  };
-  
-  // QC Analysis
+    confidence_lower: number | null;
+    confidence_upper: number | null;
+    risk_band: string | null;
+    model_version: string | null;
+  } | null;
+  // Always null today — grading predictions (POST /grade/embryo) are
+  // computed on demand and never persisted, so there is no historical
+  // record to show for past cases.
+  grading_prediction: null;
+
+  // QC Analysis — simple per-case flags computed directly from this case's
+  // own data (missing fields, low-confidence prediction), not the
+  // aggregate Lab QC pipeline (Module 7), which flags at the
+  // technician/batch level rather than per case.
   qc_flags: string[];
   qc_passed: boolean;
-  
+
   // Actual Outcome (if available)
   actual_result: string | null;
   ultrasound_date: string | null;
-  follow_up_notes: string;
-  
-  // Traceability
+  follow_up_notes: string | null;
+
+  // Attributable record changes; unavailable historical events remain absent.
   audit_trail: Array<{
     timestamp: string;
     action: string;
     user: string;
     details: string;
   }>;
-  
-  // Linked Cases
+
+  // Linked Cases — other transfers sharing this case's donor+sire pairing.
+  // prediction_accuracy is null unless that case has both a stored
+  // prediction and a resolved outcome to compare it against.
   similar_cases: Array<{
     transfer_id: string;
     outcome: string;
-    prediction_accuracy: number;
+    prediction_accuracy: number | null;
   }>;
 }
 
@@ -237,6 +243,7 @@ export default function CaseDetailPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="timeline">Timeline & History</TabsTrigger>
           <TabsTrigger value="genetics">Genetics</TabsTrigger>
           <TabsTrigger value="predictions">Predictions</TabsTrigger>
           <TabsTrigger value="qc">QC Analysis</TabsTrigger>
@@ -244,6 +251,7 @@ export default function CaseDetailPage() {
         </TabsList>
 
         {/* Overview Tab */}
+        <TabsContent value="timeline"><CaseTimeline transferId={caseDetail.transfer_id} /></TabsContent>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
@@ -277,7 +285,7 @@ export default function CaseDetailPage() {
               <CardContent className="space-y-3 text-sm">
                 <div>
                   <p className="text-gray-600">Stage</p>
-                  <p>{caseDetail.embryo_stage === 7 ? "Blastocyst" : "Day " + caseDetail.embryo_stage}</p>
+                  <p>{caseDetail.embryo_stage == null ? "Not recorded" : `Stage ${caseDetail.embryo_stage}`}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Grade</p>
@@ -391,28 +399,35 @@ export default function CaseDetailPage() {
               <CardTitle>Pregnancy Prediction</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Probability</p>
-                  <p className={`text-2xl font-bold ${getPredictionColor(caseDetail.pregnancy_prediction.probability)}`}>
-                    {(caseDetail.pregnancy_prediction.probability * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">95% CI</p>
-                  <p className="text-sm font-mono">
-                    [{(caseDetail.pregnancy_prediction.confidence_lower * 100).toFixed(1)}% -
-                    {(caseDetail.pregnancy_prediction.confidence_upper * 100).toFixed(1)}%]
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Risk Band</p>
-                  <p className="font-bold">{caseDetail.pregnancy_prediction.risk_band}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600">Model Version: {caseDetail.pregnancy_prediction.model_version}</p>
-              </div>
+              {caseDetail.pregnancy_prediction ? (
+                <>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Probability</p>
+                      <p className={`text-2xl font-bold ${getPredictionColor(caseDetail.pregnancy_prediction.probability)}`}>
+                        {(caseDetail.pregnancy_prediction.probability * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">95% CI</p>
+                      <p className="text-sm font-mono">
+                        {caseDetail.pregnancy_prediction.confidence_lower !== null && caseDetail.pregnancy_prediction.confidence_upper !== null
+                          ? `[${(caseDetail.pregnancy_prediction.confidence_lower * 100).toFixed(1)}% - ${(caseDetail.pregnancy_prediction.confidence_upper * 100).toFixed(1)}%]`
+                          : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Risk Band</p>
+                      <p className="font-bold">{caseDetail.pregnancy_prediction.risk_band ?? "—"}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Model Version: {caseDetail.pregnancy_prediction.model_version ?? "—"}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-600">No pregnancy prediction has been generated for this case yet.</p>
+              )}
             </CardContent>
           </Card>
 
@@ -420,20 +435,11 @@ export default function CaseDetailPage() {
             <CardHeader>
               <CardTitle>Embryo Grading Prediction</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Grade</p>
-                  <p className="text-xl font-bold">{caseDetail.grading_prediction.grade}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Confidence</p>
-                  <p className="text-xl font-bold">{(caseDetail.grading_prediction.confidence * 100).toFixed(0)}%</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600">Model Version: {caseDetail.grading_prediction.model_version}</p>
-              </div>
+            <CardContent>
+              <p className="text-sm text-gray-600">
+                AI grading predictions aren't stored per case yet — grading (POST /grade/embryo) is computed on
+                demand and isn't linked to a case record. This section will populate once that history is tracked.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -478,22 +484,29 @@ export default function CaseDetailPage() {
               <CardDescription>Complete record of all actions on this case</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {caseDetail.audit_trail.map((entry, idx) => (
-                  <div key={idx} className="pb-3 border-b last:border-b-0">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-sm">{entry.action}</p>
-                        <p className="text-xs text-gray-500">{entry.details}</p>
-                      </div>
-                      <div className="text-right text-xs text-gray-600">
-                        <p>{entry.user}</p>
-                        <p>{new Date(entry.timestamp).toLocaleString()}</p>
+              {caseDetail.audit_trail.length === 0 ? (
+                <p className="text-sm text-gray-600">
+                  Audit logging isn't implemented yet — this tab will show a full change history (who changed what,
+                  when) once that's built.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {caseDetail.audit_trail.map((entry, idx) => (
+                    <div key={idx} className="pb-3 border-b last:border-b-0">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-sm">{entry.action}</p>
+                          <p className="text-xs text-gray-500">{entry.details}</p>
+                        </div>
+                        <div className="text-right text-xs text-gray-600">
+                          <p>{entry.user}</p>
+                          <p>{new Date(entry.timestamp).toLocaleString()}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -523,7 +536,9 @@ export default function CaseDetailPage() {
                     </div>
                     <p className="text-sm">
                       <span className="text-gray-600">Prediction Accuracy: </span>
-                      <span className="font-bold">{(similar.prediction_accuracy * 100).toFixed(0)}%</span>
+                      <span className="font-bold">
+                        {similar.prediction_accuracy === null ? "—" : `${(similar.prediction_accuracy * 100).toFixed(0)}%`}
+                      </span>
                     </p>
                   </div>
                 </div>

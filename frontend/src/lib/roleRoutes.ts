@@ -70,6 +70,32 @@ export const ROLE_PERMISSIONS = {
     canEditSettings: false,
     canExportReports: true,
   },
+  // Same access as "et team" — recipient/synchronization/transfer work is
+  // the closest overlap with a vet's role. Matches the backend's
+  // ET_WRITE_ROLES grouping (app/auth/dependencies.py).
+  veterinarian: {
+    canManageUsers: false,
+    canViewAnalytics: false,
+    canViewAllData: false,
+    canEnterLabData: false,
+    canEnterETData: true,
+    canGradeEmbryos: false,
+    canEditSettings: false,
+    canExportReports: true,
+  },
+  // Same access as "admin" for CRUD purposes — matches how organizations.py
+  // already treats organization_admin, and the backend's LAB_WRITE_ROLES/
+  // ET_WRITE_ROLES groupings (app/auth/dependencies.py).
+  organization_admin: {
+    canManageUsers: true,
+    canViewAnalytics: true,
+    canViewAllData: true,
+    canEnterLabData: true,
+    canEnterETData: true,
+    canGradeEmbryos: true,
+    canEditSettings: true,
+    canExportReports: true,
+  },
   viewer: {
     canManageUsers: false,
     canViewAnalytics: false,

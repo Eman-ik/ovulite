@@ -427,7 +427,7 @@ def ingest_et_data(csv_path: str, db: Session, organization_id: int = 1, commit:
             except Exception as exc:
                 stats["rows_skipped"] += 1
                 stats["errors"].append(f"Row {raw_row_num}: {exc}")
-                logger.error("Row %d failed: %s", row_num, exc)
+                logger.error("Row %d failed: %s", raw_row_num, exc)
 
     if commit:
         db.commit()

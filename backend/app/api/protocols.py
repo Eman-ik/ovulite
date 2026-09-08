@@ -71,3 +71,14 @@ def update_protocol(
     db.commit()
     db.refresh(p)
     return p
+
+
+@router.delete("/{protocol_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_protocol(protocol_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES))):
+    p = db.query(Protocol).filter(
+        Protocol.protocol_id == protocol_id, Protocol.organization_id == current_user.organization_id
+    ).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Protocol not found")
+    db.delete(p)
+    db.commit()

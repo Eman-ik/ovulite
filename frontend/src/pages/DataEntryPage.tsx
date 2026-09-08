@@ -25,32 +25,6 @@ import {
 } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Plus, Search, Upload } from "lucide-react";
 
-const parseCsvRows = (text: string): string[][] => {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let quoted = false;
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    if (char === '"') {
-      if (quoted && text[index + 1] === '"') {
-        field += '"';
-        index += 1;
-      } else quoted = !quoted;
-    } else if (char === "," && !quoted) {
-      row.push(field.trim()); field = "";
-    } else if ((char === "\n" || char === "\r") && !quoted) {
-      if (char === "\r" && text[index + 1] === "\n") index += 1;
-      row.push(field.trim());
-      if (row.some((value) => value.length > 0)) rows.push(row);
-      row = []; field = "";
-    } else field += char;
-  }
-  row.push(field.trim());
-  if (row.some((value) => value.length > 0)) rows.push(row);
-  return rows;
-};
-
 const normalizePregnancyResult = (value: string | null | undefined) => {
   const normalized = value?.trim().toLowerCase();
   if (["pregnant", "p", "positive"].includes(normalized ?? "")) return "Pregnant";
@@ -178,10 +152,10 @@ export default function DataEntryPage() {
       } else {
         setUploadSuccess(`Validated import: ${response.data.rows_ingested ?? 0} database rows, ${summary.warning_rows} warnings, ${summary.critical_rows} rejected`);
       }
-      
+
       // Auto-dismiss success message after 5 seconds
       setTimeout(() => setUploadSuccess(null), 5000);
-      
+
       // Refresh the transfers list
       setPage(1);
       setSearch("");
@@ -197,111 +171,6 @@ export default function DataEntryPage() {
       setUploading(false);
       // Reset file input
       event.target.value = "";
-    }
-  };
-
-  // Dev helper: load sample dataset from repo CSV and populate table locally
-  const loadSampleDataset = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      // Fetch the CSV from Vite's public assets so the browser receives the raw file
-      const res = await fetch('/datasets/ET%20Summary%20-%20ET%20Data.csv');
-      if (!res.ok) throw new Error(`Failed to fetch sample CSV (${res.status})`);
-      const text = await res.text();
-
-      const csvRows = parseCsvRows(text);
-      if (csvRows.length < 2) throw new Error('CSV appears empty');
-
-      // header cleanup (some files start with '# ')
-      const headers = csvRows[0].map((header) => header.trim().toLowerCase());
-
-      const findIndex = (needle: string) => {
-        needle = needle.toLowerCase();
-        return headers.findIndex((h) => h.includes(needle));
-      };
-
-      const idxEtNumber = findIndex('et') >= 0 ? findIndex('et') : findIndex('# et');
-      const idxEtDate = findIndex('et date');
-      const idxRecipient = findIndex('recipient');
-      const idxDonor = findIndex('donor');
-      const idxSire = findIndex('sire');
-      const idxCl = findIndex('cl measure') >= 0 ? findIndex('cl measure') : findIndex('cl');
-      const idxProtocol = findIndex('protocol');
-      const idxTech = findIndex('et tech') >= 0 ? findIndex('et tech') : findIndex('et technician');
-      const idxPc1 = findIndex('1st pc result') >= 0 ? findIndex('1st pc result') : findIndex('1st pc result');
-      const idxOpu = findIndex('opu date');
-      const idxCane = findIndex('cane');
-
-      const parsed: ETTransferDetail[] = [];
-      let idCounter = 1;
-      for (let i = 1; i < csvRows.length; i++) {
-        const row = csvRows[i];
-        // naive CSV split — adequate for these simple reports
-        const cols = row;
-        if (cols.length === 0) continue;
-
-        const make = (idx: number) => (idx >= 0 && idx < cols.length ? cols[idx] : undefined);
-
-        const transfer: ETTransferDetail = {
-          transfer_id: idCounter++,
-          et_number: (() => {
-            const v = make(idxEtNumber);
-            const n = v ? parseInt(v.replace(/[^ -\u007F]/g, '').trim()) : NaN;
-            return Number.isFinite(n) ? n : null;
-          })(),
-          lab: null,
-          satellite: null,
-          customer_id: make(findIndex('customer id')) ?? null,
-          et_date: make(idxEtDate) ?? '',
-          farm_location: make(findIndex('et location')) ?? null,
-          recipient_id: null,
-          bc_score: null,
-          cl_side: make(findIndex('cl side')) ?? null,
-          cl_measure_mm: (() => {
-            const v = make(idxCl);
-            const n = v ? parseFloat(v) : NaN;
-            return Number.isFinite(n) ? n : null;
-          })(),
-          protocol_id: null,
-          protocol_name: make(idxProtocol) ?? null,
-          embryo_stage: null,
-          embryo_grade: null,
-          fresh_or_frozen: make(findIndex('fresh or frozen')) ?? null,
-          donor_tag: make(idxDonor) ?? null,
-          donor_breed: null,
-          sire_name: make(idxSire) ?? null,
-          recipient_tag: make(idxRecipient) ?? null,
-          technician_name: make(idxTech) ?? null,
-          pc1_result: normalizePregnancyResult(make(idxPc1)),
-          embryo_id: null,
-          heat_observed: undefined,
-          heat_day: undefined,
-          technician_id: undefined,
-          assistant_name: undefined,
-          pc1_date: make(findIndex('1st pc date')) ?? null,
-          donor_id: undefined,
-          sire_id: undefined,
-          opu_date: make(idxOpu) ?? null,
-          cane_number: make(idxCane) ?? null,
-        } as ETTransferDetail;
-
-        parsed.push(transfer);
-      }
-
-      setTransfers(parsed);
-      setTotal(parsed.length);
-      setPages(Math.ceil(parsed.length / pageSize));
-      setPage(1);
-      // persist in localStorage so page reload keeps it for convenience
-      try {
-        localStorage.setItem('ovulite_sample_transfers', JSON.stringify(parsed));
-      } catch {}
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load sample dataset';
-      setError(msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -330,7 +199,7 @@ export default function DataEntryPage() {
           <input
             type="file"
             id="csv-upload"
-            accept=".csv,.zip"
+              accept=".zip"
             className="hidden"
             onChange={handleFileUpload}
             disabled={uploading}
@@ -348,16 +217,16 @@ export default function DataEntryPage() {
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                Import CSV
+                 Upload image archive
               </>
             )}
           </Button>
           <Button
             variant="ghost"
-            onClick={() => void loadSampleDataset()}
+            onClick={() => navigate("/app/intake")}
             disabled={loading}
           >
-            Load sample dataset
+            Import CSV / canonical entry
           </Button>
           <Button onClick={() => navigate("/app/data-entry/new")}>
             <Plus className="mr-2 h-4 w-4" />

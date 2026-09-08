@@ -51,6 +51,19 @@ def get_recipient(recipient_id: int, db: Session = Depends(get_db), current_user
 def create_recipient(
     payload: RecipientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
+    # tag_id is only unique per farm, not org-wide — the same tag can be a
+    # different animal at a different farm (see the Recipient model's
+    # UniqueConstraint for why).
+    existing = db.query(Recipient).filter(
+        Recipient.tag_id == payload.tag_id,
+        Recipient.organization_id == current_user.organization_id,
+        Recipient.farm_location == payload.farm_location,
+    ).first()
+    if existing:
+        farm_note = f" at farm '{payload.farm_location}'" if payload.farm_location else " with no farm set"
+        raise HTTPException(
+            status_code=409, detail=f"Recipient with tag '{payload.tag_id}'{farm_note} already exists"
+        )
     r = Recipient(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(r)
     db.commit()

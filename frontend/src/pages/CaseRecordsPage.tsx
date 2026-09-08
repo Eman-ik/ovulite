@@ -26,12 +26,12 @@ interface CaseRecord {
   recipient_tag: string;
   protocol_name: string;
   outcome: "pregnant" | "open" | "recheck" | "pending";
-  pregnancy_prediction_probability: number;
+  pregnancy_prediction_probability: number | null;
   actual_result: string | null;
-  technician_name: string;
-  embryo_grade: string;
-  cl_size_mm: number;
-  notes: string;
+  technician_name: string | null;
+  embryo_grade: string | null;
+  cl_size_mm: number | null;
+  notes: string | null;
   follow_up_date: string | null;
 }
 
@@ -114,7 +114,8 @@ export default function CaseRecordsPage() {
     }
   };
 
-  const getPredictionColor = (prob: number) => {
+  const getPredictionColor = (prob: number | null) => {
+    if (prob === null) return "text-gray-400";
     if (prob < 0.3) return "text-red-600";
     if (prob < 0.6) return "text-yellow-600";
     return "text-green-600";
@@ -291,14 +292,16 @@ export default function CaseRecordsPage() {
                           {new Date(caseRecord.case_date).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-sm">
-                          <div>{caseRecord.donor_tag}</div>
-                          <div className="text-xs text-gray-500">{caseRecord.sire_name}</div>
+                          <div>{caseRecord.donor_tag ?? "—"}</div>
+                          <div className="text-xs text-gray-500">{caseRecord.sire_name ?? "—"}</div>
                         </TableCell>
-                        <TableCell className="text-sm">{caseRecord.recipient_tag}</TableCell>
-                        <TableCell className="text-sm">{caseRecord.protocol_name}</TableCell>
+                        <TableCell className="text-sm">{caseRecord.recipient_tag ?? "—"}</TableCell>
+                        <TableCell className="text-sm">{caseRecord.protocol_name ?? "—"}</TableCell>
                         <TableCell>
                           <span className={`font-bold ${getPredictionColor(caseRecord.pregnancy_prediction_probability)}`}>
-                            {(caseRecord.pregnancy_prediction_probability * 100).toFixed(0)}%
+                            {caseRecord.pregnancy_prediction_probability === null
+                              ? "—"
+                              : `${(caseRecord.pregnancy_prediction_probability * 100).toFixed(0)}%`}
                           </span>
                         </TableCell>
                         <TableCell>

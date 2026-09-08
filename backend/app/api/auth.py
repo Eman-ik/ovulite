@@ -1,15 +1,20 @@
 """Authentication API endpoints — login, register, seed, me."""
 
 import logging
+import os
+import secrets
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import get_current_user, oauth2_scheme
 from app.auth.security import (
+    ENVIRONMENT,
     create_access_token,
     create_refresh_token,
     hash_password,
@@ -21,8 +26,10 @@ from app.models.token_blacklist import RevokedToken
 from app.models.user import User
 from app.models.organization import Organization, OrganizationMembership
 from app.schemas.organization import OrganizationRegistrationRequest, OrganizationRegistrationResponse
-from app.schemas.auth import TokenResponse, RefreshTokenRequest
+from app.schemas.auth import GoogleAuthRequest, TokenResponse, RefreshTokenRequest
 from app.schemas.user import UserCreate, UserResponse
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 logger = logging.getLogger(__name__)
 
@@ -363,4 +370,129 @@ def register_organization(
         access_token=access_token,
         refresh_token=refresh_token,
     )
+
+
+def _issue_tokens_for(user: User) -> TokenResponse:
+    access_token = create_access_token(
+        data={"sub": user.username, "role": user.role, "org_id": user.organization_id}
+    )
+    refresh_token = create_refresh_token(
+        data={"sub": user.username, "org_id": user.organization_id}
+    )
+    return TokenResponse(
+        access_token=access_token, refresh_token=refresh_token, organization_id=user.organization_id
+    )
+
+
+@router.post("/google", response_model=TokenResponse)
+def google_login(
+    payload: GoogleAuthRequest,
+    db: Session = Depends(get_db),
+) -> TokenResponse:
+    """Authenticate via Google Sign-In.
+
+    Verifies the ID token issued by Google Identity Services against
+    GOOGLE_CLIENT_ID, then logs in the matching user (by verified email) or
+    provisions a new "viewer" account in the default organization — an
+    admin can promote the role afterward. Requires GOOGLE_CLIENT_ID to be
+    configured; see .env.example for setup instructions.
+    """
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google Sign-In is not configured on this server (GOOGLE_CLIENT_ID is unset).",
+        )
+
+    try:
+        claims = google_id_token.verify_oauth2_token(
+            payload.token, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Google token: {exc}",
+        )
+
+    email = claims.get("email")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Google account has no email")
+    if not claims.get("email_verified", False):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Google email is not verified")
+
+    user = db.query(User).filter(func.lower(User.email) == func.lower(email)).first()
+    if user is None:
+        organization = ensure_default_organization(db)
+        user = User(
+            organization_id=organization.organization_id,
+            username=email,
+            password_hash=hash_password(secrets.token_urlsafe(32)),
+            role="viewer",
+            full_name=claims.get("name") or email,
+            email=email,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        db.add(OrganizationMembership(
+            organization_id=organization.organization_id,
+            user_id=user.user_id,
+            role="viewer",
+            status="active",
+            is_primary=False,
+        ))
+        db.commit()
+        logger.info("Provisioned new user '%s' via Google Sign-In", user.username)
+
+    if not user.active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
+
+    user.last_login = datetime.now(timezone.utc)
+    db.commit()
+    logger.info("User '%s' logged in via Google", user.username)
+    return _issue_tokens_for(user)
+
+
+@router.post("/google/mock", response_model=TokenResponse)
+def google_login_mock(db: Session = Depends(get_db)) -> TokenResponse:
+    """Demo Google Sign-In, used by the frontend only when no real
+    GOOGLE_CLIENT_ID/VITE_GOOGLE_CLIENT_ID is configured. Logs into (or
+    provisions) a fixed local demo account — no real Google verification
+    happens here. Refuses to run when ENVIRONMENT=production so this
+    password-less login path can never reach a real deployment.
+    """
+    if ENVIRONMENT == "production":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Mock Google Sign-In is disabled in production.",
+        )
+
+    organization = ensure_default_organization(db)
+    user = db.query(User).filter(func.lower(User.username) == "google_demo").first()
+    if user is None:
+        user = User(
+            organization_id=organization.organization_id,
+            username="google_demo",
+            password_hash=hash_password(secrets.token_urlsafe(32)),
+            role="viewer",
+            full_name="Google Demo User",
+            email="google-demo@ovulite.local",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+        db.add(OrganizationMembership(
+            organization_id=organization.organization_id,
+            user_id=user.user_id,
+            role="viewer",
+            status="active",
+            is_primary=False,
+        ))
+        db.commit()
+
+    user.last_login = datetime.now(timezone.utc)
+    db.commit()
+    logger.info("Demo Google Sign-In used for user '%s'", user.username)
+    return _issue_tokens_for(user)
 

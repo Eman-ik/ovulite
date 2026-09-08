@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import CheckConstraint, String, Text, func
+from sqlalchemy import CheckConstraint, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -34,4 +34,7 @@ class Sire(OrganizationScopedMixin, Base):
             "semen_type IN ('Conventional', 'Sexed', 'Unknown')",
             name="ck_sires_semen_type",
         ),
+        # name is unique per organization, not globally — two organizations
+        # may each own a sire with the same name.
+        UniqueConstraint("organization_id", "name", name="uq_sires_org_name"),
     )

@@ -1,0 +1,27 @@
+# Optional local RAG service. Merge with the main Compose file; model data persists.
+services:
+  literature-model:
+    image: ollama/ollama:0.11.10
+    volumes:
+      - literature_models:/root/.ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+  literature-model-init:
+    image: ollama/ollama:0.11.10
+    environment:
+      OLLAMA_HOST: http://literature-model:11434
+    entrypoint: /bin/sh
+    command: ["-c", "until ollama list; do sleep 2; done; ollama pull qwen2.5:1.5b && ollama pull nomic-embed-text"]
+    depends_on:
+      - literature-model
+  backend:
+    environment:
+      LITERATURE_RAG_ENABLED: "true"
+      LITERATURE_OLLAMA_URL: http://literature-model:11434
+      LITERATURE_GENERATION_MODEL: qwen2.5:1.5b
+      LITERATURE_EMBEDDING_MODEL: nomic-embed-text
+    depends_on:
+      literature-model-init:
+        condition: service_completed_successfully
+volumes:
+  literature_models:

@@ -1,0 +1,407 @@
+
+<!DOCTYPE article
+  PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">
+<article id="rda70170" xml:lang="en" article-type="research-article" dtd-version="1.4"><?da-xref-anchor-style autodetect?><processing-meta base-tagset="archiving" mathml-version="3.0" table-model="xhtml" tagset-family="jats"><restricted-by>pmc</restricted-by></processing-meta><front><journal-meta><journal-id journal-id-type="nlm-ta">Reprod Domest Anim</journal-id><journal-id journal-id-type="iso-abbrev">Reprod Domest Anim</journal-id><journal-id journal-id-type="pmc-domain-id">379</journal-id><journal-id journal-id-type="pmc-domain">blackwellopen</journal-id><journal-id journal-id-type="nlm-id">9015668</journal-id><journal-id journal-id-type="publisher-id">RDA</journal-id><journal-title-group><journal-title>Reproduction in Domestic Animals = Zuchthygiene</journal-title></journal-title-group><issn pub-type="ppub">0936-6768</issn><issn pub-type="epub">1439-0531</issn><?publisher_abbrev blackwell?><custom-meta-group><custom-meta><meta-name>pmc-is-collection-domain</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-collection-title</meta-name><meta-value>Wiley Open Access Collection</meta-value></custom-meta></custom-meta-group></journal-meta><article-meta><article-id pub-id-type="pmcid">PMC12781044</article-id><article-id pub-id-type="pmcid-ver">PMC12781044.1</article-id><article-id pub-id-type="pmcaid">12781044</article-id><article-id pub-id-type="pmcaiid">12781044</article-id><article-id pub-id-type="pmid">41503757</article-id><article-id pub-id-type="doi">10.1111/rda.70170</article-id><article-id pub-id-type="publisher-id">RDA70170</article-id><article-id pub-id-type="other">2504264</article-id><article-version article-version-type="pmc-version">1</article-version><article-categories><subj-group subj-group-type="overline"><subject>Original Article</subject></subj-group><subj-group subj-group-type="heading"><subject>Original Article</subject></subj-group></article-categories><title-group><article-title>Impact of <styled-content style="fixed-case" toggle="no">FSH</styled-content>‐Induced Ovarian Stimulation on Oocyte Recovery and In Vitro Embryo Production in the Red Sindhi Cows</article-title></title-group><contrib-group><contrib id="rda70170-cr-0001" contrib-type="author"><name name-style="western"><surname>Pivato</surname><given-names initials="I">Ivo</given-names></name><xref rid="rda70170-aff-0001" ref-type="aff">
+<sup>1</sup>
+</xref></contrib><contrib id="rda70170-cr-0002" contrib-type="author"><name name-style="western"><surname>Martins</surname><given-names initials="GHL">George Henrique Lima</given-names></name><xref rid="rda70170-aff-0001" ref-type="aff">
+<sup>1</sup>
+</xref></contrib><contrib id="rda70170-cr-0003" contrib-type="author"><name name-style="western"><surname>de Faria</surname><given-names initials="LC">Lucas Costa</given-names></name><xref rid="rda70170-aff-0002" ref-type="aff">
+<sup>2</sup>
+</xref></contrib><contrib id="rda70170-cr-0004" contrib-type="author"><name name-style="western"><surname>Bessler</surname><given-names initials="HC">Heidi Christina</given-names></name><xref rid="rda70170-aff-0003" ref-type="aff">
+<sup>3</sup>
+</xref></contrib><contrib id="rda70170-cr-0005" contrib-type="author" corresp="yes"><name name-style="western"><surname>Martins</surname><given-names initials="CF">Carlos Frederico</given-names></name><contrib-id contrib-id-type="orcid" authenticated="false">https://orcid.org/0000-0001-8551-0146</contrib-id><xref rid="rda70170-aff-0002" ref-type="aff">
+<sup>2</sup>
+</xref><xref rid="rda70170-aff-0003" ref-type="aff">
+<sup>3</sup>
+</xref><address><email>carlos.martins@embrapa.br</email></address></contrib></contrib-group><aff id="rda70170-aff-0001">
+<label>
+<sup>1</sup>
+</label>
+<named-content content-type="organisation-division">Department of Animal Science</named-content>
+<institution>University of Brasília</institution>
+<city>Brasília</city>
+<named-content content-type="country-part">Distrito Federal</named-content>
+<country country="BR">Brazil</country>
+</aff><aff id="rda70170-aff-0002">
+<label>
+<sup>2</sup>
+</label>
+<named-content content-type="organisation-division">Department of Animal Health</named-content>
+<institution>University of Brasília</institution>
+<city>Brasília</city>
+<named-content content-type="country-part">Distrito Federal</named-content>
+<country country="BR">Brazil</country>
+</aff><aff id="rda70170-aff-0003">
+<label>
+<sup>3</sup>
+</label>
+<institution>Technology Center for Dairy Zebu Breeds from Embrapa Cerrados</institution>
+<city>Planaltina</city>
+<named-content content-type="country-part">Distrito Federal</named-content>
+<country country="BR">Brazil</country>
+</aff><author-notes><corresp id="correspondenceTo">
+<label>*</label>
+<bold>Correspondence:</bold>
+<break/>
+Carlos Frederico Martins (<email>carlos.martins@embrapa.br</email>)<break/>
+</corresp></author-notes><pub-date pub-type="epub"><day>08</day><month>1</month><year>2026</year></pub-date><pub-date pub-type="ppub"><month>1</month><year>2026</year></pub-date><volume>61</volume><issue seq="130">1</issue><issue-id pub-id-type="pmc-issue-id">504516</issue-id><issue-id pub-id-type="doi">10.1111/rda.v61.1</issue-id><elocation-id>e70170</elocation-id><history>
+<date date-type="rev-recd"><day>24</day><month>12</month><year>2025</year></date>
+<date date-type="received"><day>01</day><month>7</month><year>2025</year></date>
+<date date-type="accepted"><day>31</day><month>12</month><year>2025</year></date>
+</history><pub-history><event event-type="pmc-release"><date><day>08</day><month>01</month><year>2026</year></date></event><event event-type="pmc-live"><date><day>09</day><month>01</month><year>2026</year></date></event><event event-type="pmc-last-change"><date iso-8601-date="2026-01-09 00:25:13.010"><day>09</day><month>01</month><year>2026</year></date></event></pub-history><permissions><copyright-statement content-type="article-copyright">© 2026 The Author(s). <italic toggle="yes">Reproduction in Domestic Animals</italic> published by Wiley‐VCH GmbH.</copyright-statement><license><ali:license_ref xmlns:ali="http://www.niso.org/schemas/ali/1.0/" specific-use="textmining" content-type="ccbylicense">https://creativecommons.org/licenses/by/4.0/</ali:license_ref><license-p>This is an open access article under the terms of the <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</ext-link> License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.</license-p></license></permissions><self-uri xmlns:xlink="http://www.w3.org/1999/xlink" content-type="pmc-pdf" xlink:href="RDA-61-e70170.pdf"><?pdf-name RDA-61-e70170.pdf?><?pdf-size 334049?><?pdf-md5 1aea83f691c6fdcdab8690b6451e6019?><?pdf-image-server-status NEVER_LOAD?><?pdf-cloudpmc-urn urn:app:4f22/12781044/1aea83f691c6/RDA-61-e70170.pdf?></self-uri><self-uri xmlns:xlink="http://www.w3.org/1999/xlink" content-type="pdf" xlink:href="file:RDA-61-e70170.pdf"/><abstract><title>ABSTRACT</title><p>Follicle‐stimulating hormone (FSH) plays an important role in regulating reproductive events, particularly follicular development and oocyte competence acquisition. Some studies using FSH protocols in zebu cattle were performed, but data regarding its application in the Red Sindhi breed are scarce and therefore warranted. In this context, this study aimed to assess the FSH administration regimen—multiple doses (T1‐m) and single dose (T2‐s) and coasting period (54 h vs. 102 h) in oocyte developmental competence in Sindhi females. A total of 80 mg of FSH was administered either as a single application (40 mg IM + 40 mg, SC) or compared to multiple applications (30 mg + 30 mg + 20 mg, IM). Animals that did not receive FSH treatment serve as controls (CT). The present data showed that both T1 and T2 applications resulted in a greater number of medium‐sized follicles (7.80 vs. 8.57, <italic toggle="no">p</italic> &lt; 0.05), oocyte recovery (9.76 vs. 9.81), when compared to control (5.20; 6.30, respectively). Animals from T2 also had a greater number of aspirated follicles (12.52 vs. 8.70, <italic toggle="no">p</italic> &lt; 0.05), viable oocytes (7.33 vs. 4.45, <italic toggle="no">p</italic> &lt; 0.05) and blastocyst rates (43.22% vs. 29.11%, <italic toggle="no">p</italic> &lt; 0.05) than control animals. Our results showed that a reduced dose of FSH both single and multiple applications enhance oocyte developmental competence. Moreover, a single application of FSH combined with a longer coasting period offers practical advantages, making this approach more attractive for Sindhi breeding programmes.</p></abstract><kwd-group kwd-group-type="author-generated"><kwd id="rda70170-kwd-0001">assisted reproduction</kwd><kwd id="rda70170-kwd-0002">coasting</kwd><kwd id="rda70170-kwd-0003">in vitro fertilisation</kwd><kwd id="rda70170-kwd-0004">zebu</kwd></kwd-group><funding-group><award-group id="funding-0001"><funding-source>
+<institution-wrap><institution>00193‐0000002278/2022‐89</institution></institution-wrap>
+</funding-source></award-group></funding-group><counts><fig-count count="2"/><table-count count="3"/><page-count count="6"/><word-count count="4700"/></counts><custom-meta-group><custom-meta><meta-name>pmc-status-qastatus</meta-name><meta-value>0</meta-value></custom-meta><custom-meta><meta-name>pmc-status-live</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-status-embargo</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-status-released</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-open-access</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-olf</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-manuscript</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-legally-suppressed</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-has-pdf</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-has-supplement</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-pdf-only</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-suppress-copyright</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-is-real-version</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-is-scanned-article</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-preprint</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-in-epmc</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-license-ref</meta-name><meta-value>CC BY</meta-value></custom-meta><custom-meta><meta-name>source-schema-version-number</meta-name><meta-value>2.0</meta-value></custom-meta><custom-meta><meta-name>cover-date</meta-name><meta-value>January 2026</meta-value></custom-meta><custom-meta><meta-name>details-of-publishers-convertor</meta-name><meta-value>Converter:WILEY_ML3GV2_TO_JATSPMC version:6.6.8 mode:remove_FC converted:08.01.2026</meta-value></custom-meta></custom-meta-group></article-meta><notes><p content-type="self-citation">
+<mixed-citation publication-type="journal" id="rda70170-cit-1001">
+<string-name name-style="western">
+<surname>Pivato</surname>, <given-names>I.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>G. H. L.</given-names>
+<surname>Martins</surname>
+</string-name>, <string-name name-style="western">
+<given-names>L. C.</given-names>
+<surname>de Faria</surname>
+</string-name>, <string-name name-style="western">
+<given-names>H. C.</given-names>
+<surname>Bessler</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>C. F.</given-names>
+<surname>Martins</surname>
+</string-name>. <year>2026</year>. “<article-title>Impact of <styled-content style="fixed-case" toggle="no">FSH</styled-content>‐Induced Ovarian Stimulation on Oocyte Recovery and In Vitro Embryo Production in the Red Sindhi Cows</article-title>.” <source>Reproduction in Domestic Animals</source>
+<volume>61</volume>, no. <issue>1</issue>: <elocation-id>e70170</elocation-id>. <pub-id pub-id-type="doi">10.1111/rda.70170</pub-id>.<pub-id pub-id-type="pmid">41503757</pub-id>
+<pub-id pub-id-type="pmcid">PMC12781044</pub-id></mixed-citation>
+</p></notes></front><body id="rda70170-body-0001"><sec id="rda70170-sec-0001"><label>1</label><title>Introduction</title><p>The Red Sindhi is a zebu cattle breed (<styled-content style="fixed-case" toggle="no">
+<italic toggle="no">Bos indicus</italic>
+</styled-content>) originating from Pakistan, characterised by its red coat colour, medium body size, heat tolerance, rusticity and dual‐purpose potential for both meat and milk production (de Barros et al. <xref rid="rda70170-bib-0004" ref-type="bibr">2020</xref>; Mello et al. <xref rid="rda70170-bib-0012" ref-type="bibr">2016</xref>). In Brazil, favourable climatic conditions and the availability of high‐quality pasture and water have enabled the full expression of the breed's productive potential, making Red Sindhi cattle economically advantageous under national production systems (Panetto et al. <xref rid="rda70170-bib-0017" ref-type="bibr">2017</xref>). Additionally, the breed is recognised for its high fertility and sexual precocity, which are important for promoting genetic enhancement and reducing generation interval (Mello et al. <xref rid="rda70170-bib-0013" ref-type="bibr">2020</xref>). This emphasises the importance of studying and enhancing the efficiency of reproductive techniques in this breed.</p><p>In vitro embryo production (IVEP) has remained a central focus of reproductive biotechnology for many years, owing not only to its capacity to enhance reproductive efficiency in both males and females but also to its role in accelerating the dissemination of superior animals (Ferre et al. <xref rid="rda70170-bib-0008" ref-type="bibr">2020</xref>). Numerous strategies have been investigated to improve oocyte developmental competence. A well‐established principle in the literature is the positive association between follicular size and the ability to yield a developmentally competent oocyte capable of successful ovulation and subsequent embryonic development (Lonergan et al. <xref rid="rda70170-bib-0010" ref-type="bibr">1994</xref>). Consequently, several studies have evaluated ovarian superstimulation (OvS) achieved through multiple administrations of FSH prior to ovum pick‐up (OPU) as an approach to enhance blastocyst production and, ultimately, increase pregnancy rates (Vieira et al. <xref rid="rda70170-bib-0022" ref-type="bibr">2014</xref>).</p><p>Follicle‐stimulating hormone (FSH) plays a central role in reproductive physiology, contributing to spermatogenesis in bulls and to follicular growth and the acquisition of oocyte developmental competence in cows (Roelen <xref rid="rda70170-bib-0019" ref-type="bibr">2019</xref>). Considering this, numerous studies have evaluated ovarian stimulation protocols in conjunction with IVEP as a strategy to enhance the reproductive efficiency of oocyte donors (Blondin et al. <xref rid="rda70170-bib-0002" ref-type="bibr">2002</xref>; Egashira et al. <xref rid="rda70170-bib-0007" ref-type="bibr">2019</xref>; Hayden et al. <xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>; Nivet et al. <xref rid="rda70170-bib-0014" ref-type="bibr">2012</xref>; Ongaratto et al. <xref rid="rda70170-bib-0016" ref-type="bibr">2020</xref>; Pinheiro et al. <xref rid="rda70170-bib-0018" ref-type="bibr">2023</xref>). Lonergan et al. (<xref rid="rda70170-bib-0010" ref-type="bibr">1994</xref>) have suggested that the beneficial effects of FSH on embryo production are largely attributable to its ability to increase follicular diameter, which in turn is associated with improved oocyte recovery rates. Conversely, several studies have demonstrated a direct positive impact of FSH on oocyte quality itself, ultimately leading to higher blastocyst yields (Egashira et al. <xref rid="rda70170-bib-0007" ref-type="bibr">2019</xref>; Hayden et al. <xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>; Nivet et al. <xref rid="rda70170-bib-0014" ref-type="bibr">2012</xref>; Ongaratto et al. <xref rid="rda70170-bib-0016" ref-type="bibr">2020</xref>).</p><p>It has been suggested that mere stimulation through subsequent applications of FSH may not be sufficient to enhance oocyte competence. Blondin et al. (<xref rid="rda70170-bib-0002" ref-type="bibr">2002</xref>) proposed that a period of FSH deprivation, known as ‘coasting’, is essential to induce the necessary cellular changes in the oocyte to improve its potential to develop into an embryo.</p><p>In this context, many studies have aimed to determine the optimal interval between the last FSH application and OPU. For example, Nivet et al. (<xref rid="rda70170-bib-0014" ref-type="bibr">2012</xref>) tested four different coasting periods (20, 44, 68 and 92 h) and concluded that the most effective intervals were between 44 and 68 h. An interesting study in ewes demonstrated that a 60‐h coasting period improved oocyte quality and the expression of quality‐related genes (Pinheiro et al. <xref rid="rda70170-bib-0018" ref-type="bibr">2023</xref>).</p><p>Research investigating optimal hormonal stimulation protocols and coasting durations in Red Sindhi cattle remains limited. Therefore, the present study aimed to assess the effects of single versus multiple FSH administrations and two coasting intervals (54 or 102 h) on oocyte quality and IVEP in this breed.</p></sec><sec sec-type="materials-and-methods" id="rda70170-sec-0002"><label>2</label><title>Materials and Methods</title><p>All experimental procedures were performed in accordance with current Brazilian laws and were approved beforehand by the ethics committee on animal use at the University of Brasilia (UnB/DOC no 13522/2013).</p><sec id="rda70170-sec-0003"><label>2.1</label><title>Location</title><p>This study was performed at the Center of Technology for Zebu Dairy Breeds (CTZL) from Embrapa Cerrados, located in Brasilia, Federal District, Brazil (15°57′09″ S and 48°08′12″ W). This region represents part of the Cerrado (savannah) biome found in central Brazil and is the second largest national biome with 204 million ha, representing 24% of the country's area. The annual average rainfall ranges from 800 to 1800 mm. Climatic seasons are well defined, with dry winters and rainy summers. The climate is tropical, with average temperatures of 22°C–23°C (Sano et al. <xref rid="rda70170-bib-0020" ref-type="bibr">2019</xref>).</p></sec><sec id="rda70170-sec-0004"><label>2.2</label><title>Experimental Design</title><p>In the present study, 12 non‐lactating and non‐pregnant Sindhi cows were used. All animals presented a good body score condition (3.70; 1–5 scale), a mean weight of 400 kg and 6 years old. The animals were kept in a grazing system, in a rotated pasture composed of <italic toggle="yes">Panicum maximum Jaca. vr Mombaça</italic>, with water and mineral supplementation ad libitum during the experiment.</p><p>At the beginning of the experimental period, all animals were examined for the presence of a dominant follicle (DF). Follicles larger than 5 mm were aspirated to achieve dominant follicle removal (DFR). Subsequently, immediately after DFR, all females were synchronised in day 0 (D0) using an intravaginal progesterone device (1 g; Cronipres, Biogénesis‐Bagó S.A., Buenos Aires, Argentina), which remained in place until OPU in day 7 (D7). Three experimental treatments were evaluated: Treatment 1 (T1‐m): DFR and application of FSH in multiple doses (<italic toggle="yes">n</italic> = 4 females). In this treatment, OvS consisted of 80 mg FSH (Folltropin‐V; Bioniche, Canada, containing pituitary extract of porcine follicle‐stimulating hormone (pFSH) 400 mg NIH) administered intramuscularly in three decreasing doses (30 mg, 30 mg and 20 mg) at 24‐h intervals between each application. The first FSH application was commencing from day 3 (D3) of progesterone device application, and the last application was administered on day 5 (D5), 54 h prior to OPU; Treatment 2 (T2‐s): DFR and application of FSH in a single dose (<italic toggle="yes">n</italic> = 4 females). In this treatment, OvS consisted of the same total FSH dose (80 mg), applied as a single dose commencing from day 3 (D3) of progesterone device application, with 40 mg administered intramuscularly and 40 mg subcutaneously, 102 h prior to OPU; Control treatment (CT): DFR and OPU (<italic toggle="yes">n</italic> = 4 females): animals underwent DFR and the OPU without ovarian stimulation. After OPU, all animals received a new intravaginal implant and a new replicate was started. Five replicates were performed for each treatment within an interval of 7 days between each OPU‐hormonal stimulation, as shown in Figure <xref rid="rda70170-fig-0001" ref-type="fig">1</xref>.</p><fig position="float" fig-type="FIGURE" id="rda70170-fig-0001" orientation="portrait"><label>FIGURE 1</label><caption><p>Schematic representation of experimental design.</p></caption><graphic xmlns:xlink="http://www.w3.org/1999/xlink" position="anchor" id="jats-graphic-1" orientation="portrait" xlink:href="RDA-61-e70170-g001.jpg"><?image-name RDA-61-e70170-g001.jpg?><?image-size 49478?><?image-md5 abe408dbdd8df3b43ce32d71e5753927?><?image-image-server-status LOAD_COMPLETED?><?image-original-height 757?><?image-original-width 993?><?image-scaled-height 505?><?image-scaled-width 662?><?image-cloudpmc-urn urn:cdn:blobs/4f22/12781044/abe408dbdd8d/RDA-61-e70170-g001.jpg?><?thumb-name RDA-61-e70170-g001.gif?><?thumb-size 8442?><?thumb-md5 a1dbe08e47aa6e87b0230d9b9c7a3964?><?thumb-image-server-status NEVER_LOAD?><?thumb-scaled-height 79?><?thumb-scaled-width 104?><?thumb-cloudpmc-urn urn:cdn:blobs/4f22/12781044/a1dbe08e47aa/RDA-61-e70170-g001.gif?></graphic></fig><p>The evaluations to determine the effects of each treatment were divided into two stages: Stage 1—Follicular Assessment: this phase evaluated the effects of single versus multiple FSH applications on follicular population and size distribution. All visible follicles were counted and measured using a 7.5 MHz linear‐array transducer (Honda, Japan) connected to an HS 1500 ultrasound unit (Honda, Japan). Follicles were classified based on diameter as follows: small (&lt; 3 mm), medium (3–8 mm) and large (&gt; 8 mm); Stage 2—IVEP Evaluation: in this phase, the influence of FSH treatment protocol on IVEP was evaluated. Females from all treatments were subjected to OPU and recovered cumulus–oocyte complexes (COCs) were evaluated and subsequently processed for in vitro maturation (IVM), fertilisation (IVF) and embryo culture (IVC). In this phase, the following variables were recorded: number of follicles aspirated, total oocytes recovered, number of viable oocytes, cleavage rate and blastocyst yield on day 7 of culture.</p></sec><sec id="rda70170-sec-0005"><label>2.3</label><title>Ovum Pick‐Up</title><p>The OPU procedure was conducted using an HS 1500 ultrasound unit (Honda, Japan) equipped with a sectorial, multi‐frequency (5–10 MHz) micro‐convex probe (HCV‐3710 MV, Honda, Japan) mounted on a transvaginal aspiration guide (WTA, Brazil). Follicular aspiration was performed using an 18G needle (WTA, Brazil) connected to a digital vacuum pump (BV‐003d, WTA, Brazil), with the aspiration flow rate maintained at 15 mL/min.</p></sec><sec id="rda70170-sec-0006"><label>2.4</label><title>In Vitro Embryo Production (<styled-content style="fixed-case" toggle="no">IVEP</styled-content>)</title><p>IVEP procedures followed the methodology described by de Toledo et al. (<xref rid="rda70170-bib-0005" ref-type="bibr">2023</xref>), with minor modifications. Recovered oocytes were morphologically classified into four grades (I–IV) according to the number of layers of cumulus–oophorus cells, cumulus–oophorus expansion, cytoplasmic homogeneity, colour and structural integrity. Only Grade I, II and III COCs were selected for IVM.</p><p>For IVM, COCs from each donor were placed in 200 μL of maturation medium (MIV), consisting of TCM‐199 with Earle's salts (Thermo Fisher Scientific Inc.) supplemented with 10% fetal bovine serum (FBS), LH (24 IU/mL), FSH (10 μg/mL) and antibiotics. Maturation was carried out for 22 h at 38.5°C in a 5% CO<sub>2</sub> atmosphere. Matured COCs were allocated in groups of 30 oocytes into 150 μL drops of fertilisation medium (TALP; Tyrode's albumin lactate pyruvate) supplemented with 2 mM penicillamine, 1 mM hypotaurine, 250 μM epinephrine and 10 μg/mL heparin (Sigma). Frozen–thawed semen was evaluated for viability and subjected to selection via a 45%–90% Percoll density gradient (Sigma Aldrich). The final sperm concentration in fertilisation drops was adjusted to 1 × 10<sup>6</sup> spermatozoa/mL. Fertilisation was performed for 18 h at 38.5°C under 5% CO<sub>2</sub>.</p><p>For in vitro culture (IVC), presumptive zygotes were partially denuded and transferred to synthetic oviduct fluid (SOF) supplemented with 0.34 mM sodium tricitrate, 2.77 mM myo‐inositol (Sigma Aldrich) and 5% FBS. Embryo development was evaluated at 44 h post‐insemination to determine cleavage rate and on day 7 (D7) to assess blastocyst production.</p></sec><sec id="rda70170-sec-0007"><label>2.5</label><title>Statistical Analysis</title><p>The study was entirely casualised with three treatments and five repetitions, considering in statistical model the fixed effect of treatments on the variables: total number of follicles aspirated, the number of follicles in each size category, total number of COCs recovered and viable COCs per cow, as well as cleavage rate (number of cleaved zygotes per total number of COCs cultured), blastocyst rate (number of blastocysts produced per total number of COCs cultured) and number of embryos produced per OPU procedure.</p><p>Firstly, data normality was verified by the Shapiro–Wilk test. The variation in the follicle size before OPU, number of follicles, recovered and viable COCs among OPU sessions was determined by ANOVA variance test. When ANOVA detected statistical differences, the Tukey test was used to compare all treatments. Binomial variables such as cleavage and blastocyst rates were compared using the Chi‐squared method. Results are shown as mean ± SEM and statistical significance was determined based on a <italic toggle="yes">p</italic> value &lt; 0.05.</p></sec></sec><sec sec-type="results" id="rda70170-sec-0008"><label>3</label><title>Results</title><sec id="rda70170-sec-0009"><label>3.1</label><title>Stage 1—Follicular Growth</title><p>There were substantially more medium follicles (<italic toggle="yes">p</italic> &lt; 0.05) in both OvS treatments than in the control treatment. No differences were observed concerning small and large follicles among treatments (Table <xref rid="rda70170-tbl-0001" ref-type="table">1</xref>).</p><table-wrap position="float" id="rda70170-tbl-0001" content-type="TABLE" orientation="portrait"><label>TABLE 1</label><caption><p>Number of follicles by diameter category (mean ± SEM) per Sindhi cow stimulated with multiple (T1‐m) or single (T2‐s) FSH application.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead valign="bottom"><tr style="border-bottom:solid 1px #000000"><th align="left" rowspan="2" valign="bottom" colspan="1">Treatment</th><th align="center" colspan="3" valign="bottom" rowspan="1">Follicle size</th></tr><tr style="border-bottom:solid 1px #000000"><th align="center" valign="bottom" rowspan="1" colspan="1">&lt; 3 mm</th><th align="center" valign="bottom" rowspan="1" colspan="1">3–8 mm</th><th align="center" valign="bottom" rowspan="1" colspan="1">&gt; 8 mm</th></tr></thead><tbody valign="top"><tr><td align="left" valign="top" rowspan="1" colspan="1">T1 (m)</td><td align="center" valign="top" rowspan="1" colspan="1">0.52 ± 0.17</td><td align="center" valign="top" rowspan="1" colspan="1">7.80 ± 0.80ª</td><td align="center" valign="top" rowspan="1" colspan="1">1.20 ± 0.23</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">T2 (s)</td><td align="center" valign="top" rowspan="1" colspan="1">0.76 ± 0.24</td><td align="center" valign="top" rowspan="1" colspan="1">8.57 ± 1.04ª</td><td align="center" valign="top" rowspan="1" colspan="1">1.38 ± 0.24</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">Control</td><td align="center" valign="top" rowspan="1" colspan="1">0.80 ± 0.33</td><td align="center" valign="top" rowspan="1" colspan="1">5.20 ± 0.51<sup>b</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">1.50 ± 0.19</td></tr></tbody></table><table-wrap-foot id="rda70170-ntgp-0001"><fn id="rda70170-note-0001"><p>
+<italic toggle="yes">Note:</italic> Different letters “<sup>ab</sup>” in the same column indicate differences between groups (<italic toggle="yes">p</italic> &lt; 0.05). Control: without FSH stimulation (control).</p></fn></table-wrap-foot></table-wrap></sec><sec id="rda70170-sec-0010"><label>3.2</label><title>Stage 2—In Vitro Embryo Production</title><p>There was no observed difference in the mean number of COCs recovered between T1 (m) and T2 (s); however, OvS treatments presented more COCs than the control treatment (<italic toggle="yes">p</italic> &lt; 0.05; Table <xref rid="rda70170-tbl-0002" ref-type="table">2</xref>). The number of viable oocytes was similar between treatments with hormonal stimulation, but only the single hormonal application treatment presented more viable oocytes than the control treatment (<italic toggle="yes">p</italic> &lt; 0.05; Table <xref rid="rda70170-tbl-0002" ref-type="table">2</xref>).</p><table-wrap position="float" id="rda70170-tbl-0002" content-type="TABLE" orientation="portrait"><label>TABLE 2</label><caption><p>Number of aspirated follicles, recovered oocytes and viable oocytes per Sindhi cow (mean ± SEM) stimulated with multiple (T1‐m) or single (T2‐s) FSH application.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead valign="bottom"><tr style="border-bottom:solid 1px #000000"><th align="left" valign="bottom" rowspan="1" colspan="1">Treatment</th><th align="center" valign="bottom" rowspan="1" colspan="1">Aspirated follicles (<italic toggle="yes">n</italic>)</th><th align="center" valign="bottom" rowspan="1" colspan="1">Retrieved oocytes (<italic toggle="yes">n</italic>)</th><th align="center" valign="bottom" rowspan="1" colspan="1">Viable oocytes (<italic toggle="yes">n</italic>)</th></tr></thead><tbody valign="top"><tr><td align="left" valign="top" rowspan="1" colspan="1">T1 (m)</td><td align="center" valign="top" rowspan="1" colspan="1">11.36 ± 1.39<sup>ab</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">9.76 ± 1.32ª</td><td align="center" valign="top" rowspan="1" colspan="1">6.72 ± 1.04<sup>ab</sup>
+</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">T2 (s)</td><td align="center" valign="top" rowspan="1" colspan="1">12.52 ± 1.81ª</td><td align="center" valign="top" rowspan="1" colspan="1">9.81 ± 1.83ª</td><td align="center" valign="top" rowspan="1" colspan="1">7.33 ± 1.32ª</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">Control</td><td align="center" valign="top" rowspan="1" colspan="1">8.70 ± 0.74<sup>b</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">6.30 ± 0.82<sup>b</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">4.45 ± 0.51<sup>b</sup>
+</td></tr></tbody></table><table-wrap-foot id="rda70170-ntgp-0002"><fn id="rda70170-note-0002"><p>
+<italic toggle="yes">Note:</italic> Different letters “<sup>ab</sup>” in the same column indicate differences between groups (<italic toggle="yes">p</italic> &lt; 0.05). Control: without FSH stimulation (control).</p></fn></table-wrap-foot></table-wrap><p>Single dose of FSH treatment presented a lower rate of cleavage than multiple doses of FSH treatment (84.75% vs. 93.52%, respectively, Table <xref rid="rda70170-tbl-0003" ref-type="table">3</xref>).</p><table-wrap position="float" id="rda70170-tbl-0003" content-type="TABLE" orientation="portrait"><label>TABLE 3</label><caption><p>Cleavage and blastocysts rates (mean ± SEM) in Sindhi cows stimulated with multiple (T1‐m) or single (T2‐s) FSH application.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead valign="bottom"><tr style="border-bottom:solid 1px #000000"><th align="left" valign="bottom" rowspan="1" colspan="1">Treatment</th><th align="center" valign="bottom" rowspan="1" colspan="1">Oocytes (<italic toggle="yes">n</italic>°)</th><th align="center" valign="bottom" rowspan="1" colspan="1">Cleavage (%)</th><th align="center" valign="bottom" rowspan="1" colspan="1">Blastocyst D7 (%)</th></tr></thead><tbody valign="top"><tr><td align="left" valign="top" rowspan="1" colspan="1">T1‐m</td><td align="center" valign="top" rowspan="1" colspan="1">108</td><td align="center" valign="top" rowspan="1" colspan="1">93.52 ± 4.19 (101/108)<sup>a</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">38.89 ± 0.65 (42/108)<sup>a,b</sup>
+</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">T2‐s</td><td align="center" valign="top" rowspan="1" colspan="1">118</td><td align="center" valign="top" rowspan="1" colspan="1">84.75 ± 5.79 (100/118)<sup>b</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">43.22 ± 0.48 (51/118)<sup>a</sup>
+</td></tr><tr><td align="left" valign="top" rowspan="1" colspan="1">Control</td><td align="center" valign="top" rowspan="1" colspan="1">79</td><td align="center" valign="top" rowspan="1" colspan="1">86.08 ± 2.94 (68/79)<sup>a,b</sup>
+</td><td align="center" valign="top" rowspan="1" colspan="1">29.11 ± 0.95 (23/79)<sup>b</sup>
+</td></tr></tbody></table><table-wrap-foot id="rda70170-ntgp-0003"><fn id="rda70170-note-0003"><p>
+<italic toggle="yes">Note:</italic> Different letters “<sup>ab</sup>” in the same column indicate differences between groups (<italic toggle="yes">p</italic> &lt; 0.05). Control: without FSH stimulation (control).</p></fn></table-wrap-foot></table-wrap><p>Regarding embryo production, it was observed that follicle stimulation using a single dose of FSH (T2‐s) reflected in a better blastocyst rate in D7 when compared to the non‐treated group (43.22% vs. 29.11% of embryos in T2‐s and TC, respectively; <italic toggle="yes">p</italic> &lt; 0.05). These results reflect a difference of 45% in embryo production per OPU between the treatment that used a single application of FSH and 102 h of coasting compared to the control treatment (12.75 ± 0.95 vs. 5.75 ± 1.9 embryos/OPU, respectively for T2‐s and TC; Figure <xref rid="rda70170-fig-0002" ref-type="fig">2</xref>).</p><fig position="float" fig-type="FIGURE" id="rda70170-fig-0002" orientation="portrait"><label>FIGURE 2</label><caption><p>Embryo production/OPU (mean ± SEM) of animals in the different treatments.</p></caption><graphic xmlns:xlink="http://www.w3.org/1999/xlink" position="anchor" id="jats-graphic-3" orientation="portrait" xlink:href="RDA-61-e70170-g002.jpg"><?image-name RDA-61-e70170-g002.jpg?><?image-size 36388?><?image-md5 b866042ae5173f4f0d36472c2ded0450?><?image-image-server-status LOAD_COMPLETED?><?image-original-height 600?><?image-original-width 992?><?image-scaled-height 400?><?image-scaled-width 661?><?image-cloudpmc-urn urn:cdn:blobs/4f22/12781044/b866042ae517/RDA-61-e70170-g002.jpg?><?thumb-name RDA-61-e70170-g002.gif?><?thumb-size 7295?><?thumb-md5 b2e57048cf3b3d13846d5e666fb77e18?><?thumb-image-server-status NEVER_LOAD?><?thumb-scaled-height 80?><?thumb-scaled-width 132?><?thumb-cloudpmc-urn urn:cdn:blobs/4f22/12781044/b2e57048cf3b/RDA-61-e70170-g002.gif?></graphic></fig><p>No differences were observed between T1‐m and T2‐s treatments (<italic toggle="yes">p</italic> &gt; 0.05; Table <xref rid="rda70170-tbl-0003" ref-type="table">3</xref>).</p></sec></sec><sec sec-type="discussion" id="rda70170-sec-0011"><label>4</label><title>Discussion</title><p>In our experiment, the use of a reduced concentration of FSH in single and multiple dosages induced an enhancement in the number of follicles and their size, oocyte viability and, consequently, embryo production rates, reinforcing its importance as a reproductive tool. A single application of FSH in the Red Sindhi females and 102 h of coasting produced about 45% more embryos per OPU than the control treatment.</p><p>It is well known that FSH plays an important role in reproductive biology in mammals, inducing follicular growth in females and participating actively in oocyte developmental acquisition (Roelen <xref rid="rda70170-bib-0019" ref-type="bibr">2019</xref>). When its use becomes prolonged, such as in OvS protocols, it is expected that more follicles pass through these steps, resulting in more than one follicle reaching the dominant stage. Our results showed that the use of FSH in single and multiple applications enhanced the number of medium follicles (3–8 mm; <italic toggle="yes">p</italic> &lt; 0.05), highlighting the importance of FSH supplementation on follicle development. Other studies using ovarian stimulation found a similar pattern of follicular growth. When Blondin et al. (<xref rid="rda70170-bib-0002" ref-type="bibr">2002</xref>) tested two different protocols of OvS with 4 or 6 FSH applications and distinct coasting intervals (33 and 48 h) before OPU, they observed that the Holstein heifers treated with FSH, independent of coasting interval, presented more follicles (&gt; 3 mm) than the non‐treated group. Furthermore, Hayden et al. (<xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>) also observed that the use of FSH in multiple dosages resulted in a higher number of medium follicles (6–10 mm) in pregnant Holstein heifers than large or small follicles.</p><p>In females treated with FSH, the increase in follicle count was directly associated with a higher number of oocytes recovered, indicating a positive correlation between follicular development and oocyte yield (9.76 and 9.81 vs. 6.3 COCs/OPU/cow, respectively, for T1 (m), T2 (s) and CT). It has been described in the literature that puncture of follicles larger than 4 mm results in a minor COCs recovery rate (Seneda et al. <xref rid="rda70170-bib-0021" ref-type="bibr">2001</xref>), conversely, the relation between follicle size and its recovery capability is controversial. Comparing the effect of a single application of FSH in Japanese cattle, Egashira et al. (<xref rid="rda70170-bib-0007" ref-type="bibr">2019</xref>) described that, even though there was an increase in the size of the follicles, no difference was observed in oocyte recovery, suggesting that the follicle size had no effect. The same was observed in pregnant Holstein heifers by Hayden et al. (<xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>). Our results contrast with these findings, and a possible explanation is based on the increase in the number of follicles in proportion to the increase in their size in the ovaries of stimulated Red Sindhi cows, which could result in a higher number of recovered structures.</p><p>The use of FSH in single and multiple applications had a positive impact in oocyte viability by enhancing oocyte morphological quality in our study. This finding contrasts with the results reported by Hayden et al. (<xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>), who observed that multiple FSH applications in pregnant heifers did not impact oocyte viability. Along with the differences in morphological quality, the presented results showed that the use of FSH promoted an improvement of oocyte competence by increasing the embryo production rate by approximately 15%. Despite the lower cleavage rate observed with the single‐dose FSH treatment compared to the multiple‐dose and control groups, this protocol led to a higher yield of blastocysts by day 7. Many authors reported that the use of superstimulation indeed enhances blastocyst development (Egashira et al. <xref rid="rda70170-bib-0007" ref-type="bibr">2019</xref>; Hayden et al. <xref rid="rda70170-bib-0009" ref-type="bibr">2023</xref>; Nivet et al. <xref rid="rda70170-bib-0014" ref-type="bibr">2012</xref>; Vieira et al. <xref rid="rda70170-bib-0022" ref-type="bibr">2014</xref>; Vieira et al. <xref rid="rda70170-bib-0023" ref-type="bibr">2016</xref>), reinforcing its importance as a reproductive tool in embryo production efficiency.</p><p>Our results also demonstrated that a single application of FSH is efficient in inducing an increase in follicle number, oocyte viability and embryo production rates, as in the use of multiple applications of FSH, but could be a better strategy due to the reduced animal management. In contrast, although a single FSH administration influenced ovarian response, Chaubal et al. (<xref rid="rda70170-bib-0024" ref-type="bibr">2007</xref>) reported that multiple FSH applications improved ovarian efficiency in crossbred Angus cows prior to OPU and led to higher blastocyst rates compared to both single administration and control groups. <styled-content style="fixed-case" toggle="no">
+<italic toggle="no">Bos indicus</italic>
+</styled-content> cattle are known to be more sensitive to exogenous gonadotropin administration (Baruselli et al. <xref rid="rda70170-bib-0001" ref-type="bibr">2006</xref>) than <styled-content style="fixed-case" toggle="no">
+<italic toggle="no">Bos taurus</italic>
+</styled-content> breeds. Studies of OvS in the Sindhi breed are still scarce. Some authors report that a lower dose (100 mg) in multiple applications had a successful effect in inducing multiple ovulations in primiparous and nulliparous Sindhi donors (Mattos et al. <xref rid="rda70170-bib-0011" ref-type="bibr">2011</xref>). A study performed by Carvalho et al. (<xref rid="rda70170-bib-0003" ref-type="bibr">2010</xref>) assessed the use of different concentrations (100, 133 and 200 mg) of FSH in Sindhi superstimulatory response. Despite the better response indicated by the higher number of corpora lutea (CL) with the 200 mg dose, there was a lower recovery rate of structures through uterine flushing compared to the other dose groups. A possible explanation is that higher FSH doses may increase the number of oocytes that remain trapped in follicles, which luteinise instead of ovulating (Clark et al. <xref rid="rda70170-bib-0025" ref-type="bibr">2022</xref>). In the present study, all Sindhi donors underwent weekly hormonal stimulation, which could increase the risk of endocrine and metabolic disorders. To minimise these risks, a lower FSH dose (80 mg) was used. Furthermore, we opted to use FSH from porcine pituitary diluted in saline solution, as its half‐life is short in the bloodstream. According to Demoustier et al. (<xref rid="rda70170-bib-0006" ref-type="bibr">1988</xref>), pFSH has a relatively short elimination half‐life of approximately 5 h in circulating plasma, while the total clearance is estimated to be around 10–12 h.</p><p>In treatment 2, the use of a single dose of pFSH with a first intramuscular application and a second subcutaneous application, aimed to slightly prolong the action of FSH on ovarian follicles, as well as reduce animal handling on the farm, avoiding the application of multiple doses over several days. Since the replicates were weekly, we also did not use any carrier vehicle that would prolong the release of FSH for a longer time, such as hyaluronan, a biocompatible natural glycosaminoglycan, that has been used as a diluent to support the sustained release of various drugs (Oh et al. <xref rid="rda70170-bib-0015" ref-type="bibr">2010</xref>).</p><p>Despite the reduced dosage and number of applications, all donors showed a satisfactory ovarian response. In this context, our study is the first to demonstrate the effectiveness of lower FSH doses and fewer applications in stimulating a favourable response in Sindhi cows.</p></sec><sec sec-type="conclusions" id="rda70170-sec-0012"><label>5</label><title>Conclusions</title><p>According to our results, both single and multiple <styled-content style="fixed-case" toggle="no">FSH</styled-content> doses significantly enhance oocyte developmental competence, leading to increased blastocyst yields. Moreover, a single <styled-content style="fixed-case" toggle="no">FSH</styled-content> application combined with a longer coasting period simplifies livestock management and reduces stress, making this approach more practical and easier to implement.</p></sec><sec id="rda70170-sec-0013"><title>Author Contributions</title><p>
+<bold>Ivo Pivato:</bold> conceptualization, methodology, supervision and final review of the manuscript. <bold>George Henrique Lima Martins:</bold> methodology, investigation and data curation. <bold>Lucas Costa de Faria:</bold> writing, review, editing and visualisation. <bold>Heidi Christina Bessler:</bold> methodology, investigation and data curation. <bold>Carlos Frederico Martins:</bold> conceptualization, methodology, supervision, writing – original draft, final review of the manuscript, project administration and funding acquisition.</p></sec><sec id="rda70170-sec-0018"><title>Funding</title><p>This work was supported by Fundação de Apoio à Pesquisa do Distrito Federal, 00193‐0000002278/2022‐89.</p></sec><sec sec-type="COI-statement" id="rda70170-sec-0015"><title>Conflicts of Interest</title><p>The authors declare no conflicts of interest.</p></sec></body><back><ack id="rda70170-sec-0014"><title>Acknowledgements</title><p>The authors thank Embrapa‐Brazilian Agricultural Research Corporation and Fundação de Apoio a Pesquisa do Distrito Federal (FAPDF) for financial support.</p></ack><sec sec-type="data-availability" id="rda70170-sec-0017"><title>Data Availability Statement</title><p>The data that support the findings of this study are available from the corresponding author upon reasonable request.</p></sec><ref-list content-type="cited-references" id="rda70170-bibl-0001"><title>References</title><ref id="rda70170-bib-0001"><mixed-citation publication-type="journal" id="rda70170-cit-0001">
+<string-name name-style="western">
+<surname>Baruselli</surname>, <given-names>P. S.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. F.</given-names>
+<surname>de Sa Filho</surname>
+</string-name>, <string-name name-style="western">
+<given-names>C. M.</given-names>
+<surname>Martins</surname>
+</string-name>, et al. <year>2006</year>. “<article-title>Superovulation and Embryo Transfer in <italic toggle="yes">Bos indicus</italic> Cattle</article-title>.” <source>Theriogenology</source>
+<volume>65</volume>, no. <issue>1</issue>: <fpage>77</fpage>–<lpage>88</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2005.10.006</pub-id>.<pub-id pub-id-type="pmid">16290257</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0002"><mixed-citation publication-type="journal" id="rda70170-cit-0002">
+<string-name name-style="western">
+<surname>Blondin</surname>, <given-names>P.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>D.</given-names>
+<surname>Bousquet</surname>
+</string-name>, <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Twagiramungu</surname>
+</string-name>, <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Twagiramungu</surname>
+</string-name>, <string-name name-style="western">
+<given-names>F.</given-names>
+<surname>Barnes</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>M. A.</given-names>
+<surname>Sirard</surname>
+</string-name>. <year>2002</year>. “<article-title>Manipulation of Follicular Development to Produce Developmentally Competent Bovine Oocytes1</article-title>.” <source>Biology of Reproduction</source>
+<volume>66</volume>, no. <issue>1</issue>: <fpage>38</fpage>–<lpage>43</lpage>. <pub-id pub-id-type="doi">10.1095/biolreprod66.1.38</pub-id>.<pub-id pub-id-type="pmid">11751261</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0003"><mixed-citation publication-type="journal" id="rda70170-cit-0003">
+<string-name name-style="western">
+<surname>Carvalho</surname>, <given-names>B. P.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. R. B.</given-names>
+<surname>Mello</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. M.</given-names>
+<surname>Baldrighi</surname>
+</string-name>, et al. <year>2010</year>. “<article-title>Effect of Different Follicle‐Stimulating Hormone Doses on Superovulatory Response of Red Sindhi Cows</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>22</volume>, no. <issue>1</issue>: <fpage>359</fpage>. <pub-id pub-id-type="doi">10.1071/RDv22n1Ab406</pub-id>.</mixed-citation></ref><ref id="rda70170-bib-0024"><mixed-citation publication-type="journal" id="rda70170-cit-0024">
+<string-name name-style="western">
+<surname>Chaubal</surname>, <given-names>S. A. L.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>B.</given-names>
+<surname>Ferre</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. A.</given-names>
+<surname>Molina</surname>
+</string-name>, et al. <year>2007</year>. “<article-title>Hormonal treatments for increasing the oocyte and embryo production in an OPU‐IVP system</article-title>.” <source>Theriogenology</source>
+<volume>67</volume>, no. <issue>4</issue>: <fpage>719</fpage>–<lpage>728</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2006.07.022</pub-id>.<pub-id pub-id-type="pmid">17140652</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0025"><mixed-citation publication-type="journal" id="rda70170-cit-0025">
+<string-name name-style="western">
+<surname>Clark</surname>, <given-names>Z. L.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>K. R.</given-names>, <surname>Karl</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M. L.</given-names>
+<surname>Ruebel</surname>
+</string-name>, et al. <year>2022</year>. “<article-title>Excessive follicle‐stimulating hormone during ovarian stimulation of cattle may induce premature luteinization of most ovulatory‐size follicles</article-title>.” <source>Biology of Reproduction</source>
+<volume>106</volume>, no. <issue>5</issue>: <fpage>968</fpage>–<lpage>978</lpage>. <pub-id pub-id-type="doi">10.1093/biolre/ioac021</pub-id>.<pub-id pub-id-type="pmid">35084014</pub-id>
+<pub-id pub-id-type="pmcid">PMC9113431</pub-id></mixed-citation></ref><ref id="rda70170-bib-0004"><mixed-citation publication-type="journal" id="rda70170-cit-0004">
+<string-name name-style="western">
+<surname>de Barros</surname>, <given-names>R. R. O.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>R. R. C.</given-names>
+<surname>Mello</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S. L. G.</given-names>
+<surname>de Sousa</surname>
+</string-name>, et al. <year>2020</year>. “<article-title>Reproductive Efficiency and Milk Yield in Sindhi Breed Cattle</article-title>.” <source>Brazilian Journal of Veterinary Medicine</source>
+<volume>42</volume>, no. <issue>1</issue>: <elocation-id>e105120</elocation-id>. <pub-id pub-id-type="doi">10.29374/2527-2179.bjvm105120</pub-id>.</mixed-citation></ref><ref id="rda70170-bib-0005"><mixed-citation publication-type="journal" id="rda70170-cit-0005">
+<string-name name-style="western">
+<surname>de Toledo</surname>, <given-names>R. B.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>O. A. C.</given-names>
+<surname>de Faria</surname>
+</string-name>, <string-name name-style="western">
+<given-names>L. O.</given-names>
+<surname>Leme</surname>
+</string-name>, et al. <year>2023</year>. “<article-title>Effect of Food Supplementation on In Vitro Embryo Production and Growth Performance in Prepubertal Nelore Heifers</article-title>.” <source>Animal Biotechnology</source>
+<volume>34</volume>, no. <issue>9</issue>: <fpage>5087</fpage>–<lpage>5096</lpage>. <pub-id pub-id-type="doi">10.1080/10495398.2023.2279612</pub-id>.<pub-id pub-id-type="pmid">37975200</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0006"><mixed-citation publication-type="journal" id="rda70170-cit-0006">
+<string-name name-style="western">
+<surname>Demoustier</surname>, <given-names>M. M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>J. F.</given-names>
+<surname>Beckers</surname>
+</string-name>, <string-name name-style="western">
+<given-names>P. V. D.</given-names>
+<surname>Zwalmen</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J.</given-names>
+<surname>Closset</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>F.</given-names>
+<surname>Ectors</surname>
+</string-name>. <year>1988</year>. “<article-title>Determination of Porcine Plasma Follitropin Levels During Superovulation Treatment in Cows</article-title>.” <source>Theriogenology</source>
+<volume>30</volume>: <fpage>379</fpage>–<lpage>386</lpage>. <pub-id pub-id-type="doi">10.1016/0093-691x(88)90185-9</pub-id>.<pub-id pub-id-type="pmid">16726478</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0007"><mixed-citation publication-type="journal" id="rda70170-cit-0007">
+<string-name name-style="western">
+<surname>Egashira</surname>, <given-names>J.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>Y.</given-names>
+<surname>Ihara</surname>
+</string-name>, <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Khatun</surname>
+</string-name>, et al. <year>2019</year>. “<article-title>Efficient In Vitro Embryo Production Using In Vivo‐Matured Oocytes From Superstimulated Japanese Black Cows</article-title>.” <source>Journal of Reproduction and Development</source>
+<volume>65</volume>, no. <issue>2</issue>: <fpage>183</fpage>–<lpage>190</lpage>. <pub-id pub-id-type="doi">10.1262/jrd.2018-155</pub-id>.<pub-id pub-id-type="pmid">30745496</pub-id>
+<pub-id pub-id-type="pmcid">PMC6473104</pub-id></mixed-citation></ref><ref id="rda70170-bib-0008"><mixed-citation publication-type="journal" id="rda70170-cit-0008">
+<string-name name-style="western">
+<surname>Ferre</surname>, <given-names>L. B.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. E.</given-names>
+<surname>Kjelland</surname>
+</string-name>, <string-name name-style="western">
+<given-names>L. B.</given-names>
+<surname>Strobech</surname>
+</string-name>, et al. <year>2020</year>. “<article-title>Review: Recent Advances in Bovine In Vitro Embryo Production: Reproductive Biotechnology History and Methods</article-title>.” <source>Animal</source>
+<volume>14</volume>, no. <issue>5</issue>: <fpage>991</fpage>–<lpage>1004</lpage>. <pub-id pub-id-type="doi">10.1017/S1751731119002775</pub-id>.<pub-id pub-id-type="pmid">31760966</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0009"><mixed-citation publication-type="journal" id="rda70170-cit-0009">
+<string-name name-style="western">
+<surname>Hayden</surname>, <given-names>C. B.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>R. V.</given-names>
+<surname>Sala</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D. C.</given-names>
+<surname>Pereira</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. F.</given-names>
+<surname>Moreno</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>García‐Guerra</surname>
+</string-name>. <year>2023</year>. “<article-title>Effect of Use and Dosage of p‐Follicle‐Stimulating Hormone for Ovarian Superstimulation Before Ovum Pick‐Up and In Vitro Embryo Production in Pregnant Holstein Heifers</article-title>.” <source>Journal of Dairy Science</source>
+<volume>106</volume>, no. <issue>11</issue>: <fpage>8110</fpage>–<lpage>8121</lpage>. <pub-id pub-id-type="doi">10.3168/jds.2023-23576</pub-id>.<pub-id pub-id-type="pmid">37641305</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0010"><mixed-citation publication-type="journal" id="rda70170-cit-0010">
+<string-name name-style="western">
+<surname>Lonergan</surname>, <given-names>P.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>P.</given-names>
+<surname>Monaghan</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D.</given-names>
+<surname>Rizos</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M. P.</given-names>
+<surname>Boland</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>I.</given-names>
+<surname>Gordon</surname>
+</string-name>. <year>1994</year>. “<article-title>Effect of Follicle Size on Bovine Oocyte Quality and Developmental Competence Following Maturation, Fertilization, and Culture In Vitro</article-title>.” <source>Molecular Reproduction and Development</source>
+<volume>37</volume>: <fpage>48</fpage>–<lpage>53</lpage>.<pub-id pub-id-type="pmid">8129930</pub-id>
+<pub-id pub-id-type="doi" assigning-authority="pmc">10.1002/mrd.1080370107</pub-id></mixed-citation></ref><ref id="rda70170-bib-0011"><mixed-citation publication-type="journal" id="rda70170-cit-0011">
+<string-name name-style="western">
+<surname>Mattos</surname>, <given-names>M. C.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. R.</given-names>
+<surname>Bastos</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M. M.</given-names>
+<surname>Guardieiro</surname>
+</string-name>, et al. <year>2011</year>. “<article-title>Improvement of Embryo Production by the Replacement of the Last Two Doses of Porcine Follicle‐Stimulating Hormone With Equine Chorionic Gonadotropin in Sindhi Donors</article-title>.” <source>Animal Reproduction Science</source>
+<volume>125</volume>, no. <issue>1–4</issue>: <fpage>119</fpage>–<lpage>123</lpage>. <pub-id pub-id-type="doi">10.1016/j.anireprosci.2011.02.028</pub-id>.<pub-id pub-id-type="pmid">21470801</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0012"><mixed-citation publication-type="journal" id="rda70170-cit-0012">
+<string-name name-style="western">
+<surname>Mello</surname>, <given-names>R. R. C.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. R. B.</given-names>
+<surname>Mello</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S. L. G.</given-names>
+<surname>de Sousa</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>J. E.</given-names>
+<surname>Ferreira</surname>
+</string-name>. <year>2016</year>. “<article-title>Parâmetros da Produção In Vitro de Embriões da Raça Sindi</article-title>.” <source>Pesquisa Agropecuária Brasileira</source>
+<volume>51</volume>, no. <issue>10</issue>: <fpage>1773</fpage>–<lpage>1779</lpage>. <pub-id pub-id-type="doi">10.1590/s0100-204x2016001000009</pub-id>.</mixed-citation></ref><ref id="rda70170-bib-0013"><mixed-citation publication-type="journal" id="rda70170-cit-0013">
+<string-name name-style="western">
+<surname>Mello</surname>, <given-names>R. R. C.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>L. D.</given-names>
+<surname>Sinedino</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. E.</given-names>
+<surname>Ferreira</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S. L. G.</given-names>
+<surname>de Sousa</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>M. R. B.</given-names>
+<surname>de Mello</surname>
+</string-name>. <year>2020</year>. “<article-title>Principal Component and Cluster Analyses of Production and Fertility Traits in Red Sindhi Dairy Cattle Breed in Brazil</article-title>.” <source>Tropical Animal Health and Production</source>
+<volume>52</volume>, no. <issue>1</issue>: <fpage>273</fpage>–<lpage>281</lpage>. <pub-id pub-id-type="doi">10.1007/s11250-019-02009-7</pub-id>.<pub-id pub-id-type="pmid">31372883</pub-id>
+<pub-id pub-id-type="pmcid">PMC6969864</pub-id></mixed-citation></ref><ref id="rda70170-bib-0014"><mixed-citation publication-type="journal" id="rda70170-cit-0014">
+<string-name name-style="western">
+<surname>Nivet</surname>, <given-names>A. L.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Bunel</surname>
+</string-name>, <string-name name-style="western">
+<given-names>R.</given-names>
+<surname>Labrecque</surname>
+</string-name>, et al. <year>2012</year>. “<article-title>FSH Withdrawal Improves Developmental Competence of Oocytes in the Bovine Model</article-title>.” <source>Reproduction</source>
+<volume>143</volume>, no. <issue>2</issue>: <fpage>165</fpage>–<lpage>171</lpage>. <pub-id pub-id-type="doi">10.1530/REP-11-0391</pub-id>.<pub-id pub-id-type="pmid">22080141</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0015"><mixed-citation publication-type="journal" id="rda70170-cit-0015">
+<string-name name-style="western">
+<surname>Oh</surname>, <given-names>E. J.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>K.</given-names>
+<surname>Park</surname>
+</string-name>, <string-name name-style="western">
+<given-names>K. S.</given-names>
+<surname>Kim</surname>
+</string-name>, et al. <year>2010</year>. “<article-title>Target Specific and Long‐Acting Delivery of Protein, Peptide, and Nucleotide Therapeutics Using Hyaluronic Acid Derivatives</article-title>.” <source>Journal of Controlled Release</source>
+<volume>141</volume>: <fpage>2</fpage>–<lpage>12</lpage>. <pub-id pub-id-type="doi">10.1016/j.jconrel.2009.09.010</pub-id>.<pub-id pub-id-type="pmid">19758573</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0016"><mixed-citation publication-type="journal" id="rda70170-cit-0016">
+<string-name name-style="western">
+<surname>Ongaratto</surname>, <given-names>F. L.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>A. V.</given-names>
+<surname>Cedeno</surname>
+</string-name>, <string-name name-style="western">
+<given-names>P.</given-names>
+<surname>Rodriguez‐Villamil</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Tríbulo</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>G. A.</given-names>
+<surname>Bó</surname>
+</string-name>. <year>2020</year>. “<article-title>Effect of FSH Treatment on Cumulus Oocyte Complex Recovery by Ovum Pick Up and In Vitro Embryo Production in Beef Donor Cows</article-title>.” <source>Animal Reproduction Science</source>
+<volume>214</volume>: <elocation-id>106274</elocation-id>. <pub-id pub-id-type="doi">10.1016/j.anireprosci.2020.106274</pub-id>.<pub-id pub-id-type="pmid">32087924</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0017"><mixed-citation publication-type="journal" id="rda70170-cit-0017">
+<string-name name-style="western">
+<surname>Panetto</surname>, <given-names>J. C.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. V.</given-names>
+<surname>Silva</surname>
+</string-name>, <string-name name-style="western">
+<given-names>R. M.</given-names>
+<surname>Leite</surname>
+</string-name>, et al. <year>2017</year>. “<article-title>Red Sindhi Cattle in Brazil: Population Structure and Distribution</article-title>.” <source>Genetics and Molecular Research</source>
+<volume>16</volume>, no. <issue>1</issue>: <elocation-id>gmr16019501</elocation-id>. <pub-id pub-id-type="doi">10.4238/gmr16019501</pub-id>.<pub-id pub-id-type="pmid">28301672</pub-id></mixed-citation></ref><ref id="rda70170-bib-0018"><mixed-citation publication-type="journal" id="rda70170-cit-0018">
+<string-name name-style="western">
+<surname>Pinheiro</surname>, <given-names>J. B. S.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>L. M.</given-names>
+<surname>Figueira</surname>
+</string-name>, <string-name name-style="western">
+<given-names>L. F. L.</given-names>
+<surname>Correia</surname>
+</string-name>, et al. <year>2023</year>. “<article-title>The Coasting Time Affects the Quality of Cumulus‐Oocyte Complexes in Superstimulated Ewes</article-title>.” <source>Theriogenology</source>
+<volume>196</volume>: <fpage>236</fpage>–<lpage>243</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2022.11.026</pub-id>.<pub-id pub-id-type="pmid">36434845</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0019"><mixed-citation publication-type="journal" id="rda70170-cit-0019">
+<string-name name-style="western">
+<surname>Roelen</surname>, <given-names>B. A. J.</given-names>
+</string-name>
+<year>2019</year>. “<article-title>Bovine Oocyte Maturation: Acquisition of Developmental Competence</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>32</volume>, no. <issue>2</issue>: <fpage>98</fpage>–<lpage>103</lpage>. <pub-id pub-id-type="doi">10.1071/RD19255</pub-id>.<pub-id pub-id-type="pmid">32188561</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0020"><mixed-citation publication-type="journal" id="rda70170-cit-0020">
+<string-name name-style="western">
+<surname>Sano</surname>, <given-names>E. E.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>A. A.</given-names>
+<surname>Rodrigues</surname>
+</string-name>, <string-name name-style="western">
+<given-names>E. S.</given-names>
+<surname>Martins</surname>
+</string-name>, et al. <year>2019</year>. “<article-title>Cerrado Ecoregions: A Spatial Framework to Assess and Prioritize Brazilian Savanna Environmental Diversity for Conservation</article-title>.” <source>Journal of Environmental Management</source>
+<volume>232</volume>: <fpage>818</fpage>–<lpage>828</lpage>. <pub-id pub-id-type="doi">10.1016/j.jenvman.2018.11.108</pub-id>.<pub-id pub-id-type="pmid">30529869</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0021"><mixed-citation publication-type="journal" id="rda70170-cit-0021">
+<string-name name-style="western">
+<surname>Seneda</surname>, <given-names>M. M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>C. R.</given-names>
+<surname>Esper</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. M.</given-names>
+<surname>Garcia</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. A.</given-names>
+<surname>Oliveira</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>R.</given-names>
+<surname>Vantini</surname>
+</string-name>. <year>2001</year>. “<article-title>Relationship Between Follicle Size and Ultrasound‐Guided Transvaginal Oocyte Recovery</article-title>.” <source>Animal Reproduction Science</source>
+<volume>67</volume>, no. <issue>1</issue>: <fpage>37</fpage>–<lpage>43</lpage>. <pub-id pub-id-type="doi">10.1016/S0378-4320(01)00113-0</pub-id>.<pub-id pub-id-type="pmid">11408112</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0022"><mixed-citation publication-type="journal" id="rda70170-cit-0022">
+<string-name name-style="western">
+<surname>Vieira</surname>, <given-names>L. M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>C. A.</given-names>
+<surname>Rodrigues</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Castro Netto</surname>
+</string-name>, et al. <year>2014</year>. “<article-title>Superstimulation Prior to the Ovum Pick‐Up to Improve In Vitro Embryo Production in Lactating and Non‐Lactating Holstein Cows</article-title>.” <source>Theriogenology</source>
+<volume>82</volume>, no. <issue>2</issue>: <fpage>318</fpage>–<lpage>324</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2014.04.013</pub-id>.<pub-id pub-id-type="pmid">24839924</pub-id>
+</mixed-citation></ref><ref id="rda70170-bib-0023"><mixed-citation publication-type="journal" id="rda70170-cit-0023">
+<string-name name-style="western">
+<surname>Vieira</surname>, <given-names>L. M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>C. A.</given-names>
+<surname>Rodrigues</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Castro Netto</surname>
+</string-name>, et al. <year>2016</year>. “<article-title>Efficacy of a Single Intramuscular Injection of Porcine FSH in Hyaluronan Prior to Ovum Pick‐Up in Holstein Cattle</article-title>.” <source>Theriogenology</source>
+<volume>85</volume>, no. <issue>5</issue>: <fpage>877</fpage>–<lpage>886</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2015.10.036</pub-id>.<pub-id pub-id-type="pmid">26639640</pub-id>
+</mixed-citation></ref></ref-list></back></article>

@@ -4,10 +4,11 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ETTransferBase(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
     et_number: Optional[int] = None
     lab: Optional[str] = None
     satellite: Optional[str] = None
@@ -15,7 +16,7 @@ class ETTransferBase(BaseModel):
     et_date: date
     farm_location: Optional[str] = None
     recipient_id: Optional[int] = None
-    bc_score: Optional[Decimal] = None
+    bc_score: Optional[Decimal] = Field(default=None, ge=1, le=5)
     cl_side: Optional[str] = None
     cl_measure_mm: Optional[Decimal] = None
     protocol_id: Optional[int] = None
@@ -51,6 +52,16 @@ class ETTransferBase(BaseModel):
         if v is not None and v not in ("Pregnant", "Open", "Recheck"):
             raise ValueError("PC1 result must be 'Pregnant', 'Open', or 'Recheck'")
         return v
+
+    @model_validator(mode="after")
+    def check_dates(self):
+        if self.pc1_date and self.pc1_date < self.et_date:
+            raise ValueError("First pregnancy check cannot precede transfer")
+        if self.pc2_date and self.pc2_date < (self.pc1_date or self.et_date):
+            raise ValueError("Second pregnancy check cannot precede transfer or first check")
+        if self.pc2_result is not None and self.pc2_result not in {"Pregnant", "Open", "Recheck"}:
+            raise ValueError("Second pregnancy result must be Pregnant, Open or Recheck")
+        return self
 
 
 class ETTransferCreate(ETTransferBase):

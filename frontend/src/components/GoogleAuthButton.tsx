@@ -2,7 +2,6 @@ import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import api from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 interface GoogleAuthButtonProps {
   isDark: boolean;
@@ -12,10 +11,9 @@ interface GoogleAuthButtonProps {
 
 export const GoogleAuthButton = ({ isDark, onLoading, onError }: GoogleAuthButtonProps) => {
   const { loginFromGoogle } = useAuth();
-  const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
 
-  const isPlaceholder = !import.meta.env.VITE_GOOGLE_CLIENT_ID || 
+  const isPlaceholder = !import.meta.env.VITE_GOOGLE_CLIENT_ID ||
                         import.meta.env.VITE_GOOGLE_CLIENT_ID.includes("your-google-client-id");
 
   const handleMockLogin = async () => {
@@ -24,8 +22,10 @@ export const GoogleAuthButton = ({ isDark, onLoading, onError }: GoogleAuthButto
     try {
       console.log("[GoogleAuth] Starting mock login flow...");
       const res = await api.post("/auth/google/mock");
+      // loginFromGoogle already navigates to the correct role-based landing
+      // page once the user profile loads — no need to navigate here (this
+      // used to hardcode "/dashboard", a route that doesn't exist).
       await loginFromGoogle(res.data.access_token, res.data.refresh_token);
-      navigate("/dashboard");
     } catch {
       onError?.("Demo login failed. Make sure to RESTART your backend.");
     } finally {
@@ -44,7 +44,6 @@ export const GoogleAuthButton = ({ isDark, onLoading, onError }: GoogleAuthButto
       });
 
       await loginFromGoogle(res.data.access_token, res.data.refresh_token);
-      navigate("/dashboard");
     } catch (err: any) {
       console.error("[GoogleAuth] Auth failed:", err);
       onError?.(err.response?.data?.detail || "Authentication failed");

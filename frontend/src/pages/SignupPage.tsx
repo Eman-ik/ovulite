@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ArrowRight, Eye, EyeOff, Lock, Mail, Moon, Sun, User, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 
 import api from "@/lib/api";
 
@@ -418,7 +419,17 @@ export function SignupPage() {
               </button>
             </form>
 
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
+              <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#52525b" : "#94a3b8" }}>or</span>
+              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
+            </div>
 
+            <GoogleAuthButton
+              isDark={isDark}
+              onLoading={setIsLoading}
+              onError={setError}
+            />
 
             <p className="mt-8 text-center text-sm" style={{ color: isDark ? "#52525b" : "#64748b" }}>
               Already have an account?{" "}

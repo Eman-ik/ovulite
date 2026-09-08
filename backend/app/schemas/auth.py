@@ -26,3 +26,9 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class GoogleAuthRequest(BaseModel):
+    """Request body for Google Sign-In — the ID token from Google Identity Services."""
+
+    token: str
+
+

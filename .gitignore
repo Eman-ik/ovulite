@@ -58,3 +58,7 @@ uploads/
 
 # Local training exports
 ovulite_training_*.csv
+
+# Project-local literature model binaries and weights
+.runtime/
+outputs/release60-smoke*.db

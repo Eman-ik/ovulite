@@ -1,0 +1,505 @@
+
+<!DOCTYPE article
+  PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">
+<article id="vms370376" xml:lang="en" article-type="research-article" dtd-version="1.4"><processing-meta base-tagset="archiving" mathml-version="3.0" table-model="xhtml" tagset-family="jats"><restricted-by>pmc</restricted-by></processing-meta><front><journal-meta><journal-id journal-id-type="nlm-ta">Vet Med Sci</journal-id><journal-id journal-id-type="iso-abbrev">Vet Med Sci</journal-id><journal-id journal-id-type="pmc-domain-id">3144</journal-id><journal-id journal-id-type="pmc-domain">vetmedsci</journal-id><journal-id journal-id-type="nlm-id">101678837</journal-id><journal-id journal-id-type="publisher-id">VMS3</journal-id><journal-title-group><journal-title>Veterinary Medicine and Science</journal-title></journal-title-group><issn pub-type="epub">2053-1095</issn><?publisher_abbrev blackwell?><publisher><publisher-name>Wiley</publisher-name></publisher></journal-meta><article-meta><article-id pub-id-type="pmcid">PMC12020915</article-id><article-id pub-id-type="pmcid-ver">PMC12020915.1</article-id><article-id pub-id-type="pmcaid">12020915</article-id><article-id pub-id-type="pmcaiid">12020915</article-id><article-id pub-id-type="pmid">40273144</article-id><article-id pub-id-type="doi">10.1002/vms3.70376</article-id><article-id pub-id-type="publisher-id">VMS370376</article-id><article-version article-version-type="pmc-version">1</article-version><article-categories><subj-group subj-group-type="overline"><subject>Original Article</subject></subj-group><subj-group subj-group-type="heading"><subject>Original Article</subject><subj-group subj-group-type="heading"><subject>Ruminant</subject></subj-group></subj-group></article-categories><title-group><article-title>The Effect of L‐Carnitine Supplementation in Culture Medium on the Development and Cryopreservation of in Vitro Produced Bovine Embryos</article-title></title-group><contrib-group><contrib id="vms370376-cr-0001" contrib-type="author" corresp="yes"><name name-style="western"><surname>Yildiz</surname><given-names initials="M">Mehmet</given-names></name><contrib-id contrib-id-type="orcid" authenticated="false">https://orcid.org/0000-0001-5523-7433</contrib-id><xref rid="vms370376-aff-0001" ref-type="aff">
+<sup>1</sup>
+</xref><address><email>mehmetyildiz@yyu.edu.tr</email></address></contrib><contrib id="vms370376-cr-0002" contrib-type="author"><name name-style="western"><surname>Cetin</surname><given-names initials="Y">Yunus</given-names></name><contrib-id contrib-id-type="orcid" authenticated="false">https://orcid.org/0000-0002-5402-9429</contrib-id><xref rid="vms370376-aff-0002" ref-type="aff">
+<sup>2</sup>
+</xref></contrib></contrib-group><aff id="vms370376-aff-0001">
+<label>
+<sup>1</sup>
+</label>
+<named-content content-type="organisation-division">Department of Obstetrics and Gynecology Faculty of Veterinary Medicine</named-content>
+<institution>Van Yuzuncu Yil University</institution>
+<city>Van</city>
+<country country="TR">Turkey</country>
+</aff><aff id="vms370376-aff-0002">
+<label>
+<sup>2</sup>
+</label>
+<named-content content-type="organisation-division">Department of Obstetrics and Gynecology</named-content>
+<named-content content-type="organisation-division">Faculty of Veterinary Medicine</named-content>
+<institution>Burdur Mehmet Akif Ersoy University</institution>
+<city>Burdur</city>
+<country country="TR">Turkey</country>
+</aff><pub-date pub-type="epub"><day>24</day><month>4</month><year>2025</year></pub-date><pub-date pub-type="collection"><month>5</month><year>2025</year></pub-date><volume>11</volume><issue seq="620">3</issue><issue-id pub-id-type="pmc-issue-id">485412</issue-id><issue-id pub-id-type="doi">10.1002/vms3.v11.3</issue-id><elocation-id>e70376</elocation-id><history>
+<date date-type="rev-recd"><day>29</day><month>1</month><year>2025</year></date>
+<date date-type="received"><day>15</day><month>10</month><year>2024</year></date>
+<date date-type="accepted"><day>11</day><month>4</month><year>2025</year></date>
+</history><pub-history><event event-type="pmc-release"><date><day>24</day><month>04</month><year>2025</year></date></event><event event-type="pmc-live"><date><day>24</day><month>04</month><year>2025</year></date></event><event event-type="pmc-last-change"><date iso-8601-date="2025-04-25 11:25:15.163"><day>25</day><month>04</month><year>2025</year></date></event></pub-history><permissions><copyright-statement content-type="article-copyright">© 2025 The Author(s). <italic toggle="yes">Veterinary Medicine and Science</italic> published by John Wiley &amp; Sons Ltd.</copyright-statement><license><ali:license_ref xmlns:ali="http://www.niso.org/schemas/ali/1.0/" specific-use="textmining" content-type="ccbylicense">https://creativecommons.org/licenses/by/4.0/</ali:license_ref><license-p>This is an open access article under the terms of the <ext-link xmlns:xlink="http://www.w3.org/1999/xlink" ext-link-type="uri" xlink:href="https://creativecommons.org/licenses/by/4.0/">http://creativecommons.org/licenses/by/4.0/</ext-link> License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.</license-p></license></permissions><self-uri xmlns:xlink="http://www.w3.org/1999/xlink" content-type="pmc-pdf" xlink:href="VMS3-11-e70376.pdf"><?pdf-name VMS3-11-e70376.pdf?><?pdf-size 206642?><?pdf-md5 8856af7faceedd5668037f4b8413d53a?><?pdf-image-server-status NEVER_LOAD?><?pdf-cloudpmc-urn urn:app:2f2b/12020915/8856af7facee/VMS3-11-e70376.pdf?></self-uri><self-uri xmlns:xlink="http://www.w3.org/1999/xlink" content-type="pdf" xlink:href="file:VMS3-11-e70376.pdf"/><abstract><title>ABSTRACT</title><sec id="vms370376-sec-0010"><title>Background</title><p>In vitro culture media play a crucial role in supporting the growth and development of bovine embryos. Despite advancements in media formulations, there is ongoing interest in optimising these media by supplementing them with compounds like L‐carnitine to improve embryo development and cryopreservation outcomes. However, the effects of L‐carnitine supplementation in commercial culture media remain unclear. The aim of this study was to investigate the effects of adding 0.75 mM L‐carnitine to commercial in vitro culture (IVC) media on bovine in vitro embryo production (IVP). The first phase of the study evaluated the effects of L‐carnitine on embryo development, while the second phase evaluated the effects of L‐carnitine on embryo cryopreservation.</p></sec><sec id="vms370376-sec-0020"><title>Methods</title><p>A total of 508 bovine ovaries used in the study were harvested from slaughterhouses. Only morphologically healthy ovaries were included in the study, while ovaries with cysts or any pathological findings were excluded. Oocytes were collected by aspiration method. The collected oocytes were fertilised in vitro using prepared spermatozoa under standard conditions. Following fertilisation, embryos were morphologically evaluated, and only those exhibiting uniform blastomeres and minimal cytoplasmic fragmentation were included in subsequent steps. The embryos were then randomly divided into two groups: one supplemented with 0.75 mM L‐carnitine in the IVC medium and the other without supplementation. Cleavage rates on Day 4 and embryo development rates on 7 days after fertilisation were evaluated with the supplementation of L‐carnitine. In addition, the survival effects of embryos collected on Day 7 after direct culture, slow freezing and vitrification were investigated.</p></sec><sec id="vms370376-sec-0030"><title>Results</title><p>It was determined that L‐carnitine supplementation to IVC medium did not affect the cleavage rates on Day 4 and blastocyst development rates on Day 7 (<italic toggle="yes">p</italic> &gt; 0.05). Moreover, it did not affect the survival and development rates of embryos collected on Day 7 following both slow freezing and thawing, as well as vitrification and warming processes (<italic toggle="yes">p</italic> &gt; 0.05).</p></sec><sec id="vms370376-sec-0040"><title>Conclusions</title><p>Supplementation of L‐carnitine to commercially available in vitro culture medium did not enhance embryo development rates or survival rates after cryopreservation. This is likely due to the presence of antioxidant compounds in commercial embryo culture media.</p></sec></abstract><abstract id="vms370376-abs-0001" abstract-type="graphical"><p>Supplementation of L‐carnitine to commercially available in vitro culture medium did not enhance embryo development rates or survival rates after cryopreservation. This is likely due to the presence of antioxidant compounds in commercial embryo culture media.
+<boxed-text position="anchor" content-type="graphic" orientation="portrait"><graphic xmlns:xlink="http://www.w3.org/1999/xlink" position="anchor" id="jats-graphic-1" orientation="portrait" xlink:href="VMS3-11-e70376-g001.jpg"><?image-name VMS3-11-e70376-g001.jpg?><?image-size 11095?><?image-md5 ae8896e43ca17b3d48d9593dcf5698ff?><?image-image-server-status NEVER_LOAD?><?image-original-height 103?><?image-original-width 180?><?image-scaled-height 103?><?image-scaled-width 180?><?image-cloudpmc-urn urn:cdn:blobs/2f2b/12020915/ae8896e43ca1/VMS3-11-e70376-g001.jpg?></graphic></boxed-text>
+</p></abstract><kwd-group kwd-group-type="author-generated"><kwd id="vms370376-kwd-0001">bovine</kwd><kwd id="vms370376-kwd-0002">embryo</kwd><kwd id="vms370376-kwd-0003">IVP</kwd><kwd id="vms370376-kwd-0004">L‐carnitine</kwd><kwd id="vms370376-kwd-0005">slow freezing</kwd><kwd id="vms370376-kwd-0006">vitrification</kwd></kwd-group><funding-group><award-group id="funding-0001"><funding-source>Burdur Mehmet Akif Ersoy University</funding-source><award-id>0640‐DR‐20</award-id></award-group></funding-group><counts><fig-count count="1"/><table-count count="5"/><page-count count="8"/><word-count count="5665"/></counts><custom-meta-group><custom-meta><meta-name>pmc-status-qastatus</meta-name><meta-value>0</meta-value></custom-meta><custom-meta><meta-name>pmc-status-live</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-status-embargo</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-status-released</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-open-access</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-olf</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-manuscript</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-legally-suppressed</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-has-pdf</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-has-supplement</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-pdf-only</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-suppress-copyright</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-is-real-version</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-is-scanned-article</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-preprint</meta-name><meta-value>no</meta-value></custom-meta><custom-meta><meta-name>pmc-prop-in-epmc</meta-name><meta-value>yes</meta-value></custom-meta><custom-meta><meta-name>pmc-license-ref</meta-name><meta-value>CC BY</meta-value></custom-meta><custom-meta><meta-name>source-schema-version-number</meta-name><meta-value>2.0</meta-value></custom-meta><custom-meta><meta-name>cover-date</meta-name><meta-value>May 2025</meta-value></custom-meta><custom-meta><meta-name>details-of-publishers-convertor</meta-name><meta-value>Converter:WILEY_ML3GV2_TO_JATSPMC version:6.5.5 mode:remove_FC converted:24.04.2025</meta-value></custom-meta></custom-meta-group></article-meta><notes><fn-group><fn id="vms370376-note-0001"><p>
+<bold>Funding</bold>: The study was supported by Burdur Mehmet Akif Ersoy University Scientific Research Projects Coordination Office (Project No: 0640‐DR‐20).</p></fn></fn-group></notes></front><body><sec id="vms370376-sec-0050"><label>1</label><title>Introduction</title><p>Embryo transfer technologies have advanced significantly in recent years, enabling the large‐scale production of bovine embryos. According to the 2022 data from the International Embryo Transfer Society, approximately 2,011,480 bovine embryos are produced annually worldwide, with 80.39% produced in vitro and 19.61% derived in vivo. While 35.2% of embryos collected of in vivo derived (IVD) are transferred fresh, 55.7% of embryos in vitro produced (IVP) are transferred fresh. The fresh transfer of IVP embryos may be due to their susceptibility to cryopreservation (Ferré et al. <xref rid="vms370376-bib-0009" ref-type="bibr">2020</xref>; Viana <xref rid="vms370376-bib-0032" ref-type="bibr">2023</xref>). This sensitivity to cryopreservation may result from abnormal oocytes, high cytoplasmic lipid content, different lipid droplet arrangements and low inner cell mass (del Collado et al. <xref rid="vms370376-bib-0007" ref-type="bibr">2016</xref>; Seidel <xref rid="vms370376-bib-0022" ref-type="bibr">2006</xref>).</p><p>Modifying in vitro culture (IVC) conditions, such as eliminating serum supplements, has been shown to reduce lipid accumulation and improve cryotolerance in IVP embryos. However, this approach may compromise blastocyst development (Accorsi et al. <xref rid="vms370376-bib-0001" ref-type="bibr">2016</xref>; Figueiró et al. <xref rid="vms370376-bib-0010" ref-type="bibr">2020</xref>). To address these challenges, L‐carnitine, a quaternary ammonium compound that facilitates the transport of fatty acids into mitochondria for β‐oxidation (Somfai et al. <xref rid="vms370376-bib-0024" ref-type="bibr">2011</xref>), has gained attention. L‐carnitine supplementation during IVC has been reported to decrease lipid accumulation in embryos without the use of lipolytic agents (Murillo et al. <xref rid="vms370376-bib-0018" ref-type="bibr">2017</xref>). Moreover, it has been demonstrated to enhance the survival and in vitro development of bovine IVP embryos following cryopreservation (Takahashi et al. <xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>; Held‐Hoelker et al. <xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>; Ruiz et al. <xref rid="vms370376-bib-0021" ref-type="bibr">2014</xref>).</p><p>Another critical factor influencing embryo quality is the level of reactive oxygen species (ROS). ROS levels may increase in oocytes cultured at atmospheric oxygen (20% O<sub>2</sub>) level (Ali et al. <xref rid="vms370376-bib-0003" ref-type="bibr">2003</xref>) or during embryo cryopreservation (Ahn et al. <xref rid="vms370376-bib-0002" ref-type="bibr">2002</xref>). Excessive ROS production is reported to impair ß‐oxidation, affecting mitochondrial function and leading to lipid accumulation (Van Hoeck et al. <xref rid="vms370376-bib-0030" ref-type="bibr">2015</xref>). Elevated intracellular ROS levels result in various cellular damages, including apoptosis and DNA fragmentation, which in turn lead to embryo fragmentation and developmental blocks (Guerin et al. <xref rid="vms370376-bib-0012" ref-type="bibr">2001</xref>). Therefore, the addition of antioxidants such as L‐carnitine to the IVC medium supports mitochondrial function, reduces ROS levels and protects DNA from fragmentation. Thus, it positively affects embryo development and protects embryos against cryodamage by reducing ROS levels during cryopreservation (Silva et al. <xref rid="vms370376-bib-0023" ref-type="bibr">2015</xref>; Somfai et al. <xref rid="vms370376-bib-0024" ref-type="bibr">2011</xref>).</p><p>Despite evidence supporting the beneficial effects of L‐carnitine on embryo survival and development (Takahashi et al. <xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>; Held‐Hoelker et al. <xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>; Ruiz et al. <xref rid="vms370376-bib-0021" ref-type="bibr">2014</xref>), the optimal timing, concentration of L‐carnitine added to the IVC medium, and the number of cryoprotectants used during cryopreservation have not yet been standardised. Commercial embryo culture media are currently employed on a widespread basis in the production of embryos in vitro. However, there is a lack of research evaluating the effects of L‐carnitine supplementation in commercial bovine embryo culture media. Embryo production and cryopreservation involve multiple stages, including in vitro maturation (IVM), in vitro fertilization (IVF), IVC, cryopreservation and thawing or warming. Each stage's media composition, particularly the concentrations of supplements and cryoprotectants, can significantly influence embryonic development and survival. The aim of this study was to investigate the effects of adding 0.75 mM L‐carnitine to a commercial IVC medium. In this context, (1) division rates of embryos at Day 4, (2) development of embryos at Day 7 after fertilisation, (3) development of embryos after Day 7, (4) survival and development of slow frozen embryos after thawing and (5) survival and development of vitrified and heated embryos were investigated.</p></sec><sec id="vms370376-sec-0060"><label>2</label><title>Materials and Methods</title><p>The IVM, IVF and IVC media used in this study (IVF Bioscience, Falmouth, UK) and all other chemicals and reagents, unless otherwise specified, were obtained from Sigma‐Aldrich (St. Louis, MO, USA). The study was conducted between October 2020 and August 2021.</p><p>Ovaries used in the study were obtained from Holstein and Simmental cattle slaughtered at two different abattoirs in Burdur, Turkey. Ovaries were collected randomly without consideration of the pedigree or general characteristics of the cows. However, ovaries showing cysts or pathological conditions were excluded from the study. All procedures, including in vitro embryo production and cryopreservation, were carried out at the Genetics and Embryo Technologies Application and Research Center of Burdur Mehmet Akif Ersoy University.</p><sec id="vms370376-sec-0070"><label>2.1</label><title>Oocyte Collection, Maturation and Fertilization</title><p>Bovine ovaries derived from the slaughterhouse were brought to the laboratory within 2 h at the latest. For aspiration medium, a tissue culture medium (TCM199) containing 1% foetal bovine serum (FBS) was used. Oocytes were aspirated from follicles measuring approximately 2–8 mm in diameter using 10 mL syringes equipped with sterile 18‐gauge needles. Only Grade A and B immature oocytes were used for the maturation process (Kakkassery et al. <xref rid="vms370376-bib-0036" ref-type="bibr">2010</xref>). A total of 40–45 oocytes were matured in 500 µL IVM medium in Petri dishes with wells in the centre. The maturation process was carried out by incubating for 20–22 h. The evaluation was conducted according to Kobayashi et al. (<xref rid="vms370376-bib-0016" ref-type="bibr">1994</xref>). In the study, to avoid variations due to different bulls, frozen sperm from a single bull was used for fertilisation. Matured oocytes were fertilised using the conventional IVF method. The fertilisation was carried out by placing 2 × 10<sup>6</sup>/mL spermatozoa and 40–45 oocytes in 500 µL IVF medium in petri wells and incubating for 24 h. Throughout all stages of IVM, IVF and IVC media were covered with mineral oil to prevent evaporation and contamination. In addition, all incubation processes were carried out at 39°C in an atmosphere of 5% CO<sub>2</sub>, 5% O<sub>2</sub>, 90% N<sub>2</sub> and high humidity.</p></sec><sec id="vms370376-sec-0080"><label>2.2</label><title>Effects of L‐Carnitine Cleavage and Embryo Development</title><p>For Experiments 1 and 2, presumptive zygotes were randomly divided into two groups to be cultured in either L‐carnitine‐containing (Group IVC‐LC) or L‐carnitine‐free (Group IVC) culture medium. L‐carnitine was added to the Group IVC‐LC at a concentration of 0.75 mM (Zolini et al. <xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>). The medium was prepared by placing 40–45 embryos per 500 µL in a petri dish with a centre well. Presumptive zygotes were cultured in the incubator until Day 4 post‐fertilisation, and cleavage rates were evaluated. Unfertilised or non‐cleaved oocytes were excluded from the study. Embryo development rates were evaluated on Day 7 post‐fertilisation. The experiment was repeated 22 times.</p></sec><sec id="vms370376-sec-0090"><label>2.3</label><title>Effects of L‐Carnitine on the Development of Blastocysts</title><p>For Experiment 3, on the 7th day after fertilisation, early blastocysts and blastocysts were cultured for 96 h in Group IVC‐LC and Group IVC. The rates of embryo expansion, hatching and hatched blastocysts were evaluated at 24, 48 and 72 h. The experiment was repeated 11 times.</p></sec><sec id="vms370376-sec-0100"><label>2.4</label><title>Effects of L‐Carnitine on the Development of Slow‐Frozen and Thawed Blastocysts</title><p>For Experiment 4, early blastocysts and blastocysts cultured in Group IVC‐LC and Group IVC media on Day 7 post‐fertilisation were harvested and subjected to slow freezing at a controlled rate. The slow‐freezing medium consisted of TCM‐199 containing 1.5 M Ethylene Glycol (EG), 0.1 M sucrose and 20% FBS. Harvested embryos were transferred to 0.25 mL straws, 1 embryo per straw. After equilibrating the embryos in the slow‐freezing solution at room temperature for 10 min, they were placed in an adjustable‐rate freezing device (Freeze Control CL‐5500). The protocol involved equilibrating at −6°C for 10 min. Two minutes after placing the straws in the device, seeding was performed using a cooled cotton swab. The freezing process was carried out at a rate of −0.3°C to −6°C per minute until reaching −32°C. Upon completion, the straws were transferred to goblets and stored in a liquid nitrogen tank for at least one day.</p><p>The slow‐frozen embryos were thawed by holding the straws in the air for 5 s, followed by immersion in a 30°C water bath for 20 s. Thawed embryos were washed three times in TCM‐199 medium containing 0.3 M sucrose and 10% FBS, followed by washing in TCM‐199 medium with 10% FBS. Subsequently, embryos were cultured in Group IVC‐LC and Group IVC media for 96 h. The rates of expanded, hatching and hatched blastocysts of thawed embryos were evaluated at 24, 48 and 72 h. The experiment was repeated six times.</p></sec><sec id="vms370376-sec-0110"><label>2.5</label><title>Effects of L‐Carnitine on the Development of Blastocysts Post‐Vitrification</title><p>For Experiment 5, early blastocysts and blastocysts cultured in Group IVC‐LC and Group IVC media on Day 7 post‐fertilisation were vitrified. The vitrification medium was prepared in two stages. Firstly, embryos were washed three times in the first vitrification medium containing 3.5 M EG and 20% FBS in TCM‐199. The samples were then washed three times in the second vitrification medium, which contained 7 M EG, 0.5 M sucrose, 18% (w/v) Ficoll 70 and 20% FBS in TCM‐199, before vitrification. Harvested embryos were transferred to 0.25 mL pipettes with a 10 µL drop of second vitrification solution, 1 embryo per pipette. The open end of the straw was sealed with a plug and vitrified by immersion in liquid nitrogen within 45 s. After vitrification, the straws were placed in goblets and stored in a liquid nitrogen tank for at least one day.</p><p>Vitrified embryos were warmed in the same way as the thawing procedure for slow‐frozen embryos. The embryos were first washed in TCM‐199 medium containing 0.5 M sucrose and 20% FBS, then in TCM‐199 medium with 0.25 M sucrose and 20% FBS and finally in TCM‐199 medium with 20% FBS, with each wash performed at least three times. The embryos were then cultured in their respective media, Group IVC‐LC and Group IVC, for 96 h. The rates of expanded, hatching and hatched blastocysts were evaluated at 24, 48 and 72 h. The experiment was repeated five times.</p></sec><sec id="vms370376-sec-0120"><label>2.6</label><title>Statistical Analysis</title><p>The normality of the numerical variables was checked using the Shapiro–Wilk test. For Experiments 1–5, the independent samples <italic toggle="yes">t</italic>‐test was used for groups with normal distributions. For groups where normality was not achieved, the Mann–Whitney <italic toggle="yes">U</italic> test was applied. Statistical significance was considered at a level of <italic toggle="yes">p</italic> &lt; 0.05 for all calculations and interpretations, with hypotheses being two‐tailed. The statistical analysis of the data was performed using the SPSS v26 (IBM Inc. Chicago, IL, USA) statistical package.</p></sec></sec><sec id="vms370376-sec-0130"><label>3</label><title>Results</title><sec id="vms370376-sec-0140"><label>3.1</label><title>Oocyte Collection, Maturation and Fertilization</title><p>From 508 ovaries collected under appropriate conditions at slaughterhouses, a total of 1258 oocytes were harvested. Among these, 29.89% were classified as first‐degree mature, and 65.02% as second‐degree mature, resulting in 1194 mature oocytes used for fertilisation. The remaining 64 oocytes (5.09%) did not reach maturity and were excluded from the fertilisation process. Only oocytes classified as first‐ and second‐degree mature were included in the subsequent procedures.</p><p>After 24 h post‐fertilisation, cells were vortexed for the denudation process. Due to loss and degeneration, 104 cells (8.71%) were excluded from the study.</p></sec><sec id="vms370376-sec-0150"><label>3.2</label><title>Experiments 1–2: The Effect of L‐Carnitine on Cleavage and Embryo Development</title><p>Of the 1090 mature oocytes on Day 4 after IVF, unfertilised oocytes (UFO) and 2‐cell embryos were excluded from the study. The study was continued with a total of 465 embryos with 4, 8 and more cells (Table <xref rid="vms370376-tbl-0001" ref-type="table">1</xref>). On the 7th day of IVF, there were 233 embryos in Group IVC and 232 embryos in Group IVC‐LC. The development rates of the embryos are shown in Table <xref rid="vms370376-tbl-0002" ref-type="table">2</xref>.</p><table-wrap position="float" id="vms370376-tbl-0001" content-type="TABLE" orientation="portrait"><label>TABLE 1</label><caption><p>Cleavage rates on Day 4 of in vitro fertilization.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead><tr style="border-bottom:solid 1px #000000"><th align="left" rowspan="1" colspan="1">Group</th><th align="center" rowspan="1" colspan="1">Total number of mature oocytes (n)</th><th align="center" rowspan="1" colspan="1">UFO %</th><th align="center" rowspan="1" colspan="1">2 cell embryo (%)</th><th align="center" rowspan="1" colspan="1">4 cell embryo (%)</th><th align="center" rowspan="1" colspan="1">&gt;8 and more cell embryo (%)</th><th align="center" rowspan="1" colspan="1">Total embryo (%)</th></tr></thead><tbody><tr><td align="left" rowspan="1" colspan="1">
+<bold>Group IVC</bold>
+</td><td align="center" rowspan="1" colspan="1">553</td><td align="center" rowspan="1" colspan="1">38.4<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-1" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>2.8</td><td align="center" rowspan="1" colspan="1">15.9 ± 1.5</td><td align="center" rowspan="1" colspan="1">25.8 ± 2.5</td><td align="center" rowspan="1" colspan="1">19.9 ± 3.0</td><td align="center" rowspan="1" colspan="1">60.6 ± 2.7</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>Group IVC‐LC</bold>
+</td><td align="center" rowspan="1" colspan="1">537</td><td align="center" rowspan="1" colspan="1">39.3<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-2" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 2.9</td><td align="center" rowspan="1" colspan="1">14.6<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-3" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 2.2</td><td align="center" rowspan="1" colspan="1">25.2 ± 2.9</td><td align="center" rowspan="1" colspan="1">20.9 ± 2.4</td><td align="center" rowspan="1" colspan="1">60.7 ± 2.9</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>
+<italic toggle="yes">p</italic>
+</bold>
+</td><td align="center" rowspan="1" colspan="1"/><td align="center" rowspan="1" colspan="1">0.906</td><td align="center" rowspan="1" colspan="1">0.557</td><td align="center" rowspan="1" colspan="1">0.655</td><td align="center" rowspan="1" colspan="1">0.581</td><td align="center" rowspan="1" colspan="1">0.888</td></tr></tbody></table><table-wrap-foot><fn id="vms370376-tbl1-note-0001"><p>
+<italic toggle="yes">Note</italic>: Percentage results are presented as means ± SEM.</p></fn></table-wrap-foot><permissions><copyright-holder>John Wiley &amp; Sons, Ltd.</copyright-holder></permissions></table-wrap><table-wrap position="float" id="vms370376-tbl-0002" content-type="TABLE" orientation="portrait"><label>TABLE 2</label><caption><p>Findings on Day 7 of in vitro fertilization.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead><tr style="border-bottom:solid 1px #000000"><th align="left" rowspan="1" colspan="1"/><th align="center" rowspan="1" colspan="1">Number of total embryos d 4 (n)</th><th align="center" rowspan="1" colspan="1">
+<p>Degenerated embryos</p>
+<p>(%)</p>
+</th><th align="center" rowspan="1" colspan="1">Morula (%)</th><th align="center" rowspan="1" colspan="1">Early blastocyst (%)</th><th align="center" rowspan="1" colspan="1">Blastocyst (%)</th><th align="center" rowspan="1" colspan="1">Advanced blastocyst (%)</th><th align="center" rowspan="1" colspan="1">Total embryo d 7 (%)</th></tr></thead><tbody><tr><td align="left" rowspan="1" colspan="1">
+<bold>Group IVC</bold>
+</td><td align="center" rowspan="1" colspan="1">233</td><td align="center" rowspan="1" colspan="1">28.7<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-4" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>3.8</td><td align="center" rowspan="1" colspan="1">16.6 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-5" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>3.4</td><td align="center" rowspan="1" colspan="1">13.3 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-6" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>3.3</td><td align="center" rowspan="1" colspan="1">37.2 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-7" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>3.8</td><td align="center" rowspan="1" colspan="1">4.2 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-8" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>1.7</td><td align="center" rowspan="1" colspan="1">71.3 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-9" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>3.8</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>Group IVC‐LC</bold>
+</td><td align="center" rowspan="1" colspan="1">232</td><td align="center" rowspan="1" colspan="1">32.3 ± 4.2</td><td align="center" rowspan="1" colspan="1">13.0 ± 3.3</td><td align="center" rowspan="1" colspan="1">9.9<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-10" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 3.1</td><td align="center" rowspan="1" colspan="1">43.1<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-11" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 4.1</td><td align="center" rowspan="1" colspan="1">1.8<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-12" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 1.0</td><td align="center" rowspan="1" colspan="1">67.7<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-13" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 4.2</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>
+<italic toggle="yes">p</italic>
+</bold>
+</td><td align="center" rowspan="1" colspan="1"/><td align="center" rowspan="1" colspan="1">0.638</td><td align="center" rowspan="1" colspan="1">0.420</td><td align="center" rowspan="1" colspan="1">0.322</td><td align="center" rowspan="1" colspan="1">0.359</td><td align="center" rowspan="1" colspan="1">0.244</td><td align="center" rowspan="1" colspan="1">0.638</td></tr></tbody></table><table-wrap-foot><fn id="vms370376-tbl2-note-0001"><p>
+<italic toggle="yes">Note</italic>: Percentage results are presented as means ± SEM.</p></fn></table-wrap-foot><permissions><copyright-holder>John Wiley &amp; Sons, Ltd.</copyright-holder></permissions></table-wrap></sec><sec id="vms370376-sec-0160"><label>3.3</label><title>Experiment 3: Effect of L‐Carnitine on the Embryo Development</title><p>On Day 7 post‐fertilisation, embryos that had reached the early blastocyst and blastocyst stages were cultured in the same medium and evaluated at 24, 48 and 72 h. Supplementation of L‐carnitine to the IVC medium did not enhance the expanded blastocyst rates (<italic toggle="yes">p</italic> &gt; 0.05). Although a significant decrease was observed in hatching/hatched blastocyst ratios at 48 h (<italic toggle="yes">p</italic> &lt; 0.05), this difference disappeared at 72 h (<italic toggle="yes">p</italic> &gt; 0.05). Thus, L‐carnitine did not affect the development rates of embryos cultured without freezing (Table <xref rid="vms370376-tbl-0003" ref-type="table">3</xref>).</p><table-wrap position="float" id="vms370376-tbl-0003" content-type="TABLE" orientation="portrait"><label>TABLE 3</label><caption><p>Developmental status of early blastocysts and blastocysts cultured directly.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead><tr><th align="left" rowspan="1" colspan="1"/><th align="center" rowspan="1" colspan="1"/><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Expanded blastocyst (%)</th><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Hatching/Hatched blastocyst (%)</th></tr><tr style="border-bottom:solid 1px #000000"><th align="left" rowspan="1" colspan="1"/><th align="center" rowspan="1" colspan="1">Number of embryos</th><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th></tr></thead><tbody><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC</bold>
+</td><td align="center" rowspan="1" colspan="1">62</td><td align="center" rowspan="1" colspan="1">35.5 ± 9.9</td><td align="center" rowspan="1" colspan="1">43.0 ± 9.6</td><td align="center" rowspan="1" colspan="1">55.9 ± 11.0</td><td align="center" rowspan="1" colspan="1">16.7 ± 9.5</td><td align="center" rowspan="1" colspan="1">30.2 ± 10.3</td><td align="center" rowspan="1" colspan="1">31.7 ± 9.9</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC‐LC</bold>
+</td><td align="center" rowspan="1" colspan="1">57</td><td align="center" rowspan="1" colspan="1">31.7 ± 12.1</td><td align="center" rowspan="1" colspan="1">34.6 ± 12.2</td><td align="center" rowspan="1" colspan="1">55.2 ± 14.1</td><td align="center" rowspan="1" colspan="1">0.5 ± 0.5</td><td align="center" rowspan="1" colspan="1">4.2 ± 3.6</td><td align="center" rowspan="1" colspan="1">10.9 ± 5.8</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>
+<italic toggle="yes">p</italic>
+</bold>
+</td><td align="left" rowspan="1" colspan="1"/><td align="center" rowspan="1" colspan="1">0.589</td><td align="center" rowspan="1" colspan="1">0.506</td><td align="center" rowspan="1" colspan="1">0.946</td><td align="center" rowspan="1" colspan="1">0.098</td><td align="center" rowspan="1" colspan="1">0.020<xref rid="vms370376-tbl3-note-0001" ref-type="table-fn">
+<sup>*</sup>
+</xref>
+</td><td align="center" rowspan="1" colspan="1">0.058</td></tr></tbody></table><table-wrap-foot><fn id="vms370376-tbl3-note-0001"><label>*</label><p>
+<italic toggle="yes">p</italic> &lt; 0.05.</p></fn></table-wrap-foot><permissions><copyright-holder>John Wiley &amp; Sons, Ltd.</copyright-holder></permissions></table-wrap></sec><sec id="vms370376-sec-0170"><label>3.4</label><title>Experiment 4: Effects of L‐Carnitine Development of Slow‐Frozen and Thawed Blastocysts</title><p>On Day 7 post‐fertilisation, early blastocysts and blastocysts were slow‐frozen and then thawed before being cultured back again in the same IVC medium. During thawing, it was observed that one embryo in the Group IVC and one embryo in the Group IVC‐LC were fragmented. The developmental progress of the embryos was evaluated at 24, 48, and 72 h post‐thawing (Table <xref rid="vms370376-tbl-0004" ref-type="table">4</xref>).</p><table-wrap position="float" id="vms370376-tbl-0004" content-type="TABLE" orientation="portrait"><label>TABLE 4</label><caption><p>Comparison of development rates of slow‐frozen and thawed embryos.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead><tr><th align="left" rowspan="1" colspan="1"/><th rowspan="2" align="center" colspan="1">Number of embryos</th><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Expanded blastocyst (%)</th><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Hatching/Hatched blastocyst (%)</th></tr><tr style="border-bottom:solid 1px #000000"><th align="left" rowspan="1" colspan="1"/><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th></tr></thead><tbody><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC</bold>
+</td><td align="center" rowspan="1" colspan="1">33</td><td align="center" rowspan="1" colspan="1">9.3<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-14" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>6.0</td><td align="center" rowspan="1" colspan="1">13.0 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-15" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>8.3</td><td align="center" rowspan="1" colspan="1">19.0 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-16" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>9.4</td><td align="center" rowspan="1" colspan="1">0.0 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-17" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>0.0</td><td align="center" rowspan="1" colspan="1">5.6 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-18" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>5.6</td><td align="center" rowspan="1" colspan="1">5.6<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-19" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>5.6</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC‐LC</bold>
+</td><td align="center" rowspan="1" colspan="1">36</td><td align="center" rowspan="1" colspan="1">22.2<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-20" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 8.0</td><td align="center" rowspan="1" colspan="1">49.3<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-21" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 16.9</td><td align="center" rowspan="1" colspan="1">49.3<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-22" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 16.9</td><td align="center" rowspan="1" colspan="1">0.0<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-23" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 0.0</td><td align="left" rowspan="1" colspan="1">12.5<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-24" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 8.5</td><td align="left" rowspan="1" colspan="1">20.8<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-25" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 10.0</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>
+<italic toggle="yes">p</italic>
+</bold>
+</td><td align="center" rowspan="1" colspan="1"/><td align="center" rowspan="1" colspan="1">0.198</td><td align="center" rowspan="1" colspan="1">0.113</td><td align="center" rowspan="1" colspan="1">0.164</td><td align="center" rowspan="1" colspan="1">—</td><td align="center" rowspan="1" colspan="1">0.528</td><td align="center" rowspan="1" colspan="1">0.214</td></tr></tbody></table><permissions><copyright-holder>John Wiley &amp; Sons, Ltd.</copyright-holder></permissions></table-wrap></sec><sec id="vms370376-sec-0180"><label>3.5</label><title>Experiment 5: Effects of L‐Carnitine on the Development of Blastocysts Post‐Vitrification</title><p>On the 7th day post‐fertilisation, early blastocysts and blastocysts were vitrified and then thawed before being re‐cultured in the same IVC medium. During the thawing process, it was observed that one embryo in the Group IVC and two embryos in the Group IVC‐LC were fragmented. The developmental progress of the embryos was evaluated at 24, 48 and 72 h post‐warming (Table <xref rid="vms370376-tbl-0005" ref-type="table">5</xref>).</p><table-wrap position="float" id="vms370376-tbl-0005" content-type="TABLE" orientation="portrait"><label>TABLE 5</label><caption><p>Comparison of development rates of vitrified and thawed embryos.</p></caption><table frame="hsides" rules="groups"><col align="left" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><col align="center" span="1"/><thead><tr><th rowspan="2" align="left" colspan="1"/><th rowspan="2" align="center" colspan="1">Number of embryos</th><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Expanded blastocyst (%)</th><th colspan="3" style="border-bottom:solid 1px #000000" align="center" rowspan="1">Hatching/Hatched blastocyst (%)</th></tr><tr style="border-bottom:solid 1px #000000"><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th><th align="center" rowspan="1" colspan="1">24 h</th><th align="center" rowspan="1" colspan="1">48 h</th><th align="center" rowspan="1" colspan="1">72 h</th></tr></thead><tbody><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC</bold>
+</td><td align="center" rowspan="1" colspan="1">26</td><td align="center" rowspan="1" colspan="1">10.5 ± 7.7</td><td align="center" rowspan="1" colspan="1">10.5<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-26" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>7.7</td><td align="center" rowspan="1" colspan="1">14.5 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-27" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>11.6</td><td align="center" rowspan="1" colspan="1">6.5 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-28" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>4.2</td><td align="center" rowspan="1" colspan="1">10.5 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-29" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>7.7</td><td align="center" rowspan="1" colspan="1">10.5<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-30" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>7.7</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>Grup IVC‐LC</bold>
+</td><td align="center" rowspan="1" colspan="1">31</td><td align="center" rowspan="1" colspan="1">34.2<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-31" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math>9.0</td><td align="center" rowspan="1" colspan="1">34.2 <mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-32" display="inline"><mml:mrow><mml:mo>±</mml:mo></mml:mrow></mml:math>9.0</td><td align="center" rowspan="1" colspan="1">36.7<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-33" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 7.8</td><td align="center" rowspan="1" colspan="1">10.9<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-34" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 7.8</td><td align="center" rowspan="1" colspan="1">19.6<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-35" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 6.9</td><td align="center" rowspan="1" colspan="1">23.6<mml:math xmlns:mml="http://www.w3.org/1998/Math/MathML" id="jats-math-36" display="inline"><mml:mrow><mml:mrow><mml:mspace width="0.33em"/><mml:mo>±</mml:mo></mml:mrow></mml:mrow></mml:math> 4.9</td></tr><tr><td align="left" rowspan="1" colspan="1">
+<bold>
+<italic toggle="yes">p</italic>
+</bold>
+</td><td align="center" rowspan="1" colspan="1"/><td align="center" rowspan="1" colspan="1">0.056</td><td align="center" rowspan="1" colspan="1">0.056</td><td align="center" rowspan="1" colspan="1">0.090</td><td align="center" rowspan="1" colspan="1">0.814</td><td align="center" rowspan="1" colspan="1">0.278</td><td align="center" rowspan="1" colspan="1">0.110</td></tr></tbody></table><permissions><copyright-holder>John Wiley &amp; Sons, Ltd.</copyright-holder></permissions></table-wrap></sec></sec><sec id="vms370376-sec-0190"><label>4</label><title>Discussion</title><p>L‐carnitine has been widely studied for its potential to enhance oocyte quality, embryo development and cryopreservation outcomes in various mammalian species. Previous studies have shown that L‐carnitine can improve lipid metabolism, reduce cytoplasmic lipid accumulation and enhance cryotolerance in bovine embryos (Held‐Hoelker et al. <xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>; Sudano et al. <xref rid="vms370376-bib-0025" ref-type="bibr">2014</xref>). In this study, the effect of L‐carnitine addition (0.75 mM) to the commercial IVC medium on the cryopreservation of IVP embryos was investigated.</p><p>Carrillo‐González et al. (<xref rid="vms370376-bib-0004" ref-type="bibr">2023</xref>) reported that the supplementation of 1.5 mM L‐carnitine to the IVC did not significantly affect cleavage rates of bovine embryos cultured at 38.5°C and 5% CO<sub>2</sub>, with rates of 68.3% in the control group and 67.1% in the L‐carnitine group. Similarly, Zolini et al. (<xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>) found no increase in cleavage rates when 0.75 mM L‐carnitine was added to IVC, with cleavage rates of 76.4% and 78.8% in the L‐carnitine and control groups, respectively. Consistent with these studies, our results showed no significant difference in cleavage rates: 60.7% in the L‐carnitine group and 60.6% in the control group. These differences across studies may be attributed to factors such as L‐carnitine concentration, IVC media composition, methods of oocyte retrieval, the quality of selected oocytes and laboratory conditions.</p><p>Zolini et al. (<xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>) also observed no effect of L‐carnitine (0.75 mM) on blastocyst development by Day 7, with control and L‐carnitine groups exhibiting rates of 22.2% and 20.6%, respectively. However, they noted that increasing the L‐carnitine concentration to 3.03 mM resulted in a decrease in blastocyst development. In contrast, Takahashi et al. (<xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>) found that IVC supplementation with 1.518 mM and 3.03 mM L‐carnitine enhanced blastocyst development rates to 40.2% and 44.6%, respectively, compared to 32.3% in the control group. Our study found blastocyst development rates of 43.1% in the L‐carnitine group and 36.9% in the control group, with the former being higher, though no statistically significant difference was observed. This discrepancy might be due to the exclusion of non‐dividing and 2‐cell embryos on Day 3 in our study, ensuring only embryos with at least four cells were used for further development.</p><p>Theoretically, antioxidants have positive effects on bovine embryo development. However, some researchers (Fujitani et al. <xref rid="vms370376-bib-0011" ref-type="bibr">1997</xref>; Iwata et al. <xref rid="vms370376-bib-0015" ref-type="bibr">1998</xref>) have found that embryo development is adversely affected depending on oxygen levels or culture conditions. Apart from the studies by De Matos et al. (<xref rid="vms370376-bib-0006" ref-type="bibr">2000</xref>) and Olson and Seidel (<xref rid="vms370376-bib-0019" ref-type="bibr">2000</xref>), the positive effects of antioxidants are primarily observed under 20% oxygen conditions. IVC also plays a crucial role in achieving positive results. For example, 50–100 µM cysteamine is used in IVC with TCM199 medium (De Matos et al. <xref rid="vms370376-bib-0005" ref-type="bibr">1996</xref>), while 25–50 µM cysteamine is sufficient in SOF medium (De Matos et al. <xref rid="vms370376-bib-0006" ref-type="bibr">2000</xref>). Presumably, this difference may be due to the presence in the SOF medium of factors that protect against free radical damage. (Morales et al. <xref rid="vms370376-bib-0017" ref-type="bibr">1999</xref>). In our study, we found that after Day 7 of IVF, L‐carnitine did not affect the expanded blastocyst rates at 24, 48 and 72 h. Interestingly, hatching blastocyst rates in the L‐carnitine group were statistically lower than those in the control group at 48 h, although no significant differences were observed at 72 h. The commercial IVC medium used in the present study is reported to be supplemented with BSA, vitamins, amino acids and antioxidants. However, the concentrations of the substances used were not disclosed. Therefore, it is speculated that adding additional antioxidants to a medium already containing antioxidants could increase the antioxidant concentration and adversely affect embryonic development. The lower hatching rates at 48 h suggest that this may be due to the 5% O<sub>2</sub> incubator conditions or the concentration of L‐carnitine used. Future studies using defined media rather than commercial media, with varying concentrations of L‐carnitine and different O<sub>2</sub> levels, could yield new insights. In addition, since ROS levels were not measured in this study, the lack of difference between the control group and the L‐carnitine group could be due to similar ROS values. Evaluating ROS levels and apoptosis rates in future studies could contribute to a better understanding of L‐carnitine's efficacy.</p><p>Supplementation with L‐carnitine in IVC has been reported to enhance certain aspects of embryo cryotolerance. Zolini et al. (<xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>) demonstrated that 0.75 mM L‐carnitine increased re‐expansion rates in slow‐frozen embryos but had no significant effect on hatching blastocyst rates. Similarly, Takahashi et al. (<xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>) found that higher concentrations of L‐carnitine (1.5 mM and 3.03 mM) improved the survival rates of slow‐frozen embryos. In our study, L‐carnitine supplementation to the IVC did not statistically affect the rates of expanded and hatching/hatched blastocysts post‐thawing of slow‐frozen embryos. However, there was a proportional increase in embryo development at 24, 48 and 72 h post‐thawing in the L‐carnitine supplemented group. This proportional increase suggests that significant differences might emerge with larger sample sizes, underscoring the importance of further research. Due to its role in lipid metabolism, L‐carnitine supplementation in IVC can enhance the cryotolerance of embryos (Held‐Hoelker et al. <xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>; Takahashi et al. <xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>). It is reported that supplementing the embryo IVC, supplementation with lipid‐free BSA, with L‐carnitine enhances survival post‐thawing without affecting embryo lipid content (Held‐Hoelker et al. <xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>). The lack of difference in the rates of expanded, hatching and hatched blastocysts post‐thawing in our study is consistent with Held‐Hoelker et al. (<xref rid="vms370376-bib-0014" ref-type="bibr">2017</xref>). It is reported that adding L‐carnitine to the IVC of IVP embryos obtained from cattle reduces lipid content (Takahashi et al. <xref rid="vms370376-bib-0026" ref-type="bibr">2013</xref>), which is associated with the cryo‐tolerance of IVP embryos. Our results suggest that the absence of a detectable impact may be due to comparable lipid profiles across groups. ROS levels increase during freezing and thawing (Ahn et al. <xref rid="vms370376-bib-0002" ref-type="bibr">2002</xref>) and the increased ROS can cause damage or death to embryos (Valencia and Moran <xref rid="vms370376-bib-0029" ref-type="bibr">2004</xref>). The numerical increase in embryonic development in the L‐carnitine IVC group in our study supports the findings of Ahn et al. (<xref rid="vms370376-bib-0002" ref-type="bibr">2002</xref>), suggesting that L‐carnitine supplementation in IVC might reduce ROS levels. Therefore, repeating the studies with larger sample sizes and measuring ROS levels in embryos could yield more meaningful results. The creation of pregnancies after the transfer of frozen‐stored embryos is more complex than the survival measurements observed in IVC (Zolini et al. <xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>). Therefore, we believe that new approaches to improve embryo cryotolerance need to include not only in vitro evaluation but also transfers to assess pregnancy rates.</p><p>Gupta et al. (<xref rid="vms370376-bib-0013" ref-type="bibr">2010</xref>) reported that vitrification increases ROS levels, which reduces the survival and developmental competence of pig oocytes or embryos. Adding acetyl‐L‐carnitine to the maturation and vitrification medium enhances the membrane of mitochondrial potential and modifies the lipid profile of the membrane in buffalo oocytes, thereby improving embryo enhancement and cryotolerance (Xu et al. <xref rid="vms370376-bib-0034" ref-type="bibr">2019</xref>). In particular, L‐carnitine supplementation during bovine oocyte maturation distributes lipid content from the centre to the periphery (Chankitisakul et al. <xref rid="vms370376-bib-0037" ref-type="bibr">2013</xref>). An increase in the amount of cytoplasmic lipid droplets in oocytes makes them more susceptible to cold damage in the course of cryopreservation. The mechanical removal of lipid droplets or their reduction with chemical agents can improve the cryotolerance of oocytes and embryos (Ushijima et al. <xref rid="vms370376-bib-0028" ref-type="bibr">1996</xref>). Zolini et al. (<xref rid="vms370376-bib-0035" ref-type="bibr">2019</xref>) found that adding 0.75 mM L‐carnitine to the IVC enhanced cryotolerance after warming, but did not affect implantation and pregnancy rates following the transfer of frozen‐stored bovine embryos. In our study, it was found that adding L‐carnitine to the IVC did not statistically enhance the rates of expanded blastocysts, hatching and hatched blastocysts after warming in vitrified embryos. However, there was a notable proportional increase in embryo development at 24, 48 and 72 h in the L‐carnitine‐supplemented group. The lipid content of the embryos used in our study was not analysed, so the absence of a difference might be due to the similar lipid content of the embryos, supporting Carrillo‐González et al. (<xref rid="vms370376-bib-0004" ref-type="bibr">2023</xref>). Increased ROS amount can cause damage or death in oocytes and embryos (Valencia and Moran <xref rid="vms370376-bib-0029" ref-type="bibr">2004</xref>). The numerical increase in embryonic development in the L‐carnitine group in our study might be due to L‐carnitine's effect in reducing ROS levels. Therefore, more meaningful results might be obtained in future studies by increasing the number of materials and measuring ROS levels in embryos.</p></sec><sec id="vms370376-sec-0200"><label>5</label><title>Conclusion</title><p>Supplementation of L‐carnitine to commercially available IVC did not improve embryo development or survival rates after cryopreservation in the present study. The presence of antioxidants in the commercial medium may have masked the potential effects of L‐carnitine supplementation, as antioxidants are known to influence oxidative stress levels in embryos (De Matos et al. <xref rid="vms370376-bib-0006" ref-type="bibr">2000</xref>; Olson and Seidel <xref rid="vms370376-bib-0019" ref-type="bibr">2000</xref>). Future studies should include the measurement and evaluation of lipid content and ROS levels in embryos cultured in commercial media. Further future studies could aim to investigate optimal L‐carnitine doses in commercial media to enhance embryo survival and development. Research should focus on identifying the most effective concentrations of L‐carnitine that could improve cryotolerance, taking into account the influence of other medium components, such as antioxidants, which might interact with L‐carnitine supplementation. Although significant results have been achieved in laboratory settings, it is recommended that future studies further evaluate the efficacy of L‐carnitine supplementation by assessing pregnancy rates after embryo transfer following cryopreservation and thawing. This would provide a more comprehensive understanding of L‐carnitine's impact on embryo viability and development under in vivo conditions, ultimately improving its application in assisted reproductive technologies.</p></sec><sec id="vms370376-sec-0210"><title>Author Contributions</title><p>
+<bold>Mehmet Yildiz</bold>: conceptualisation, data curation, investigation, methodology, software, validation, visualisation, writing – original draft, writing – review and editing. <bold>Yunus Cetin</bold>: conceptualisation, methodology, funding acquisition, investigation, project administration, resources, writing – original draft, writing – review and editing, supervision.</p></sec><sec id="vms370376-sec-0230"><title>Ethics Statement</title><p>All procedures conducted in this experiment received approval from the Animal Experiments Local Ethics Committee at Burdur Mehmet Akif Ersoy University Rectorate (Ethical confirmation number: 626).</p></sec><sec sec-type="COI-statement" id="vms370376-sec-0240"><title>Conflicts of Interest</title><p>The authors declare no conflicts of interest.</p></sec></body><back><ack id="vms370376-sec-0220"><title>Acknowledgements</title><p>This project was financed by Burdur Mehmet Akif Ersoy University (Project No: 0640‐DR‐20), and utilized the first author's PhD thesis. The authors would like to thank Burdur Mehmet Akif Ersoy University Scientific Research Projects Unit.</p></ack><sec sec-type="data-availability" id="vms370376-sec-0260"><title>Data Availability Statement</title><p>The data that support the findings of this study are available from the corresponding author upon reasonable request.</p></sec><ref-list id="vms370376-bibl-0001"><title>References</title><ref id="vms370376-bib-0001"><mixed-citation publication-type="journal" id="vms370376-cite-0001">
+<string-name name-style="western">
+<surname>Accorsi</surname>, <given-names>M. F.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>B. C.</given-names>
+<surname>da Silva Leão</surname>
+</string-name>, <string-name name-style="western">
+<given-names>N. A.</given-names>
+<surname>de Souza Rocha‐Frigoni</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S. H. V.</given-names>
+<surname>Perri</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>G. Z.</given-names>
+<surname>Mingoti</surname>
+</string-name>. <year>2016</year>. “<article-title>Reduction in Cytoplasmic Lipid Content in Bovine Embryos Cultured in Vitro With Linoleic Acid in Semi‐Defined Medium Is Correlated With Increases in Cryotolerance</article-title>.” <source>Zygote</source>
+<volume>24</volume>: <fpage>485</fpage>–<lpage>494</lpage>. <pub-id pub-id-type="doi">10.1017/s0967199415000428</pub-id>.<pub-id pub-id-type="pmid">26350684</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0002"><mixed-citation publication-type="journal" id="vms370376-cite-0002">
+<string-name name-style="western">
+<surname>Ahn</surname>, <given-names>H. J.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>I. P.</given-names>
+<surname>Sohn</surname>
+</string-name>, <string-name name-style="western">
+<given-names>H. C.</given-names>
+<surname>Kwon</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D. H.</given-names>
+<surname>Jo</surname>
+</string-name>, <string-name name-style="western">
+<given-names>Y. D.</given-names>
+<surname>Park</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>C. K.</given-names>
+<surname>Min</surname>
+</string-name>. <year>2002</year>. “<article-title>Characteristics of the Cell Membrane Fluidity, Actin Fibers, and Mitochondrial Dysfunctions of Frozenthawed Two‐Cell Mouse Embryos</article-title>.” <source>Molecular Reproduction and Development</source>
+<volume>61</volume>, no. <issue>4</issue>: <fpage>466</fpage>–<lpage>476</lpage>. <pub-id pub-id-type="doi">10.1002/mrd.10040</pub-id>.<pub-id pub-id-type="pmid">11891918</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0003"><mixed-citation publication-type="journal" id="vms370376-cite-0003">
+<string-name name-style="western">
+<surname>Ali</surname>, <given-names>A. A.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>J. F.</given-names>
+<surname>Bilodeau</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>M. A.</given-names>
+<surname>Sirard</surname>
+</string-name>. <year>2003</year>. “<article-title>Antioxidant Requirements for Bovine Oocytes Varies During in Vitro Maturation, Fertilization and Development</article-title>.” <source>Theriogenology</source>
+<volume>59</volume>, no. <issue>3–4</issue>: <fpage>939</fpage>–<lpage>949</lpage>.<pub-id pub-id-type="pmid">12517395</pub-id>
+<pub-id pub-id-type="doi" assigning-authority="pmc">10.1016/s0093-691x(02)01125-1</pub-id></mixed-citation></ref><ref id="vms370376-bib-0037"><mixed-citation publication-type="journal" id="vms370376-cite-0037">
+<string-name name-style="western">
+<surname>Chankitisakul</surname>, <given-names>V.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>T.</given-names>
+<surname>Somfai</surname>
+</string-name>, <string-name name-style="western">
+<given-names>Y.</given-names>
+<surname>Inaba</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Techakumphu</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>T.</given-names>
+<surname>Nagai</surname>
+</string-name>. <year>2013</year>. “<article-title>Supplementation of maturation medium with L-carnitine improves cryo-tolerance of bovine in vitro matured oocytes</article-title>.” <source>Theriogenology</source>
+<volume>79</volume>, no. <issue>4</issue>: <fpage>590</fpage>–<lpage>598</lpage>.<pub-id pub-id-type="pmid">23261307</pub-id>
+<pub-id pub-id-type="doi" assigning-authority="pmc">10.1016/j.theriogenology.2012.11.011</pub-id></mixed-citation></ref><ref id="vms370376-bib-0004"><mixed-citation publication-type="journal" id="vms370376-cite-0004">
+<string-name name-style="western">
+<surname>Carrillo‐González</surname>, <given-names>D. F.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>D. Y.</given-names>
+<surname>Hernández‐Herrera</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>J. G.</given-names>
+<surname>Maldonado‐Estrada</surname>
+</string-name>. <year>2023</year>. “<article-title>The Role of L‐Carnitine in Bovine Embryo Metabolism. A Review of the Effect of Supplementation With a Metabolic Modulator on in Vitro Embryo Production</article-title>.” <source>Animal Biotechnology</source>
+<volume>34</volume>, no. <issue>2</issue>: <fpage>413</fpage>–<lpage>423</lpage>. <pub-id pub-id-type="doi">10.1080/10495398.2021.1938593</pub-id>.<pub-id pub-id-type="pmid">34154517</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0005"><mixed-citation publication-type="journal" id="vms370376-cite-0005">
+<string-name name-style="western">
+<surname>De Matos</surname>, <given-names>D. G.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>C. C.</given-names>
+<surname>Furnus</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D. F.</given-names>
+<surname>Moses</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A. G.</given-names>
+<surname>Martinez</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Matkovic</surname>
+</string-name>. <year>1996</year>. “<article-title>Stimulation of Glutathione Synthesis of in Vitro Matured Bovine Oocytes and Its Effect on Embryo Development and Freezability</article-title>.” <source>Molecular Reproduction and Development: Incorporating Gamete Research</source>
+<volume>45</volume>, no. <issue>4</issue>: <fpage>451</fpage>–<lpage>457</lpage>. <pub-id pub-id-type="doi">10.1002/(SICI)1098-2795(199612)45:4&lt;451::AID-MRD7&gt;3.0.CO;2-Q</pub-id>.<pub-id pub-id-type="pmid">8956283</pub-id></mixed-citation></ref><ref id="vms370376-bib-0006"><mixed-citation publication-type="journal" id="vms370376-cite-0006">
+<string-name name-style="western">
+<surname>De Matos</surname>, <given-names>D. G.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>C.</given-names>
+<surname>Herrera</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D.</given-names>
+<surname>Nogueira</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Donaldson</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>R. S.</given-names>
+<surname>Pasqualini</surname>
+</string-name>. <year>2000</year>. “<article-title>Stimulation of Glutathione Synthesis During in Vitro Maturation and in Vitro Culture of Bovine Oocytes</article-title>.” <source>Journal of Reproduction and Fertility, Abstract Series</source>
+<volume>25</volume>: <fpage>75</fpage>.</mixed-citation></ref><ref id="vms370376-bib-0007"><mixed-citation publication-type="journal" id="vms370376-cite-0007">
+<string-name name-style="western">
+<surname>Del Collado</surname>, <given-names>M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>N. Z.</given-names>
+<surname>Saraiva</surname>
+</string-name>, <string-name name-style="western">
+<given-names>F. L.</given-names>
+<surname>Lopes</surname>
+</string-name>, et al. <year>2016</year>. “<article-title>Influence of Bovine Serum Albumin and Fetal Bovine Serum Supplementation During in Vitro Maturation on Lipid and Mitochondrial Behaviour in Oocytes and Lipid Accumulation in Bovine Embryos</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>28</volume>, no. <issue>11</issue>: <fpage>1721</fpage>–<lpage>1732</lpage>. <pub-id pub-id-type="doi">10.1071/rd15067</pub-id>.<pub-id pub-id-type="pmid">25986410</pub-id></mixed-citation></ref><ref id="vms370376-bib-0009"><mixed-citation publication-type="journal" id="vms370376-cite-0009">
+<string-name name-style="western">
+<surname>Ferré</surname>, <given-names>L. B.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M. E.</given-names>
+<surname>Kjelland</surname>
+</string-name>, <string-name name-style="western">
+<given-names>L. B.</given-names>
+<surname>Strøbech</surname>
+</string-name>, <string-name name-style="western">
+<given-names>P.</given-names>
+<surname>Hyttel</surname>
+</string-name>, <string-name name-style="western">
+<given-names>P.</given-names>
+<surname>Mermillod</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>P. J.</given-names>
+<surname>Ross</surname>
+</string-name>. <year>2020</year>. “<article-title>Recent Advances in Bovine in Vitro Embryo Production: Reproductive Biotechnology History and Methods</article-title>.” <source>Animal</source>
+<volume>14</volume>, no. <issue>5</issue>: <fpage>991</fpage>–<lpage>1004</lpage>. <pub-id pub-id-type="doi">10.1017/S1751731119002775</pub-id>.<pub-id pub-id-type="pmid">31760966</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0010"><mixed-citation publication-type="journal" id="vms370376-cite-0010">
+<string-name name-style="western">
+<surname>Figueiró</surname>, <given-names>M. R.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>J. M.</given-names>
+<surname>Garcia</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M. R.</given-names>
+<surname>de Lima</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>del Collado</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>N. Z.</given-names>
+<surname>Saraiva</surname>
+</string-name>. <year>2020</year>. “<article-title>Is It Possible to Alter the Embryo Lipid Accumulation With Reduction of Fetal Bovine Serum and Use of L‐Carnitine for in Vitro Maturation of Bubaline Oocytes?</article-title>.” <source>Zygote</source>
+<volume>28</volume>, no. <issue>2</issue>: <fpage>109</fpage>–<lpage>115</lpage>. <pub-id pub-id-type="doi">10.1017/S096719941900073X</pub-id>.</mixed-citation></ref><ref id="vms370376-bib-0011"><mixed-citation publication-type="journal" id="vms370376-cite-0011">
+<string-name name-style="western">
+<surname>Fujitani</surname>, <given-names>Y.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>K.</given-names>
+<surname>Kasai</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>Ohtani</surname>
+</string-name>, <string-name name-style="western">
+<given-names>K.</given-names>
+<surname>Nishimura</surname>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Yamada</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>K.</given-names>
+<surname>Utsumi</surname>
+</string-name>. <year>1997</year>. “<article-title>Effect of Oxygen Concentration and Free Radicals on in Vitro Development of in Vitro Produced Bovine Embryos</article-title>.” <source>Journal of Animal Science</source>
+<volume>75</volume>, no. <issue>2</issue>: <fpage>483</fpage>–<lpage>489</lpage>. <pub-id pub-id-type="doi">10.2527/1997.752483x</pub-id>.<pub-id pub-id-type="pmid">9051472</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0012"><mixed-citation publication-type="journal" id="vms370376-cite-0012">
+<string-name name-style="western">
+<surname>Guerin</surname>, <given-names>P.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>EL Mouatassim</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>Y.</given-names>
+<surname>Menezo</surname>
+</string-name>. <year>2001</year>. “<article-title>Oxidative Stress and Protection Against Reactive Oxygen Species in the Pre‐Implantation Embryo and Its Surroundings</article-title>.” <source>Human Reproduction Update</source>
+<volume>7</volume>, no. <issue>2</issue>: <fpage>175</fpage>–<lpage>189</lpage>. <pub-id pub-id-type="doi">10.1093/humupd/7.2.175</pub-id>.<pub-id pub-id-type="pmid">11284661</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0013"><mixed-citation publication-type="journal" id="vms370376-cite-0013">
+<string-name name-style="western">
+<surname>Gupta</surname>, <given-names>M. K.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S. J.</given-names>
+<surname>Uhm</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>H. T.</given-names>
+<surname>Lee</surname>
+</string-name>. <year>2010</year>. “<article-title>Effect of Vitrification and Beta‐Mercaptoethanol on Reactive Oxygen Species Activity and in Vitro Development of Oocytes Vitrified Before or After in Vitro Fertilization</article-title>.” <source>Fertility and Sterility</source>
+<volume>93</volume>, no. <issue>8</issue>: <fpage>2602</fpage>–<lpage>2607</lpage>. <pub-id pub-id-type="doi">10.1016/j.fertnstert.2010.01.043</pub-id>.<pub-id pub-id-type="pmid">20303480</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0014"><mixed-citation publication-type="journal" id="vms370376-cite-0014">
+<string-name name-style="western">
+<surname>Held‐Hoelker</surname>, <given-names>E.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S. L.</given-names>
+<surname>Klein</surname>
+</string-name>, <string-name name-style="western">
+<given-names>F.</given-names>
+<surname>Rings</surname>
+</string-name>, et al. <year>2017</year>. “<article-title>Cryosurvival of in Vitro Produced Bovine Embryos Supplemented With L‐Carnitine and Concurrent Reduction of Fatty Acids</article-title>.” <source>Theriogenology</source>
+<volume>96</volume>: <fpage>145</fpage>–<lpage>152</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2017.03.014</pub-id>.<pub-id pub-id-type="pmid">28532831</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0015"><mixed-citation publication-type="journal" id="vms370376-cite-0015">
+<string-name name-style="western">
+<surname>Iwata</surname>, <given-names>H.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>Akamatsu</surname>
+</string-name>, <string-name name-style="western">
+<given-names>N.</given-names>
+<surname>Minami</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Yamada</surname>
+</string-name>. <year>1998</year>. “<article-title>Effects of Antioxidants on the Development of Bovine IVM/IVF Embryos in Various Concentrations of Glucose</article-title>.” <source>Theriogenology</source>
+<volume>50</volume>, no. <issue>3</issue>: <fpage>365</fpage>–<lpage>375</lpage>. <pub-id pub-id-type="doi">10.1016/S0093-691X(98)00146-0</pub-id>.<pub-id pub-id-type="pmid">10732132</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0016"><mixed-citation publication-type="journal" id="vms370376-cite-0016">
+<string-name name-style="western">
+<surname>Kobayashi</surname>, <given-names>K.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>Yamashita</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Hoshi</surname>
+</string-name>. <year>1994</year>. “<article-title>Influence of Epidermal Growth Factor and Transforming Growth Factor‐α on in Vitro Maturation of Cumulus Cell‐Enclosed Bovine Oocytes in a Defined Medium</article-title>.” <source>Reproduction</source>
+<volume>100</volume>, no. <issue>2</issue>: <fpage>439</fpage>–<lpage>446</lpage>. <pub-id pub-id-type="doi">10.1530/jrf.0.1000439</pub-id>.<pub-id pub-id-type="pmid">8021861</pub-id></mixed-citation></ref><ref id="vms370376-bib-0036"><mixed-citation publication-type="journal" id="vms370376-cite-0036">
+<string-name name-style="western">
+<surname>Kakkassery</surname>, <given-names>M. P.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>V.</given-names>
+<surname>Vijayakumaran</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>T.</given-names>
+<surname>Sreekumaran</surname>
+</string-name>. <year>2010</year>. “<article-title>Effect of Cumulus Oocyte Complex Morphology on in Vitro Maturation of Bovine Oocytes</article-title>.” <source>J Vet Anim Sci</source>
+<volume>100</volume>: <fpage>12</fpage>–<lpage>17</lpage>.</mixed-citation></ref><ref id="vms370376-bib-0017"><mixed-citation publication-type="journal" id="vms370376-cite-0017">
+<string-name name-style="western">
+<surname>Morales</surname>, <given-names>H.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>P.</given-names>
+<surname>Tilquin</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. F.</given-names>
+<surname>Rees</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Massip</surname>
+</string-name>, <string-name name-style="western">
+<given-names>F.</given-names>
+<surname>Dessy</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Van Langendonckt</surname>
+</string-name>. <year>1999</year>. “<article-title>Pyruvate Prevents Peroxide‐Induced Injury of in Vitro Preimplantation Bovine Embryos</article-title>.” <source>Molecular Reproduction and Development: Incorporating Gamete Research</source>
+<volume>52</volume>, no. <issue>2</issue>: <fpage>149</fpage>–<lpage>157</lpage>. <pub-id pub-id-type="doi">10.1002/(SICI)1098-2795(199902)52:2&lt;149::AID-MRD5&gt;3.0.CO;2-4</pub-id>.<pub-id pub-id-type="pmid">9890745</pub-id></mixed-citation></ref><ref id="vms370376-bib-0018"><mixed-citation publication-type="journal" id="vms370376-cite-0018">
+<string-name name-style="western">
+<surname>Murillo</surname>, <given-names>A.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Muñoz</surname>
+</string-name>, <string-name name-style="western">
+<given-names>D.</given-names>
+<surname>Martín‐González</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>Carrocera</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>MartínezNistal</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>E.</given-names>
+<surname>Gómez</surname>
+</string-name>. <year>2017</year>. “<article-title>Low Serum Concentration in Bovine Embryo Culture Enhances Early Blastocyst Rates on Day‐6 With Quality Traits in the Expanded Blastocyst Stage Similar to BSA‐Cultured Embryos</article-title>.” <source>Reproductive Biology</source>
+<volume>17</volume>, no. <issue>2</issue>: <fpage>162</fpage>–<lpage>171</lpage>. <pub-id pub-id-type="doi">10.1016/j.repbio.2017.04.002</pub-id>.<pub-id pub-id-type="pmid">28479126</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0019"><mixed-citation publication-type="journal" id="vms370376-cite-0019">
+<string-name name-style="western">
+<surname>Olson</surname>, <given-names>S. E.</given-names>
+</string-name>, and <string-name name-style="western">
+<given-names>G. E.</given-names>
+<surname>Seidel</surname>
+<suffix>Jr</suffix>
+</string-name>. <year>2000</year>. “<article-title>Culture of in Vitro‐Produced Bovine Embryos With Vitamin E Improves Development in Vitro and After Transfer to Recipients</article-title>.” <source>Biology of Reproduction</source>
+<volume>62</volume>, no. <issue>2</issue>: <fpage>248</fpage>–<lpage>252</lpage>. <pub-id pub-id-type="doi">10.1095/biolreprod62.2.248</pub-id>.<pub-id pub-id-type="pmid">10642559</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0021"><mixed-citation publication-type="journal" id="vms370376-cite-0021">
+<string-name name-style="western">
+<surname>Ruiz</surname>, <given-names>A.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>P. J.</given-names>
+<surname>Hansen</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>J.</given-names>
+<surname>Block</surname>
+</string-name>. <year>2014</year>. “<article-title>Effects of Lipid Metabolic Regulators During Bovine Embryo Culture on Blastocyst Development and Cryosurvival</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>26</volume>, no. <issue>1</issue>: <fpage>138</fpage>–<lpage>138</lpage>. <pub-id pub-id-type="doi">10.1071/RDv26n1Ab48</pub-id>.</mixed-citation></ref><ref id="vms370376-bib-0022"><mixed-citation publication-type="journal" id="vms370376-cite-0022">
+<string-name name-style="western">
+<surname>Seidel</surname>, <given-names>G. E.</given-names>
+</string-name>
+<year>2006</year>. “<article-title>Modifying Oocytes and Embryos to Improve Their Cryopreservation</article-title>.” <source>Theriogenology</source>
+<volume>65</volume>, no. <issue>1</issue>: <fpage>228</fpage>–<lpage>235</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2005.09.025</pub-id>.<pub-id pub-id-type="pmid">16263160</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0023"><mixed-citation publication-type="journal" id="vms370376-cite-0023">
+<string-name name-style="western">
+<surname>Silva</surname>, <given-names>E.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>A. F.</given-names>
+<surname>Greene</surname>
+</string-name>, <string-name name-style="western">
+<given-names>K.</given-names>
+<surname>Strauss</surname>
+</string-name>, <string-name name-style="western">
+<given-names>J. R.</given-names>
+<surname>Herrick</surname>
+</string-name>, <string-name name-style="western">
+<given-names>W. B.</given-names>
+<surname>Schoolcraft</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>R. L.</given-names>
+<surname>Krisher</surname>
+</string-name>. <year>2015</year>. “<article-title>Antioxidant Supplementation During in Vitro Culture Improves Mitochondrial Function and Development of Embryos From Aged Female Mice</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>27</volume>, no. <issue>6</issue>: <fpage>975</fpage>–<lpage>983</lpage>. <pub-id pub-id-type="doi">10.1071/RD14474</pub-id>.<pub-id pub-id-type="pmid">25739837</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0024"><mixed-citation publication-type="journal" id="vms370376-cite-0024">
+<string-name name-style="western">
+<surname>Somfai</surname>, <given-names>T.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>M.</given-names>
+<surname>Kaneda</surname>
+</string-name>, <string-name name-style="western">
+<given-names>S.</given-names>
+<surname>Akagi</surname>
+</string-name>, et al. <year>2011</year>. “<article-title>Enhancement of Lipid Metabolism With L‐Carnitine During in Vitro Maturation Improves Nuclear Maturation and Cleavage Ability of Follicular Porcine Oocytes</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>23</volume>, no. <issue>7</issue>: <fpage>912</fpage>–<lpage>920</lpage>. <pub-id pub-id-type="doi">10.1071/RD10339</pub-id>.<pub-id pub-id-type="pmid">21871210</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0025"><mixed-citation publication-type="journal" id="vms370376-cite-0025">
+<string-name name-style="western">
+<surname>Sudano</surname>, <given-names>M. J.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>D. M.</given-names>
+<surname>Paschoal</surname>
+</string-name>, <string-name name-style="western">
+<given-names>T.</given-names>
+<surname>da Silva Rascado</surname>
+</string-name>, et al. <year>2014</year>. “<article-title>Crucial Surviving Aspects for Vitrified in Vitro‐Produced Bovine Embryos</article-title>.” <source>Zygote</source>
+<volume>22</volume>, no. <issue>2</issue>: <fpage>124</fpage>–<lpage>131</lpage>. <pub-id pub-id-type="doi">10.1017/S0967199412000196</pub-id>.<pub-id pub-id-type="pmid">22784438</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0026"><mixed-citation publication-type="journal" id="vms370376-cite-0026">
+<string-name name-style="western">
+<surname>Takahashi</surname>, <given-names>T.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>Y.</given-names>
+<surname>Inaba</surname>
+</string-name>, <string-name name-style="western">
+<given-names>T.</given-names>
+<surname>Somfai</surname>
+</string-name>, et al. <year>2013</year>. “<article-title>Supplementation of Culture Medium With L‐Carnitine Improves Development and Cryotolerance of Bovine Embryos Produced in Vitro</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>25</volume>, no. <issue>4</issue>: <fpage>589</fpage>–<lpage>599</lpage>. <pub-id pub-id-type="doi">10.1071/RD11262</pub-id>.<pub-id pub-id-type="pmid">22954232</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0028"><mixed-citation publication-type="journal" id="vms370376-cite-0028">
+<string-name name-style="western">
+<surname>Ushijima</surname>, <given-names>H.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Yamakawa</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>H.</given-names>
+<surname>Nagashima</surname>
+</string-name>. <year>1996</year>. “<article-title>Cryopreservation of Bovine IVM/IVF Embryos at Early Cleavage Stage Following Removal of Cytoplasmic Lipid Droplets</article-title>.” <source>Theriogenology</source>
+<volume>1</volume>, no. <issue>45</issue>: <fpage>159</fpage>–<lpage>159</lpage>.</mixed-citation></ref><ref id="vms370376-bib-0029"><mixed-citation publication-type="journal" id="vms370376-cite-0029">
+<string-name name-style="western">
+<surname>Valencia</surname>, <given-names>A.</given-names>
+</string-name>, and <string-name name-style="western">
+<given-names>J.</given-names>
+<surname>Moran</surname>
+</string-name>. <year>2004</year>. “<article-title>Reactive Oxygen Species Induce Different Cell Death Mechanisms in Cultured Neurins</article-title>.” <source>Free Radical Biology and Medicine</source>
+<volume>36</volume>, no. <issue>9</issue>: <fpage>1112</fpage>–<lpage>1125</lpage>. <pub-id pub-id-type="doi">10.1016/j.freeradbiomed.2004.02.013</pub-id>.<pub-id pub-id-type="pmid">15082065</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0030"><mixed-citation publication-type="journal" id="vms370376-cite-0030">
+<string-name name-style="western">
+<surname>Van Hoeck</surname>, <given-names>V.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>D.</given-names>
+<surname>Rizos</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A.</given-names>
+<surname>Gutierrez‐Adan</surname>
+</string-name>, et al. <year>2015</year>. “<article-title>Interaction Between Differential Gene Expression Profile and Phenotype in Bovine Blastocysts Originating From Oocytes Exposed to Elevated Non‐esterified Fatty Acid Concentrations</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>27</volume>, no. <issue>2</issue>: <fpage>372</fpage>–<lpage>384</lpage>. <pub-id pub-id-type="doi">10.1071/RD13263</pub-id>.<pub-id pub-id-type="pmid">24360349</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0032"><mixed-citation publication-type="journal" id="vms370376-cite-0032">
+<string-name name-style="western">
+<surname>Viana</surname>, <given-names>J.</given-names>
+</string-name>
+<year>2023</year>. “<article-title>2022 Statistics of Embryo Production and Transfer Indomestic Farm Animals</article-title>.” <source>Embryo Technology Newsletter</source>
+<volume>41</volume>: <fpage>4</fpage>.</mixed-citation></ref><ref id="vms370376-bib-0034"><mixed-citation publication-type="journal" id="vms370376-cite-0034">
+<string-name name-style="western">
+<surname>Xu</surname>, <given-names>H. Y.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>S. S.</given-names>
+<surname>Geng</surname>
+</string-name>, <string-name name-style="western">
+<given-names>T. T.</given-names>
+<surname>Li</surname>
+</string-name>, et al. <year>2019</year>. “<article-title>Maturation of Buffalo Oocytes in Vitro With Acetyl‐L‐Carnitine Improves Cryotolerance due to Changes in Mitochondrial Function and the Membrane Lipid Profile</article-title>.” <source>Reproduction, Fertility and Development</source>
+<volume>31</volume>, no. <issue>2</issue>: <fpage>386</fpage>–<lpage>394</lpage>. <pub-id pub-id-type="doi">10.1071/RD18102</pub-id>.<pub-id pub-id-type="pmid">30309436</pub-id>
+</mixed-citation></ref><ref id="vms370376-bib-0035"><mixed-citation publication-type="journal" id="vms370376-cite-0035">
+<string-name name-style="western">
+<surname>Zolini</surname>, <given-names>A. M.</given-names>
+</string-name>, <string-name name-style="western">
+<given-names>E.</given-names>
+<surname>Carrascal‐Triana</surname>
+</string-name>, <string-name name-style="western">
+<given-names>A. R.</given-names>
+<surname>de King</surname>
+</string-name>, <string-name name-style="western">
+<given-names>P. J.</given-names>
+<surname>Hansen</surname>
+</string-name>, <string-name name-style="western">
+<given-names>C. A. A.</given-names>
+<surname>Torres</surname>
+</string-name>, and <string-name name-style="western">
+<given-names>J.</given-names>
+<surname>Block</surname>
+</string-name>. <year>2019</year>. “<article-title>Effect of Addition of L‐Carnitine to media for Oocyte Maturation and Embryo Culture on Development and Cryotolerance of Bovine Embryos Produced in Vitro</article-title>.” <source>Theriogenology</source>
+<volume>133</volume>: <fpage>135</fpage>–<lpage>143</lpage>. <pub-id pub-id-type="doi">10.1016/j.theriogenology.2019.05.005</pub-id>.<pub-id pub-id-type="pmid">31091484</pub-id>
+</mixed-citation></ref></ref-list></back></article>

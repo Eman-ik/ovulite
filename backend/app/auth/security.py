@@ -42,12 +42,12 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    """Hash a plaintext password using bcrypt (12 rounds by default)."""
+    """Hash a plaintext password using argon2."""
     return pwd_context.hash(password)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Verify a plaintext password against a bcrypt hash."""
+    """Verify a plaintext password against an argon2 hash."""
     return pwd_context.verify(plain, hashed)
 
 
