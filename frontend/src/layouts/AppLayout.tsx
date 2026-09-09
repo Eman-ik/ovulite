@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ROLE_PERMISSIONS, getRoleDisplayName } from "@/lib/roleRoutes";
+import { ROLE_PERMISSIONS, getPermissions, getRoleDisplayName } from "@/lib/roleRoutes";
 import {
   LayoutDashboard,
   FileInput,
@@ -66,7 +66,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: "Intelligence",
     items: [
       { to: "analytics", icon: BarChart3, label: "Analytics", permission: "canViewAnalytics" },
-      { to: "model-performance", icon: TrendingUp, label: "Model Performance", permission: "canViewAnalytics" },
+      { to: "model-performance", icon: TrendingUp, label: "Model Performance", permission: "canViewResearch" },
       { to: "literature", icon: BookOpen, label: "Literature" },
     ],
   },
@@ -88,8 +88,7 @@ export default function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const role = user?.role?.toLowerCase() || "viewer";
-  const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] ?? ROLE_PERMISSIONS.viewer;
+  const permissions = getPermissions(user?.role);
 
   const visibleSections = useMemo(() => {
     const allowed = (item: NavItem) => {

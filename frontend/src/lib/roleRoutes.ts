@@ -1,55 +1,132 @@
+/**
+ * Ovulite's four operational roles, plus the two support roles the backend
+ * already issues.
+ *
+ *   admin         → runs the platform          (Command Center)
+ *   embryologist  → runs the IVF laboratory    (OPU → embryo → freeze)
+ *   veterinarian  → runs recipients and ET     (sync → CL → transfer → PD)
+ *   researcher    → analyses outcomes          (analytics, models, exports)
+ *
+ * Support roles: `organization_admin` (admin scoped to one org) and `viewer`
+ * (read-only). `et team` is the legacy string for `veterinarian` — the ET
+ * dataset was imported with it, so both resolve to the same permissions.
+ */
+
+export const CANONICAL_ROLES = [
+  "admin",
+  "organization_admin",
+  "embryologist",
+  "veterinarian",
+  "researcher",
+  "viewer",
+] as const;
+
+export type CanonicalRole = (typeof CANONICAL_ROLES)[number];
+
+/**
+ * Map any role string the backend might hand us onto a canonical role.
+ * Order matters: the most specific match wins.
+ */
+export function normalizeRole(role: string | null | undefined): CanonicalRole {
+  const r = (role ?? "").trim().toLowerCase();
+  if (!r) return "viewer";
+
+  if (r.includes("organization_admin") || r.includes("organization admin")) return "organization_admin";
+  if (r.includes("admin")) return "admin";
+  // "lab" must be tested before the bare "technician" fallback below, or
+  // "lab technician" would resolve to the ET side.
+  if (r.includes("embryologist") || r.includes("lab")) return "embryologist";
+  if (r.includes("research") || r.includes("analyst") || r.includes("data scientist")) return "researcher";
+  if (r.includes("vet") || r.includes("et team") || r.includes("et-team") || r.includes("et_team")) {
+    return "veterinarian";
+  }
+  // A bare "technician" is an ET technician in this dataset — the lab side is
+  // always recorded as "embryologist" or "lab …".
+  if (r.includes("technician")) return "veterinarian";
+  return "viewer";
+}
+
+/**
+ * Every operational role lands on `/app` — the dashboard reshapes itself per
+ * role (see buildRoleConfig in HomepageDashboard), so a lab user gets the
+ * laboratory view and a vet gets the recipient view at the same URL. Viewers
+ * have no dashboard of their own and go straight to the case list.
+ */
 export function getRoleLandingPath(role: string | null | undefined): string {
-  const normalized = (role ?? "").trim().toLowerCase();
-
-  if (!normalized) return "/app";
-  
-  // Admin dashboard
-  if (normalized.includes("admin")) return "/app";
-  
-  // Lab/Embryologist dashboard
-  if (normalized.includes("embryologist")) return "/app/embryo-grading";
-  
-  // ET Team/Technician/Vet dashboard
-  if (normalized.includes("et team") || normalized.includes("et-team") || normalized.includes("vet") || normalized.includes("veterinarian")) {
-    return "/app/predictions";
-  }
-  
-  // Technician/Lab staff - data entry
-  if (normalized.includes("technician") || normalized.includes("lab") || normalized.includes("staff")) {
-    return "/app/data-entry";
-  }
-  
-  // Viewer - cases only
-  if (normalized.includes("viewer")) return "/app/cases";
-
-  // Default fallback
-  return "/app";
+  return normalizeRole(role) === "viewer" ? "/app/cases" : "/app";
 }
 
 export function getRoleDisplayName(role: string | null | undefined): string {
-  const normalized = (role ?? "").trim().toLowerCase();
-  
-  if (normalized.includes("admin")) return "System Administrator";
-  if (normalized.includes("embryologist")) return "Lab Technician / Embryologist";
-  if (normalized.includes("et team")) return "ET Technician / Veterinarian";
-  if (normalized.includes("veterinarian")) return "Veterinarian";
-  if (normalized.includes("technician")) return "Technician";
-  if (normalized.includes("viewer")) return "Viewer";
-  
-  return "User";
+  switch (normalizeRole(role)) {
+    case "admin":
+      return "System Administrator";
+    case "organization_admin":
+      return "Organization Administrator";
+    case "embryologist":
+      return "Embryologist / Lab Team";
+    case "veterinarian":
+      return "Veterinarian / ET Team";
+    case "researcher":
+      return "Researcher / Data Analyst";
+    case "viewer":
+    default:
+      return "Viewer";
+  }
 }
 
-export const ROLE_PERMISSIONS = {
-  admin: {
-    canManageUsers: true,
-    canViewAnalytics: true,
-    canViewAllData: true,
-    canEnterLabData: true,
-    canEnterETData: true,
-    canGradeEmbryos: true,
-    canEditSettings: true,
-    canExportReports: true,
-  },
+type PermissionSet = {
+  /** Create and manage users, laboratories and org settings. */
+  canManageUsers: boolean;
+  /** Read the analytics environment (rates, protocol and donor performance). */
+  canViewAnalytics: boolean;
+  /** See org-wide data including the data-quality checklist. */
+  canViewAllData: boolean;
+  /** Write OPU / IVF / embryo records. */
+  canEnterLabData: boolean;
+  /** Write recipient / transfer / pregnancy-diagnosis records. */
+  canEnterETData: boolean;
+  /** Use the AI grading tool and record a manual grade. */
+  canGradeEmbryos: boolean;
+  canEditSettings: boolean;
+  canExportReports: boolean;
+  /** Model evaluation, dataset explorer, protocol comparison. */
+  canViewResearch: boolean;
+};
+
+const VET_PERMISSIONS: PermissionSet = {
+  canManageUsers: false,
+  canViewAnalytics: false,
+  canViewAllData: false,
+  canEnterLabData: false,
+  canEnterETData: true,
+  canGradeEmbryos: false,
+  canEditSettings: false,
+  canExportReports: true,
+  canViewResearch: false,
+};
+
+const ADMIN_PERMISSIONS: PermissionSet = {
+  canManageUsers: true,
+  canViewAnalytics: true,
+  canViewAllData: true,
+  canEnterLabData: true,
+  canEnterETData: true,
+  canGradeEmbryos: true,
+  canEditSettings: true,
+  canExportReports: true,
+  canViewResearch: true,
+};
+
+export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
+  /** Legacy alias kept so imported `et team` accounts resolve. */
+  "et team": PermissionSet;
+} = {
+  admin: ADMIN_PERMISSIONS,
+
+  // Matches how organizations.py already treats organization_admin, and the
+  // backend's LAB_WRITE_ROLES / ET_WRITE_ROLES groupings.
+  organization_admin: ADMIN_PERMISSIONS,
+
   embryologist: {
     canManageUsers: false,
     canViewAnalytics: false,
@@ -59,43 +136,26 @@ export const ROLE_PERMISSIONS = {
     canGradeEmbryos: true,
     canEditSettings: false,
     canExportReports: true,
+    canViewResearch: false,
   },
-  "et team": {
+
+  veterinarian: VET_PERMISSIONS,
+
+  // Reads everything, writes nothing. The research role exists to analyse
+  // outcomes and evaluate models, not to edit clinical records — so every
+  // write flag is false while the analysis surfaces are all open.
+  researcher: {
     canManageUsers: false,
-    canViewAnalytics: false,
-    canViewAllData: false,
-    canEnterLabData: false,
-    canEnterETData: true,
-    canGradeEmbryos: false,
-    canEditSettings: false,
-    canExportReports: true,
-  },
-  // Same access as "et team" — recipient/synchronization/transfer work is
-  // the closest overlap with a vet's role. Matches the backend's
-  // ET_WRITE_ROLES grouping (app/auth/dependencies.py).
-  veterinarian: {
-    canManageUsers: false,
-    canViewAnalytics: false,
-    canViewAllData: false,
-    canEnterLabData: false,
-    canEnterETData: true,
-    canGradeEmbryos: false,
-    canEditSettings: false,
-    canExportReports: true,
-  },
-  // Same access as "admin" for CRUD purposes — matches how organizations.py
-  // already treats organization_admin, and the backend's LAB_WRITE_ROLES/
-  // ET_WRITE_ROLES groupings (app/auth/dependencies.py).
-  organization_admin: {
-    canManageUsers: true,
     canViewAnalytics: true,
     canViewAllData: true,
-    canEnterLabData: true,
-    canEnterETData: true,
-    canGradeEmbryos: true,
-    canEditSettings: true,
+    canEnterLabData: false,
+    canEnterETData: false,
+    canGradeEmbryos: false,
+    canEditSettings: false,
     canExportReports: true,
+    canViewResearch: true,
   },
+
   viewer: {
     canManageUsers: false,
     canViewAnalytics: false,
@@ -105,5 +165,13 @@ export const ROLE_PERMISSIONS = {
     canGradeEmbryos: false,
     canEditSettings: false,
     canExportReports: false,
+    canViewResearch: false,
   },
+
+  "et team": VET_PERMISSIONS,
 };
+
+/** Resolve a raw backend role string straight to its permission set. */
+export function getPermissions(role: string | null | undefined): PermissionSet {
+  return ROLE_PERMISSIONS[normalizeRole(role)];
+}

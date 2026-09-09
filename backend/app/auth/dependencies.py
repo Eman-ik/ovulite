@@ -76,11 +76,31 @@ def get_current_organization(current_user: User = Depends(get_current_user)) -> 
     return organization
 
 
+# The four operational roles, plus the two support roles. `role` is a free
+# string column on User, so this tuple is the vocabulary rather than a DB
+# constraint — it must stay in sync with CANONICAL_ROLES in
+# frontend/src/lib/roleRoutes.ts.
+#
+# "et team" is the legacy string for veterinarian; the imported ET dataset
+# uses it, so both are accepted wherever a vet is allowed.
+CANONICAL_ROLES = (
+    "admin",
+    "organization_admin",
+    "embryologist",
+    "veterinarian",
+    "et team",
+    "researcher",
+    "viewer",
+)
+
 # Write/delete role groups for the core clinical CRUD routers. Read access
 # (list/get) stays open to any authenticated role; only mutation is
 # restricted, split along the lab-side / ET-side line the SRS describes:
 # embryologist owns lab data entry, et team/veterinarian own recipient and
 # transfer entry. admin and organization_admin can write everywhere.
+#
+# `researcher` is deliberately absent from both: the role analyses outcomes
+# and evaluates models, and must not be able to edit clinical records.
 LAB_WRITE_ROLES = ("admin", "organization_admin", "embryologist")
 ET_WRITE_ROLES = ("admin", "organization_admin", "et team", "veterinarian")
 

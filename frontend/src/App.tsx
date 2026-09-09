@@ -41,6 +41,7 @@ function App() {
               <Route path="/app" element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="literature" element={<LiteraturePage />} />
+                {/* Data intake writes records, so the read-only researcher role is excluded. */}
                 <Route path="intake" element={<ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian"]}><IntakePage /></ProtectedRoute>} />
 
 <Route
@@ -118,7 +119,7 @@ function App() {
 <Route
   path="analytics"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
       <AnalyticsPage />
     </ProtectedRoute>
   }
@@ -127,7 +128,7 @@ function App() {
 <Route
   path="cases"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "viewer"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher", "viewer"]}>
       <CaseRecordsPage />
     </ProtectedRoute>
   }
@@ -135,7 +136,7 @@ function App() {
 <Route
   path="cases/:id"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "viewer"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher", "viewer"]}>
       <CaseDetailPage />
     </ProtectedRoute>
   }
@@ -144,7 +145,7 @@ function App() {
 <Route
   path="model-performance"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
       <ModelPerformancePage />
     </ProtectedRoute>
   }
@@ -153,7 +154,7 @@ function App() {
 <Route
   path="reports"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher"]}>
       <ReportsExportPage />
     </ProtectedRoute>
   }

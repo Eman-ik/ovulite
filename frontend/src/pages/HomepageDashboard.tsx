@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { ROLE_PERMISSIONS, getRoleDisplayName } from "@/lib/roleRoutes";
+import { getPermissions, getRoleDisplayName, normalizeRole, type CanonicalRole } from "@/lib/roleRoutes";
 import type {
   DashboardAlertsResponse,
   DashboardDataQualityResponse,
@@ -47,7 +47,7 @@ type RoleConfig = {
   alertFilter?: (metricKey: string) => boolean;
 };
 
-function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData: boolean): RoleConfig {
+function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canViewAllData: boolean): RoleConfig {
   if (role === "embryologist") {
     return {
       kpiKeys: ["oocytes_recovered", "maturation_rate", "cleavage_rate", "blastocyst_rate"],
@@ -62,7 +62,7 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       alertFilter: (key) => ["blastocyst_rate", "predictions_pending_outcome"].includes(key),
     };
   }
-  if (role === "et team") {
+  if (role === "veterinarian") {
     return {
       kpiKeys: ["transferable_embryos", "transfers_completed", "pregnancy_rate", "model_auc"],
       funnelStages: ["Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"],
@@ -74,6 +74,29 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
       showDataQuality: canViewAllData,
       filterFields: ["date_from", "date_to", "farm_location", "technician_id", "protocol_id", "fresh_or_frozen"],
       alertFilter: (key) => ["pregnancy_rate", "pregnancy_checks_due"].includes(key),
+    };
+  }
+  if (role === "researcher") {
+    // Outcome analysis, not daily operations: no "today" tiles and no active
+    // pipeline, but every comparative dimension and both outcome trends.
+    return {
+      kpiKeys: [
+        "oocytes_recovered",
+        "blastocyst_rate",
+        "transferable_embryos",
+        "transfers_completed",
+        "pregnancy_rate",
+        "model_auc",
+      ],
+      operationsTiles: [],
+      pipelineStages: [],
+      trendMetrics: [
+        { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#e79a9a" },
+        { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#8fb8de" },
+      ],
+      performanceDimensions: ["donor", "sire", "protocol", "technician"],
+      showIntelligence: true,
+      showDataQuality: true,
     };
   }
   // admin and viewer see everything
@@ -90,12 +113,16 @@ function buildRoleConfig(role: string, canViewAnalytics: boolean, canViewAllData
 
 export default function HomepageDashboard() {
   const { user } = useAuth();
-  const role = (user?.role?.toLowerCase() || "viewer") as keyof typeof ROLE_PERMISSIONS;
-  const permissions = ROLE_PERMISSIONS[role] ?? ROLE_PERMISSIONS.viewer;
+  const role = normalizeRole(user?.role);
+  const permissions = getPermissions(user?.role);
   const roleConfig = useMemo(
     () => buildRoleConfig(role, permissions.canViewAnalytics, permissions.canViewAllData),
     [role, permissions.canViewAnalytics, permissions.canViewAllData]
   );
+  // An empty tile/stage list means the role has no operational view at all
+  // (researcher); undefined means "show everything" (admin, viewer).
+  const showOperations = roleConfig.operationsTiles?.length !== 0;
+  const showPipeline = roleConfig.pipelineStages?.length !== 0;
 
   const [filters, setFilters] = useState<DashboardFilterValues>({});
   const [filterOptions, setFilterOptions] = useState<DashboardFilterOptions | null>(null);
@@ -200,9 +227,10 @@ export default function HomepageDashboard() {
         </span>
       </div>
 
-      {/* Hero + today's snapshot */}
+      {/* Hero + today's snapshot. Roles with no operational tiles (researcher)
+          get the hero full-width instead of an empty Today card. */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-        <div className="dash-card relative overflow-hidden !p-0 xl:col-span-2">
+        <div className={`dash-card relative overflow-hidden !p-0 ${showOperations ? "xl:col-span-2" : "xl:col-span-3"}`}>
           <div
             className="relative h-full min-h-[220px] p-7"
             style={{
@@ -232,13 +260,15 @@ export default function HomepageDashboard() {
           </div>
         </div>
 
-        <div className="dash-card flex flex-col">
-          <h3 className="text-base font-semibold dash-heading">Today</h3>
-          <p className="mt-1 text-xs dash-muted">What's happening right now</p>
-          <div className="mt-4 flex-1">
-            <OperationsPanel data={operations} tileKeys={roleConfig.operationsTiles} />
+        {showOperations && (
+          <div className="dash-card flex flex-col">
+            <h3 className="text-base font-semibold dash-heading">Today</h3>
+            <p className="mt-1 text-xs dash-muted">What's happening right now</p>
+            <div className="mt-4 flex-1">
+              <OperationsPanel data={operations} tileKeys={roleConfig.operationsTiles} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <FilterBar filters={filters} options={filterOptions} onChange={setFilters} visibleFields={roleConfig.filterFields} />
@@ -289,10 +319,12 @@ export default function HomepageDashboard() {
         <PerformancePanel filters={filters} dimensions={roleConfig.performanceDimensions} />
       </div>
 
-      <div className="dash-card">
-        <h3 className="mb-4 text-base font-semibold dash-heading">Active Pipeline</h3>
-        <ActivePipelineTable rows={pipeline} stages={roleConfig.pipelineStages} />
-      </div>
+      {showPipeline && (
+        <div className="dash-card">
+          <h3 className="mb-4 text-base font-semibold dash-heading">Active Pipeline</h3>
+          <ActivePipelineTable rows={pipeline} stages={roleConfig.pipelineStages} />
+        </div>
+      )}
 
       <div className={`grid grid-cols-1 gap-5 ${roleConfig.showIntelligence && roleConfig.showDataQuality ? "xl:grid-cols-2" : ""}`}>
         {roleConfig.showIntelligence && (
