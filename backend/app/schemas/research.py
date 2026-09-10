@@ -39,23 +39,54 @@ class DonorSireResponse(BaseModel):
     note: str
 
 
+class PeriodRate(RateCell):
+    period: str
+    """Month as YYYY-MM."""
+
+
 class ProtocolComparisonRow(RateCell):
     protocol_id: int
     protocol_name: str
     is_baseline: bool
     """True for the protocol with the largest sample, used as the comparator."""
+
+    # ── Naive (pooled) comparison ──
     diff_vs_baseline_pp: float | None
-    """Percentage-point difference from the baseline protocol."""
+    """Percentage-point difference from the baseline, ignoring when each was used."""
     p_value: float | None
-    """Two-proportion z-test against the baseline. None for the baseline row."""
+    """Two-proportion z-test on the pooled counts. None for the baseline row."""
     significant_at_05: bool | None
+
+    # ── Time-adjusted comparison ──
+    adjusted_diff_pp: float | None
+    """Mantel-Haenszel risk difference vs the baseline, stratified by month.
+
+    None when the protocol never shares a month with the baseline, in which
+    case no amount of adjustment can separate protocol from period.
+    """
+    adjusted_p_value: float | None
+    """Cochran-Mantel-Haenszel test across the shared months."""
+    adjusted_significant_at_05: bool | None
+    strata_compared: int
+    """Months in which both this protocol and the baseline were used."""
+    time_overlap_pct: float | None
+    """Share of this protocol's transfers that fall in those shared months."""
+    confounded: bool
+    """True when the pooled and time-adjusted estimates disagree materially."""
+    confound_reason: str | None
 
 
 class ProtocolComparisonResponse(BaseModel):
     min_sample_size: int
     baseline_protocol: str | None
     rows: list[ProtocolComparisonRow]
+    confounding_detected: bool
+    """True when any row's pooled comparison is contradicted by the adjusted one."""
+    warning: str | None
+    period_rates: list[PeriodRate]
+    """Outcome rate per month, so a period effect is visible rather than inferred."""
     note: str
+
 
 
 class FactorLevel(RateCell):

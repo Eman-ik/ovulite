@@ -17,6 +17,15 @@ Statistical discipline, applied consistently:
 * Significance is an uncorrected two-proportion z-test against the largest
   protocol. With five protocols that is five comparisons, so a single p < 0.05
   is weak evidence; the response says so in its ``note``.
+* **Group comparisons are stratified by month.** Practices are adopted at a
+  point in time, so a protocol introduced during a good period inherits that
+  period's outcomes. This dataset demonstrates it: pooled, the December-2025
+  protocol looks +14.8 pp better than the baseline at p=0.005, but within
+  December the baseline actually scored higher (46.2% vs 42.0%) — the whole
+  programme roughly doubled that month regardless of protocol. Reporting only
+  the pooled figure would assert a treatment effect that the data contradicts,
+  so every group comparison carries a Mantel-Haenszel estimate alongside it
+  and is flagged when the two disagree.
 """
 
 import math
@@ -35,6 +44,7 @@ from app.schemas.research import (
     FactorLevel,
     OutcomeFactor,
     OutcomeFactorsResponse,
+    PeriodRate,
     ProtocolComparisonResponse,
     ProtocolComparisonRow,
     RateCell,
@@ -45,6 +55,15 @@ router = APIRouter()
 # Below this, a proportion is reported as null rather than as a percentage.
 # Five is the same guard the dashboard's performance panel uses.
 MIN_SAMPLE_SIZE = 5
+
+# A pooled and a time-adjusted estimate that differ by at least this many
+# percentage points describe materially different conclusions, so the pooled
+# one is flagged rather than shown on its own.
+CONFOUND_SHIFT_PP = 5.0
+
+# Below this share of a group's transfers falling in months the baseline was
+# also used, group and period cannot be told apart with any confidence.
+MIN_TIME_OVERLAP_PCT = 60.0
 
 
 # ── Statistics ───────────────────────────────────────────
@@ -82,6 +101,53 @@ def two_proportion_p_value(s1: int, n1: int, s2: int, n2: int) -> float | None:
     z = (s1 / n1 - s2 / n2) / se
     # Two-sided normal tail via the error function.
     return math.erfc(abs(z) / math.sqrt(2))
+
+
+def chi2_sf_1df(x: float) -> float:
+    """Upper-tail probability of a chi-square with 1 degree of freedom.
+
+    For 1 df the statistic is Z², so P(X > x) = P(|Z| > √x) = erfc(√(x/2)).
+    """
+    return math.erfc(math.sqrt(x / 2))
+
+
+def mantel_haenszel(strata: list[tuple[int, int, int, int]]) -> tuple[float | None, float | None]:
+    """Pool a 2×2 comparison across strata, controlling for the stratum variable.
+
+    Each stratum is ``(a, n1, b, n0)`` — successes and totals for the exposed
+    group (a/n1) and the reference group (b/n0). Returns the MH risk
+    difference as percentage points and the Cochran-Mantel-Haenszel p-value.
+
+    This is the correction for confounding by the stratum variable: comparing
+    like with like inside each stratum, then pooling with weights, instead of
+    collapsing the table and letting stratum composition drive the result.
+    """
+    usable = [(a, n1, b, n0) for a, n1, b, n0 in strata if n1 > 0 and n0 > 0]
+    if not usable:
+        return (None, None)
+
+    # MH weights for a risk difference: w = n1*n0 / (n1+n0).
+    num = den = 0.0
+    for a, n1, b, n0 in usable:
+        w = n1 * n0 / (n1 + n0)
+        num += w * (a / n1 - b / n0)
+        den += w
+    diff = None if den == 0 else (num / den) * 100
+
+    # CMH statistic, with the continuity correction omitted (it is
+    # conservative and these strata are not tiny).
+    obs = sum(a for a, _, _, _ in usable)
+    exp = var = 0.0
+    for a, n1, b, n0 in usable:
+        total = n1 + n0
+        successes = a + b
+        if total < 2:
+            continue
+        exp += n1 * successes / total
+        var += n1 * n0 * successes * (total - successes) / (total**2 * (total - 1))
+    p_value = None if var <= 0 else chi2_sf_1df((obs - exp) ** 2 / var)
+
+    return (None if diff is None else round(diff, 1), None if p_value is None else round(p_value, 4))
 
 
 def _rate_cell(successes: int, n: int) -> dict:
@@ -127,6 +193,12 @@ def _resolved_transfers(db: Session, org_id: int) -> list[ETTransfer]:
         .all()
     )
     return [t for t in transfers if _clean_pregnancy_result(t.pc1_result) in ("Pregnant", "Open")]
+
+
+def _stratum(t: ETTransfer) -> str:
+    """Month key used to stratify comparisons, so period cannot masquerade as
+    a treatment effect. Month is the finest bucket this dataset supports."""
+    return t.et_date.strftime("%Y-%m") if t.et_date else "unknown"
 
 
 def _is_pregnant(t: ETTransfer) -> bool:
@@ -248,15 +320,70 @@ def protocol_comparison(
     base_rows = groups[baseline_id]
     base_n, base_s = len(base_rows), sum(1 for t in base_rows if _is_pregnant(t))
 
+    # Counts per (protocol, month), the stratification used below.
+    by_stratum: dict[tuple[int, str], list[int]] = {}
+    for protocol_id, group in groups.items():
+        for t in group:
+            key = (protocol_id, _stratum(t))
+            cell = by_stratum.setdefault(key, [0, 0])
+            cell[0] += 1 if _is_pregnant(t) else 0
+            cell[1] += 1
+    all_months = sorted({m for _, m in by_stratum})
+
     rows: list[ProtocolComparisonRow] = []
     for protocol_id, group in groups.items():
         n = len(group)
         successes = sum(1 for t in group if _is_pregnant(t))
         is_baseline = protocol_id == baseline_id
+
         p_value = None if is_baseline else two_proportion_p_value(successes, n, base_s, base_n)
         diff = None
         if not is_baseline and n and base_n:
             diff = round((successes / n - base_s / base_n) * 100, 1)
+
+        adj_diff = adj_p = overlap_pct = None
+        strata_compared = 0
+        confounded = False
+        reason: str | None = None
+
+        if not is_baseline:
+            strata = []
+            overlapping_n = 0
+            for month in all_months:
+                a, n1 = by_stratum.get((protocol_id, month), [0, 0])
+                b, n0 = by_stratum.get((baseline_id, month), [0, 0])
+                if n1 > 0 and n0 > 0:
+                    strata.append((a, n1, b, n0))
+                    overlapping_n += n1
+            strata_compared = len(strata)
+            overlap_pct = round(overlapping_n / n * 100, 1) if n else None
+            adj_diff, adj_p = mantel_haenszel(strata)
+
+            # Two independent ways the pooled number can mislead.
+            if not strata:
+                confounded = True
+                reason = (
+                    "This protocol was never used in the same month as the baseline, so its "
+                    "pooled difference measures the period it was used in, not the protocol. "
+                    "No adjustment is possible."
+                )
+            elif adj_diff is not None and diff is not None:
+                flipped = (adj_diff > 0) != (diff > 0) and abs(adj_diff - diff) > 1
+                shifted = abs(adj_diff - diff) >= CONFOUND_SHIFT_PP
+                if flipped or shifted:
+                    confounded = True
+                    reason = (
+                        f"Pooled difference is {diff:+.1f} pp but {adj_diff:+.1f} pp once compared "
+                        f"within the same months. The pooled figure is largely a period effect, "
+                        f"not a protocol effect."
+                    )
+                elif overlap_pct is not None and overlap_pct < MIN_TIME_OVERLAP_PCT:
+                    confounded = True
+                    reason = (
+                        f"Only {overlap_pct}% of this protocol's transfers fall in months the "
+                        "baseline was also used, so protocol and period are hard to separate."
+                    )
+
         rows.append(
             ProtocolComparisonRow(
                 protocol_id=protocol_id,
@@ -265,21 +392,56 @@ def protocol_comparison(
                 diff_vs_baseline_pp=diff,
                 p_value=None if p_value is None else round(p_value, 4),
                 significant_at_05=None if p_value is None else p_value < 0.05,
+                adjusted_diff_pp=adj_diff,
+                adjusted_p_value=adj_p,
+                adjusted_significant_at_05=None if adj_p is None else adj_p < 0.05,
+                strata_compared=strata_compared,
+                time_overlap_pct=overlap_pct,
+                confounded=confounded,
+                confound_reason=reason,
                 **_rate_cell(successes, n),
             )
         )
 
     rows.sort(key=lambda r: -r.n)
+
+    # Per-month outcome rate, so a reader can see a period effect directly
+    # instead of having to take the adjustment on trust.
+    month_totals: dict[str, list[int]] = {}
+    for t in transfers:
+        cell = month_totals.setdefault(_stratum(t), [0, 0])
+        cell[0] += 1 if _is_pregnant(t) else 0
+        cell[1] += 1
+    period_rates = [
+        PeriodRate(period=month, **_rate_cell(s, n))
+        for month, (s, n) in sorted(month_totals.items())
+    ]
+
+    confounding_detected = any(r.confounded for r in rows)
+    warning = None
+    if confounding_detected:
+        names = [r.protocol_name for r in rows if r.confounded]
+        warning = (
+            f"Protocol usage is not evenly spread over time, so the pooled comparison is "
+            f"confounded by period for: {', '.join(names)}. Read the time-adjusted column, "
+            "not the pooled one."
+        )
+
     return ProtocolComparisonResponse(
         min_sample_size=MIN_SAMPLE_SIZE,
         baseline_protocol=protocol_names.get(baseline_id),
         rows=rows,
+        confounding_detected=confounding_detected,
+        warning=warning,
+        period_rates=period_rates,
         note=(
-            "Two-proportion z-tests against the largest protocol, uncorrected for "
-            f"multiple comparisons — {len(rows) - 1} tests were run, so a single p < 0.05 "
-            "is weak evidence on its own. Intervals are Wilson score intervals. "
-            "These are observational groups, not randomised arms: protocol choice "
-            "may correlate with recipient condition and season."
+            "Pooled columns compare raw totals and ignore when each protocol was used. "
+            "The adjusted column is a Mantel-Haenszel risk difference stratified by month, "
+            "which compares protocols only within months where both were used. Where the two "
+            "disagree, the pooled figure is picking up the period rather than the protocol. "
+            f"Tests are uncorrected across {len(rows) - 1} comparisons. These are observational "
+            "groups, not randomised arms: stratifying by month removes the period effect but "
+            "not selection on recipient condition."
         ),
     )
 

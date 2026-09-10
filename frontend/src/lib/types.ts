@@ -485,15 +485,31 @@ export interface ProtocolComparisonRow extends RateCell {
   protocol_id: number;
   protocol_name: string;
   is_baseline: boolean;
+  /** Pooled comparison — ignores when each protocol was used. */
   diff_vs_baseline_pp: number | null;
   p_value: number | null;
   significant_at_05: boolean | null;
+  /** Mantel-Haenszel difference, stratified by month. */
+  adjusted_diff_pp: number | null;
+  adjusted_p_value: number | null;
+  adjusted_significant_at_05: boolean | null;
+  strata_compared: number;
+  time_overlap_pct: number | null;
+  confounded: boolean;
+  confound_reason: string | null;
+}
+
+export interface PeriodRate extends RateCell {
+  period: string;
 }
 
 export interface ProtocolComparisonResponse {
   min_sample_size: number;
   baseline_protocol: string | null;
   rows: ProtocolComparisonRow[];
+  confounding_detected: boolean;
+  warning: string | null;
+  period_rates: PeriodRate[];
   note: string;
 }
 

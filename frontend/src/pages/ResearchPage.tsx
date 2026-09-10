@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FlaskConical, GitCompare, Grid3x3, Info } from "lucide-react";
+import { AlertTriangle, FlaskConical, GitCompare, Grid3x3, Info } from "lucide-react";
 import api from "@/lib/api";
 import type {
   DonorSireResponse,
@@ -56,6 +56,41 @@ function IntervalBar({ cell, scaleMax = 60 }: { cell: RateCell; scaleMax?: numbe
         style={{ left: pos(cell.rate_pct) }}
       />
     </div>
+  );
+}
+
+function Diff({ value, bold, strike }: { value: number | null; bold?: boolean; strike?: boolean }) {
+  if (value === null) return <span className="dash-muted">—</span>;
+  return (
+    <span
+      className={`${value > 0 ? "text-[#2f7d5c]" : "text-[#b8433d]"} ${bold ? "font-semibold" : ""} ${
+        strike ? "line-through decoration-[#b8433d]/50" : ""
+      }`}
+    >
+      {value > 0 ? "+" : ""}
+      {value} pp
+    </span>
+  );
+}
+
+function PValue({
+  value,
+  significant,
+  strike,
+}: {
+  value: number | null;
+  significant: boolean | null;
+  strike?: boolean;
+}) {
+  if (value === null) return <span className="dash-muted">—</span>;
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+        significant ? "bg-[rgba(234,186,107,0.22)] text-[#a1741c]" : "dash-muted"
+      } ${strike ? "line-through" : ""}`}
+    >
+      {value < 0.001 ? "<0.001" : value}
+    </span>
   );
 }
 
@@ -144,20 +179,70 @@ export default function ResearchPage() {
           <p className="mt-4 text-sm dash-muted">Loading…</p>
         ) : (
           <>
+            {protocols.confounding_detected && protocols.warning && (
+              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(210,86,79,0.3)] bg-[rgba(231,154,154,0.14)] px-4 py-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#b8433d]" />
+                <div className="text-sm text-[#8f3f3a]">
+                  <p className="font-semibold text-[#b8433d]">Confounded by time period</p>
+                  <p className="mt-1 leading-relaxed">{protocols.warning}</p>
+                </div>
+              </div>
+            )}
+
+            {protocols.period_rates.length > 1 && (
+              <div className="mt-4 rounded-2xl bg-[#faf9f6] p-4">
+                <p className="text-xs font-medium uppercase tracking-wide dash-muted">
+                  Programme rate by month
+                </p>
+                <div className="mt-3 flex items-end gap-1.5">
+                  {protocols.period_rates.map((p) => (
+                    <div key={p.period} className="flex flex-1 flex-col items-center gap-1">
+                      <span className="text-[10px] dash-muted">
+                        {p.rate_pct === null ? "" : `${Math.round(p.rate_pct)}%`}
+                      </span>
+                      <div
+                        className="w-full rounded-t bg-[#8fb8de]"
+                        style={{ height: `${Math.max(2, ((p.rate_pct ?? 0) / 60) * 52)}px` }}
+                        title={`${p.period}: ${p.successes}/${p.n}`}
+                      />
+                      <span className="text-[9px] dash-muted">{p.period.slice(2)}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] dash-muted">
+                  A protocol adopted during a strong month inherits that month's outcomes. This is
+                  what the adjusted column removes.
+                </p>
+              </div>
+            )}
+
             <div className="custom-scrollbar mt-4 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-sm">
+              <table className="w-full min-w-[820px] text-sm">
                 <thead>
+                  <tr className="text-left text-[10px] uppercase tracking-wide dash-muted">
+                    <th className="pb-1" />
+                    <th className="pb-1" />
+                    <th className="pb-1" />
+                    <th className="border-b border-[var(--border)] pb-1 pr-4 text-center font-medium" colSpan={2}>
+                      Pooled (ignores timing)
+                    </th>
+                    <th className="border-b border-[rgba(22,24,26,0.25)] pb-1 text-center font-medium text-[var(--foreground)]" colSpan={2}>
+                      Adjusted for month
+                    </th>
+                  </tr>
                   <tr className="border-b border-[var(--border)] text-left text-xs uppercase tracking-wide dash-muted">
                     <th className="pb-2 pr-4 font-medium">Protocol</th>
-                    <th className="pb-2 pr-4 font-medium">Pregnancy Rate</th>
+                    <th className="pb-2 pr-4 font-medium">Rate</th>
                     <th className="pb-2 pr-4 font-medium">95% CI</th>
-                    <th className="pb-2 pr-4 font-medium">vs Baseline</th>
+                    <th className="pb-2 pr-3 font-medium">Diff</th>
+                    <th className="pb-2 pr-4 font-medium">p</th>
+                    <th className="pb-2 pr-3 font-medium">Diff</th>
                     <th className="pb-2 font-medium">p</th>
                   </tr>
                 </thead>
                 <tbody>
                   {protocols.rows.map((r) => (
-                    <tr key={r.protocol_id} className="border-b border-[var(--border)] last:border-0">
+                    <tr key={r.protocol_id} className="border-b border-[var(--border)] last:border-0 align-top">
                       <td className="py-3 pr-4">
                         <span className="dash-heading">{r.protocol_name}</span>
                         {r.is_baseline && (
@@ -165,11 +250,16 @@ export default function ResearchPage() {
                             baseline
                           </span>
                         )}
+                        {r.confounded && (
+                          <p className="mt-1.5 max-w-[26rem] text-[11px] leading-relaxed text-[#b8433d]">
+                            {r.confound_reason}
+                          </p>
+                        )}
                       </td>
-                      <td className="py-3 pr-4">
+                      <td className="py-3 pr-4 whitespace-nowrap">
                         <Rate cell={r} />
                       </td>
-                      <td className="w-40 py-3 pr-4">
+                      <td className="w-36 py-3 pr-4">
                         <IntervalBar cell={r} />
                         {!r.insufficient_data && (
                           <span className="mt-1 block text-[10px] dash-muted">
@@ -177,33 +267,35 @@ export default function ResearchPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 pr-4">
-                        {r.diff_vs_baseline_pp === null ? (
+
+                      {/* Pooled — struck through when the adjustment contradicts it. */}
+                      <td className={`py-3 pr-3 whitespace-nowrap ${r.confounded ? "opacity-45" : ""}`}>
+                        <Diff value={r.diff_vs_baseline_pp} strike={r.confounded} />
+                      </td>
+                      <td className={`py-3 pr-4 ${r.confounded ? "opacity-45" : ""}`}>
+                        <PValue value={r.p_value} significant={r.significant_at_05} strike={r.confounded} />
+                      </td>
+
+                      {/* Adjusted — the estimate to read. */}
+                      <td className="py-3 pr-3 whitespace-nowrap">
+                        {r.is_baseline ? (
                           <span className="dash-muted">—</span>
+                        ) : r.adjusted_diff_pp === null ? (
+                          <span className="text-xs dash-muted">n/a</span>
                         ) : (
-                          <span
-                            className={
-                              r.diff_vs_baseline_pp > 0 ? "text-[#2f7d5c]" : "text-[#b8433d]"
-                            }
-                          >
-                            {r.diff_vs_baseline_pp > 0 ? "+" : ""}
-                            {r.diff_vs_baseline_pp} pp
-                          </span>
+                          <>
+                            <Diff value={r.adjusted_diff_pp} bold />
+                            <span className="mt-0.5 block text-[10px] dash-muted">
+                              {r.strata_compared} mo · {r.time_overlap_pct}% overlap
+                            </span>
+                          </>
                         )}
                       </td>
                       <td className="py-3">
-                        {r.p_value === null ? (
+                        {r.is_baseline ? (
                           <span className="dash-muted">—</span>
                         ) : (
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                              r.significant_at_05
-                                ? "bg-[rgba(234,186,107,0.22)] text-[#a1741c]"
-                                : "dash-muted"
-                            }`}
-                          >
-                            {r.p_value < 0.001 ? "<0.001" : r.p_value}
-                          </span>
+                          <PValue value={r.adjusted_p_value} significant={r.adjusted_significant_at_05} />
                         )}
                       </td>
                     </tr>
