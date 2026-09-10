@@ -68,6 +68,11 @@ if _project_root not in sys.path:
 router = APIRouter()
 
 TRANSFERABLE_GRADES = (1, 2, 3)
+
+# Upper edge of the shuffled-label null for this dataset's size, measured by
+# permutation in ml/diagnose_split.py (null 0.501 ± 0.040, 95% range to 0.568).
+# An AUC below this is not evidence of any learned signal.
+AUC_CHANCE_CEILING = 0.57
 DEFAULT_RANGE_DAYS = 90
 
 
@@ -570,16 +575,35 @@ def get_kpis(
         _pregnancy_rate_sparkline(transfer_rows, start, end, granularity),
     ))
 
-    # 8. AI model metric (not date-scoped — the model is a single global artifact)
+    # 8. AI model metric (not date-scoped — the model is a single global artifact).
+    #
+    # Reported as discrimination above chance, not as "accuracy". ROC-AUC has a
+    # floor of 0.5, so rendering it as a bare percentage invites reading 48.8%
+    # as "about half right" when it actually means "no better than guessing".
+    # A permutation test (ml/diagnose_split.py) puts the current artifact
+    # squarely inside the shuffled-label null, so the label says so outright
+    # rather than implying a number that is merely low.
     auc, version = _model_auc_and_version()
     pending_predictions = db.query(Prediction).filter(
         Prediction.organization_id == org_id, Prediction.actual_outcome.is_(None)
     ).count()
+    if auc is None:
+        value, label, note = None, "Model Discrimination", "no model loaded"
+    else:
+        value = round((auc - 0.5) * 200, 1)  # 0.5 AUC -> 0%, 1.0 AUC -> 100%
+        label = "Model Discrimination (vs chance)"
+        note = (
+            f"AUC {auc:.3f} — not distinguishable from chance"
+            if auc < AUC_CHANCE_CEILING
+            else f"AUC {auc:.3f}"
+        )
     kpis.append(KpiItem(
-        key="model_auc", label="AI Model Accuracy (holdout AUC)",
-        value=round(auc * 100, 1) if auc is not None else None,
+        key="model_auc", label=label,
+        value=value,
         unit="percent", delta_pct=None, delta_direction=None, sparkline=[],
-        comparison_label=f"{version or 'no model loaded'} · {pending_predictions} predictions pending outcome",
+        comparison_label=(
+            f"{note} · {version or 'no version'} · {pending_predictions} predictions pending outcome"
+        ),
     ))
 
     return KpiResponse(kpis=kpis, date_from=start, date_to=end)
