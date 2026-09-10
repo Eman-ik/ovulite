@@ -22,6 +22,7 @@ import {
   Upload,
   Search,
   Bell,
+  GitCompare,
 } from "lucide-react";
 import ovuliteLogo from "../pages/icon.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -66,6 +67,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: "Intelligence",
     items: [
       { to: "analytics", icon: BarChart3, label: "Analytics", permission: "canViewAnalytics" },
+      { to: "research", icon: GitCompare, label: "Research", permission: "canViewResearch" },
       { to: "model-performance", icon: TrendingUp, label: "Model Performance", permission: "canViewResearch" },
       { to: "literature", icon: BookOpen, label: "Literature" },
     ],

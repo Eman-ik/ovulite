@@ -453,3 +453,64 @@ export interface DashboardAISummaryResponse {
   pending_predictions_count: number;
   high_risk_transfers: DashboardHighRiskTransfer[];
 }
+
+// ── Research (comparative outcome analyses) ──────────────
+
+export interface RateCell {
+  n: number;
+  successes: number;
+  rate_pct: number | null;
+  ci_low_pct: number | null;
+  ci_high_pct: number | null;
+  insufficient_data: boolean;
+}
+
+export interface DonorSireCell extends RateCell {
+  donor_id: number;
+  donor_tag: string;
+  sire_id: number;
+  sire_name: string;
+}
+
+export interface DonorSireResponse {
+  min_sample_size: number;
+  donors: string[];
+  sires: string[];
+  cells: DonorSireCell[];
+  overall: RateCell;
+  note: string;
+}
+
+export interface ProtocolComparisonRow extends RateCell {
+  protocol_id: number;
+  protocol_name: string;
+  is_baseline: boolean;
+  diff_vs_baseline_pp: number | null;
+  p_value: number | null;
+  significant_at_05: boolean | null;
+}
+
+export interface ProtocolComparisonResponse {
+  min_sample_size: number;
+  baseline_protocol: string | null;
+  rows: ProtocolComparisonRow[];
+  note: string;
+}
+
+export interface FactorLevel extends RateCell {
+  label: string;
+}
+
+export interface OutcomeFactor {
+  key: string;
+  label: string;
+  levels: FactorLevel[];
+  available: boolean;
+  unavailable_reason: string | null;
+}
+
+export interface OutcomeFactorsResponse {
+  min_sample_size: number;
+  factors: OutcomeFactor[];
+  overall: RateCell;
+}
