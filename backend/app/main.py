@@ -9,7 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from app.models import user
 from app.models.user import User
 from sqlalchemy.orm import sessionmaker
@@ -20,6 +20,7 @@ from app.api.autonomous_agent import router as autonomous_agent_router
 from app.api.cases import router as cases_router
 from app.api.dashboard import router as dashboard_router
 from app.api.research import router as research_router
+from app.api.vet import router as vet_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
@@ -90,11 +91,40 @@ def init_db():
     pass
 
 
+def _create_schema_if_unmanaged() -> None:
+    """Build the schema from the models only when Alembic is not managing it.
+
+    ``create_all`` and Alembic must not both own the schema. create_all builds
+    tables from the current models and skips migrations entirely, which has
+    two consequences that are silent until they bite:
+
+    * A table created this way exists but never runs its migration's data
+      steps. ``pregnancy_checks`` would come up empty rather than carrying
+      migration 013's backfill of 299 historical diagnoses.
+    * Alembic then finds the table already present and fails with
+      DuplicateTable, or is stamped past the revision to get moving — which
+      is how this database ended up reporting revision 007 while the tables
+      from 008-011 all existed.
+
+    So: if an ``alembic_version`` table is present, Alembic owns the schema
+    and this does nothing. A genuinely fresh database with no migration
+    history still gets a usable schema, which keeps local setup working.
+    """
+    if inspect(engine).has_table("alembic_version"):
+        logger.info("Alembic manages this database; skipping metadata.create_all")
+        return
+    logger.warning(
+        "No alembic_version table found — creating schema from models. "
+        "Run 'alembic upgrade head' instead to get migration data steps."
+    )
+    Base.metadata.create_all(bind=engine)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """Lifespan context for the FastAPI app."""
     init_db()
-    Base.metadata.create_all(bind=engine)
+    _create_schema_if_unmanaged()
     logger.info("Ovulite API started")
 
     # Seed the default admin for local/dev databases when no users exist.
@@ -153,6 +183,7 @@ app.include_router(qc_router, prefix="/qc", tags=["qc"])
 app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(research_router, prefix="/research", tags=["research"])
+app.include_router(vet_router, prefix="/vet", tags=["vet"])
 app.include_router(organizations_router)
 app.include_router(health_router, tags=["health"])
 app.include_router(literature_router, prefix="/literature", tags=["literature"])

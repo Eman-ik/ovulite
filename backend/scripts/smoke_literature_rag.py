@@ -26,11 +26,11 @@ with Session(engine) as db:
     db.commit()
     seed_corpus(db, 1, "software-test")
     started = time.perf_counter()
-    answer = answer_question(db, "What does the literature report about corpus luteum cavities and pregnancy outcomes in bovine embryo-transfer recipients?", db.query(LiteratureDocument).all())
+    answer = answer_question(db, "What effect did CSF2 and DKK1 have on pregnancy rate for embryos cultured without serum?", db.query(LiteratureDocument).all())
     report = {"elapsed_seconds": round(time.perf_counter() - started, 2), **answer}
     destination = BASE.parent / "outputs" / "literature-rag-smoke.json"
     destination.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({key: report[key] for key in ("mode", "model", "elapsed_seconds", "answer", "fallback_reason")}, ensure_ascii=False), flush=True)
     if report["mode"] != "generative_rag" or not report["claims"]:
-        raise SystemExit("Live generation did not produce a supported cited answer; inspect the report")
-    print(f"Live RAG verification passed: {destination}", flush=True)
+        raise SystemExit("Live generation did not produce a cited answer; inspect the report")
+    print(f"Live RAG transport/schema/citation verification passed: {destination}. Scientific interpretation requires review.", flush=True)

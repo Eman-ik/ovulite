@@ -1,15 +1,22 @@
 """Pydantic schemas for Recipient CRUD operations."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class RecipientBase(BaseModel):
     tag_id: str
     farm_location: Optional[str] = None
     cow_or_heifer: Optional[str] = None
+    breed: Optional[str] = None
+    birth_date: Optional[date] = None
+    parity: Optional[int] = Field(default=None, ge=0, le=20)
+    reproductive_status: Optional[str] = None
+    reproductive_disorders: Optional[str] = None
+    previous_ai_count: Optional[int] = Field(default=None, ge=0, le=50)
+    previous_et_count: Optional[int] = Field(default=None, ge=0, le=50)
     notes: Optional[str] = None
 
 
@@ -21,11 +28,20 @@ class RecipientUpdate(BaseModel):
     tag_id: Optional[str] = None
     farm_location: Optional[str] = None
     cow_or_heifer: Optional[str] = None
+    breed: Optional[str] = None
+    birth_date: Optional[date] = None
+    parity: Optional[int] = Field(default=None, ge=0, le=20)
+    reproductive_status: Optional[str] = None
+    reproductive_disorders: Optional[str] = None
+    previous_ai_count: Optional[int] = Field(default=None, ge=0, le=50)
+    previous_et_count: Optional[int] = Field(default=None, ge=0, le=50)
     notes: Optional[str] = None
 
 
 class RecipientResponse(RecipientBase):
     recipient_id: int
+    # Derived from birth_date on read, so it can never be a stale stored value.
+    age_years: Optional[float] = None
     created_at: datetime
     updated_at: datetime
 

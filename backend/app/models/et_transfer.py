@@ -23,6 +23,9 @@ if TYPE_CHECKING:
     from app.models.protocol_log import ProtocolLog
     from app.models.recipient import Recipient
     from app.models.technician import Technician
+    from app.models.calving_record import CalvingRecord
+    from app.models.pregnancy_check import PregnancyCheck
+    from app.models.recipient_evaluation import RecipientEvaluation
 
 
 class ETTransfer(OrganizationScopedMixin, Base):
@@ -93,6 +96,18 @@ class ETTransfer(OrganizationScopedMixin, Base):
         back_populates="transfer"
     )
     protocol_logs: Mapped[list["ProtocolLog"]] = relationship(
+        back_populates="transfer"
+    )
+    pregnancy_checks: Mapped[list["PregnancyCheck"]] = relationship(
+        back_populates="transfer",
+        cascade="all, delete-orphan",
+        order_by="PregnancyCheck.check_date",
+    )
+    # One-to-one: a transfer calves at most once (see CalvingRecord).
+    calving_record: Mapped[Optional["CalvingRecord"]] = relationship(
+        back_populates="transfer", cascade="all, delete-orphan", uselist=False
+    )
+    evaluations: Mapped[list["RecipientEvaluation"]] = relationship(
         back_populates="transfer"
     )
 

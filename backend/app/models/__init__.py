@@ -12,6 +12,9 @@ from app.models.prediction import Prediction
 from app.models.protocol import Protocol
 from app.models.protocol_log import ProtocolLog
 from app.models.recipient import Recipient
+from app.models.recipient_evaluation import RecipientEvaluation
+from app.models.pregnancy_check import PregnancyCheck
+from app.models.calving_record import CalvingRecord
 from app.models.sire import Sire
 from app.models.technician import Technician
 from app.models.token_blacklist import RevokedToken
@@ -37,6 +40,9 @@ __all__ = [
     "Protocol",
     "ProtocolLog",
     "Recipient",
+    "RecipientEvaluation",
+    "PregnancyCheck",
+    "CalvingRecord",
     "RevokedToken",
     "Sire",
     "Technician",
