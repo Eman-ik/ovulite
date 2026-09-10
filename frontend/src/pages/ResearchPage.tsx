@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, FlaskConical, GitCompare, Grid3x3, Info } from "lucide-react";
+import { AlertTriangle, Activity, FlaskConical, GitCompare, Grid3x3, Info } from "lucide-react";
+import AttributionPanel from "@/components/research/AttributionPanel";
 import api from "@/lib/api";
 import type {
+  AttributionResponse,
   DonorSireResponse,
   OutcomeFactorsResponse,
   ProtocolComparisonResponse,
@@ -107,6 +109,7 @@ export default function ResearchPage() {
   const [protocols, setProtocols] = useState<ProtocolComparisonResponse | null>(null);
   const [donorSire, setDonorSire] = useState<DonorSireResponse | null>(null);
   const [factors, setFactors] = useState<OutcomeFactorsResponse | null>(null);
+  const [attribution, setAttribution] = useState<AttributionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -114,11 +117,13 @@ export default function ResearchPage() {
       api.get<ProtocolComparisonResponse>("/research/protocols"),
       api.get<DonorSireResponse>("/research/donor-sire"),
       api.get<OutcomeFactorsResponse>("/research/outcome-factors"),
+      api.get<AttributionResponse>("/research/attribution"),
     ])
-      .then(([p, d, f]) => {
+      .then(([p, d, f, a]) => {
         setProtocols(p.data);
         setDonorSire(d.data);
         setFactors(f.data);
+        setAttribution(a.data);
       })
       .catch(() => setError("Unable to load research analyses from the server."));
   }, []);
@@ -161,6 +166,19 @@ export default function ResearchPage() {
           </p>
         </div>
       )}
+
+      {/* ── Change attribution ── */}
+      <div className="dash-card">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 dash-muted" />
+          <h2 className="text-base font-semibold dash-heading">What Changed</h2>
+        </div>
+        <p className="mt-1 text-xs dash-muted">
+          Step changes in pregnancy rate, split into what was transferred (mix) versus how well it
+          went (rate). A large mix term means a comparison across this change would be confounded.
+        </p>
+        <AttributionPanel data={attribution} />
+      </div>
 
       {/* ── Protocol comparison ── */}
       <div className="dash-card">

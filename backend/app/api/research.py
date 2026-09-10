@@ -29,6 +29,7 @@ Statistical discipline, applied consistently:
 """
 
 import math
+from dataclasses import asdict
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, joinedload
@@ -36,9 +37,13 @@ from sqlalchemy.orm import Session, joinedload
 from app.api.transfers import _clean_pregnancy_result
 from app.auth.dependencies import get_current_user
 from app.database import get_db
+from app.models.embryo import Embryo
 from app.models.et_transfer import ETTransfer
 from app.models.user import User
+from app.services.attribution import Observation, analyse
 from app.schemas.research import (
+    AttributionResponse,
+    ChangePointOut,
     DonorSireCell,
     DonorSireResponse,
     FactorLevel,
@@ -185,8 +190,10 @@ def _resolved_transfers(db: Session, org_id: int) -> list[ETTransfer]:
     transfers = (
         db.query(ETTransfer)
         .options(
-            joinedload(ETTransfer.embryo),
+            joinedload(ETTransfer.embryo).joinedload(Embryo.donor),
+            joinedload(ETTransfer.embryo).joinedload(Embryo.sire),
             joinedload(ETTransfer.protocol),
+            joinedload(ETTransfer.technician),
         )
         .filter(ETTransfer.organization_id == org_id)
         .filter(ETTransfer.pc1_result.isnot(None))
@@ -517,4 +524,81 @@ def outcome_factors(
         min_sample_size=MIN_SAMPLE_SIZE,
         factors=factors,
         overall=_overall(transfers),
+    )
+
+
+# ── Change attribution ───────────────────────────────────
+
+# Dimensions worth decomposing over: each is recorded per transfer and could
+# plausibly shift in composition between periods. Ordered most to least likely
+# to be the operational lever.
+ATTRIBUTION_DIMENSIONS = [
+    "protocol",
+    "farm",
+    "technician",
+    "donor_breed",
+    "fresh_or_frozen",
+    "embryo_stage",
+    "cl_side",
+]
+
+
+@router.get("/attribution", response_model=AttributionResponse)
+def change_attribution(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> AttributionResponse:
+    """Detect the strongest step change in pregnancy rate and explain it.
+
+    Answers "why did performance change?" rather than "what is performance?".
+    Each dimension's contribution is split into a composition (mix) effect and
+    a within-group (rate) effect, so a shift caused by *what* was transferred
+    is never reported as a change in *how well* it was done.
+    """
+    transfers = _resolved_transfers(db, current_user.organization_id)
+
+    observations = [
+        Observation(
+            period=_stratum(t),
+            success=_is_pregnant(t),
+            groups={
+                "protocol": t.protocol.name if t.protocol else None,
+                "farm": t.farm_location,
+                "technician": t.technician.name if t.technician else None,
+                "donor_breed": t.embryo.donor.breed if t.embryo and t.embryo.donor else None,
+                "fresh_or_frozen": t.embryo.fresh_or_frozen if t.embryo else None,
+                "embryo_stage": (
+                    f"Stage {t.embryo.stage}" if t.embryo and t.embryo.stage is not None else None
+                ),
+                "cl_side": t.cl_side,
+            },
+        )
+        for t in transfers
+    ]
+
+    change = analyse(observations, ATTRIBUTION_DIMENSIONS)
+
+    month_totals: dict[str, list[int]] = {}
+    for t in transfers:
+        cell = month_totals.setdefault(_stratum(t), [0, 0])
+        cell[0] += 1 if _is_pregnant(t) else 0
+        cell[1] += 1
+    series = [
+        PeriodRate(period=month, **_rate_cell(s, n)) for month, (s, n) in sorted(month_totals.items())
+    ]
+
+    return AttributionResponse(
+        change_point=None if change is None else ChangePointOut(**asdict(change)),
+        series=series,
+        dimensions_tested=ATTRIBUTION_DIMENSIONS,
+        note=(
+            "Mix (pp) is how much of the change came from the population shifting; rate (pp) is "
+            "how much came from groups themselves performing differently. The two are an exact "
+            "decomposition of the observed change — they sum to it with no residual. A large mix "
+            "term means the comparison you were about to make is confounded. A large rate term "
+            "spread across every dimension means something changed in practice or conditions that "
+            "is not recorded in the data, and is worth asking the team about. Significance is a "
+            "permutation p-value, because scanning every candidate split and reporting the best "
+            "one makes the nominal p-value far too generous."
+        ),
     )

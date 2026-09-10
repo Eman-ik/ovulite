@@ -106,3 +106,52 @@ class OutcomeFactorsResponse(BaseModel):
     min_sample_size: int
     factors: list[OutcomeFactor]
     overall: RateCell
+
+
+# ── Change attribution ───────────────────────────────────
+
+
+class GroupContributionOut(BaseModel):
+    label: str
+    share_before: float
+    share_after: float
+    rate_before_pct: float | None
+    rate_after_pct: float | None
+    n_before: int
+    n_after: int
+    mix_pp: float
+    """Contribution from this group's share of the population changing."""
+    rate_pp: float
+    """Contribution from this group's own rate changing."""
+    only_in: str | None
+
+
+class DecompositionOut(BaseModel):
+    dimension: str
+    mix_pp: float
+    rate_pp: float
+    mix_share: float
+    verdict: str
+    groups: list[GroupContributionOut]
+
+
+class ChangePointOut(BaseModel):
+    period: str
+    n_before: int
+    n_after: int
+    rate_before_pct: float
+    rate_after_pct: float
+    delta_pp: float
+    z_score: float
+    permutation_p: float
+    """Empirical p from shuffling outcomes across time — the scan's own p-value
+    would be optimistic, since it is a maximum over many candidate splits."""
+    decompositions: list[DecompositionOut]
+    summary: str
+
+
+class AttributionResponse(BaseModel):
+    change_point: ChangePointOut | None
+    series: list[PeriodRate]
+    dimensions_tested: list[str]
+    note: str

@@ -174,3 +174,12 @@ def test_intake_revisions_and_source_download(harness):
     user.organization_id = 102
     assert client.get(f"/intake/batches/{batch_id}/source").status_code == 404
     assert client.get(f"/intake/batches/{batch_id}/revisions").json() == []
+
+
+def test_passages_preserve_negation_sentence():
+    from app.services.literature import passages
+    prefix = 'Background findings were documented. ' * 35
+    statement = 'Corpus luteum cavities did not negatively affect pregnancy outcomes in this study.'
+    chunks = passages(prefix + statement + ' Further investigation is required.')
+    assert any(statement in chunk for chunk in chunks)
+    assert all(not chunk.startswith('negatively affect') for chunk in chunks)

@@ -530,3 +530,49 @@ export interface OutcomeFactorsResponse {
   factors: OutcomeFactor[];
   overall: RateCell;
 }
+
+// ── Change attribution ───────────────────────────────────
+
+export interface GroupContribution {
+  label: string;
+  share_before: number;
+  share_after: number;
+  rate_before_pct: number | null;
+  rate_after_pct: number | null;
+  n_before: number;
+  n_after: number;
+  /** Contribution from this group's share of the population changing. */
+  mix_pp: number;
+  /** Contribution from this group's own rate changing. */
+  rate_pp: number;
+  only_in: string | null;
+}
+
+export interface Decomposition {
+  dimension: string;
+  mix_pp: number;
+  rate_pp: number;
+  mix_share: number;
+  verdict: string;
+  groups: GroupContribution[];
+}
+
+export interface ChangePoint {
+  period: string;
+  n_before: number;
+  n_after: number;
+  rate_before_pct: number;
+  rate_after_pct: number;
+  delta_pp: number;
+  z_score: number;
+  permutation_p: number;
+  decompositions: Decomposition[];
+  summary: string;
+}
+
+export interface AttributionResponse {
+  change_point: ChangePoint | null;
+  series: PeriodRate[];
+  dimensions_tested: string[];
+  note: string;
+}
