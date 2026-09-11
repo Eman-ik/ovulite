@@ -91,6 +91,13 @@ type PermissionSet = {
   canExportReports: boolean;
   /** Model evaluation, dataset explorer, protocol comparison. */
   canViewResearch: boolean;
+  /**
+   * See the prediction surface. Deliberately separate from canEnterETData,
+   * which governs *running* a prediction — that writes a Prediction row and
+   * needs recipient data the lab does not hold at grading time. Several roles
+   * can read predictions; only the ET side can create them.
+   */
+  canViewPredictions: boolean;
 };
 
 const VET_PERMISSIONS: PermissionSet = {
@@ -103,6 +110,7 @@ const VET_PERMISSIONS: PermissionSet = {
   canEditSettings: false,
   canExportReports: true,
   canViewResearch: false,
+  canViewPredictions: true,
 };
 
 const ADMIN_PERMISSIONS: PermissionSet = {
@@ -115,6 +123,7 @@ const ADMIN_PERMISSIONS: PermissionSet = {
   canEditSettings: true,
   canExportReports: true,
   canViewResearch: true,
+  canViewPredictions: true,
 };
 
 export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
@@ -137,6 +146,10 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canEditSettings: false,
     canExportReports: true,
     canViewResearch: false,
+    // Read-only: an embryologist wants to see what was predicted for embryos
+    // they produced, but running a prediction is a transfer-time decision
+    // that needs recipient findings they do not have.
+    canViewPredictions: true,
   },
 
   veterinarian: VET_PERMISSIONS,
@@ -154,6 +167,7 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canEditSettings: false,
     canExportReports: true,
     canViewResearch: true,
+    canViewPredictions: true,
   },
 
   viewer: {
@@ -166,6 +180,7 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canEditSettings: false,
     canExportReports: false,
     canViewResearch: false,
+    canViewPredictions: false,
   },
 
   "et team": VET_PERMISSIONS,

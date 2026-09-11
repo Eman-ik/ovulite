@@ -77,12 +77,13 @@ function App() {
   }
 />
 
-{/* researcher is read-only here: the page hides every write control and the
-    API refuses the write endpoints for that role. */}
+{/* researcher and embryologist are read-only here: the page hides every write
+    control and the API refuses the write endpoints for those roles. Running a
+    prediction is transfer-time work and stays with the ET side. */}
 <Route
   path="predictions"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian", "researcher", "embryologist"]}>
       <PredictionPage />
     </ProtectedRoute>
   }

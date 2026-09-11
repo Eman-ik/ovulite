@@ -70,7 +70,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { to: "pregnancy-diagnosis", icon: HeartPulse, label: "Pregnancy Diagnosis", permission: "canEnterETData" },
       { to: "protocol-schedules", icon: ListOrdered, label: "Protocol Schedules", permission: "canEnterETData" },
       { to: "data-entry", icon: FileInput, label: "Data Entry", permission: "canEnterETData" },
-      { to: "predictions", icon: Brain, label: "Predictions", permissionAny: ["canEnterETData", "canViewResearch"] },
+      { to: "predictions", icon: Brain, label: "Predictions", permission: "canViewPredictions" },
     ],
   },
   {
