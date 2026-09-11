@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from typing import Optional
 
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 
 class OPUSessionBase(BaseModel):
@@ -14,7 +14,34 @@ class OPUSessionBase(BaseModel):
     total_follicles: Optional[int] = None
     oocytes_recovered: Optional[int] = None
     viable_oocytes: Optional[int] = None
+    grade_a_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    grade_b_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    grade_c_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    degenerated_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    oocyte_morphology_notes: Optional[str] = None
     notes: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_oocyte_grades(self) -> "OPUSessionBase":
+        """Graded oocytes cannot outnumber the oocytes recovered.
+
+        Checked here rather than in the database because the grades are
+        entered after recovery, often in a separate pass, and a partial tally
+        is legitimate — only a tally that exceeds the total is an error.
+        """
+        graded = [
+            self.grade_a_oocytes,
+            self.grade_b_oocytes,
+            self.grade_c_oocytes,
+            self.degenerated_oocytes,
+        ]
+        if self.oocytes_recovered is not None and any(g is not None for g in graded):
+            total = sum(g or 0 for g in graded)
+            if total > self.oocytes_recovered:
+                raise ValueError(
+                    f"Graded oocytes ({total}) exceed oocytes recovered ({self.oocytes_recovered})"
+                )
+        return self
 
     @model_validator(mode="after")
     def validate_counts(self) -> "OPUSessionBase":
@@ -45,6 +72,11 @@ class OPUSessionUpdate(BaseModel):
     total_follicles: Optional[int] = None
     oocytes_recovered: Optional[int] = None
     viable_oocytes: Optional[int] = None
+    grade_a_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    grade_b_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    grade_c_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    degenerated_oocytes: Optional[int] = Field(default=None, ge=0, le=200)
+    oocyte_morphology_notes: Optional[str] = None
     notes: Optional[str] = None
 
 

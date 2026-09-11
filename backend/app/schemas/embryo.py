@@ -6,6 +6,17 @@ from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
+# Ordered as the embryo moves through the lab, which is also the order the
+# frontend offers them in.
+EMBRYO_STATUSES = (
+    "In Culture",
+    "Transferable",
+    "Frozen",
+    "Assigned",
+    "Transferred",
+    "Discarded",
+)
+
 
 class EmbryoBase(BaseModel):
     donor_id: Optional[int] = None
@@ -18,6 +29,8 @@ class EmbryoBase(BaseModel):
     fresh_or_frozen: Optional[str] = None
     cane_number: Optional[str] = None
     freezing_date: Optional[date] = None
+    status: Optional[str] = None
+    discarded_reason: Optional[str] = None
     notes: Optional[str] = None
 
     @field_validator("stage")
@@ -32,6 +45,13 @@ class EmbryoBase(BaseModel):
     def validate_grade(cls, v: int | None) -> int | None:
         if v is not None and not (1 <= v <= 4):
             raise ValueError("Embryo grade must be between 1 and 4")
+        return v
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str | None) -> str | None:
+        if v is not None and v not in EMBRYO_STATUSES:
+            raise ValueError(f"Status must be one of: {', '.join(EMBRYO_STATUSES)}")
         return v
 
     @field_validator("fresh_or_frozen")
@@ -57,6 +77,8 @@ class EmbryoUpdate(BaseModel):
     fresh_or_frozen: Optional[str] = None
     cane_number: Optional[str] = None
     freezing_date: Optional[date] = None
+    status: Optional[str] = None
+    discarded_reason: Optional[str] = None
     notes: Optional[str] = None
 
 

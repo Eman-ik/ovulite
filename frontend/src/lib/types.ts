@@ -718,3 +718,129 @@ export interface VetBoardResponse {
   protocols_without_steps: string[];
   note: string;
 }
+
+// ── Laboratory workflow ──────────────────────────────────
+
+export type EmbryoStatus =
+  | "In Culture"
+  | "Transferable"
+  | "Frozen"
+  | "Assigned"
+  | "Transferred"
+  | "Discarded";
+
+export const EMBRYO_STATUSES: EmbryoStatus[] = [
+  "In Culture",
+  "Transferable",
+  "Frozen",
+  "Assigned",
+  "Transferred",
+  "Discarded",
+];
+
+export interface LabCount {
+  key: string;
+  label: string;
+  count: number;
+  is_estimated: boolean;
+  basis: string;
+}
+
+export interface WorkflowStage {
+  label: string;
+  /** Null when the backing column is entirely unrecorded — not a zero. */
+  count: number | null;
+  unavailable_reason: string | null;
+}
+
+export interface LabBoardResponse {
+  as_of: string;
+  counts: LabCount[];
+  workflow: WorkflowStage[];
+  note: string;
+}
+
+export interface InventoryRow {
+  embryo_id: number;
+  donor_tag: string | null;
+  sire_name: string | null;
+  opu_date: string | null;
+  stage: number | null;
+  grade: number | null;
+  fresh_or_frozen: string | null;
+  cane_number: string | null;
+  freezing_date: string | null;
+  status: string | null;
+  transfer_id: number | null;
+  observation_count: number;
+}
+
+export interface InventoryResponse {
+  rows: InventoryRow[];
+  total: number;
+  page: number;
+  page_size: number;
+  summary: { status: string | null; count: number }[];
+  note: string;
+}
+
+export interface EmbryoObservation {
+  observation_id: number;
+  embryo_id: number;
+  observation_date: string;
+  day_number: number;
+  stage: number | null;
+  grade: number | null;
+  stage_label: string | null;
+  morphology: string | null;
+  is_arrested: boolean | null;
+  cell_count: number | null;
+  expansion_diameter_um: string | number | null;
+  embryologist_name: string | null;
+  notes: string | null;
+}
+
+export interface EmbryoTimeline {
+  embryo_id: number;
+  donor_tag: string | null;
+  sire_name: string | null;
+  status: string | null;
+  final_stage: number | null;
+  final_grade: number | null;
+  fresh_or_frozen: string | null;
+  observations: EmbryoObservation[];
+  transfer_id: number | null;
+  note: string;
+}
+
+export interface IVMBatch {
+  ivm_batch_id: number;
+  opu_id: number;
+  ivm_date: string | null;
+  medium: string | null;
+  medium_lot: string | null;
+  incubation_hours: string | number | null;
+  temperature_c: string | number | null;
+  co2_percent: string | number | null;
+  o2_percent: string | number | null;
+  oocytes_in: number | null;
+  mature_oocytes_out: number | null;
+  embryologist_name: string | null;
+  /** Null when either count is missing — a rate without its denominator. */
+  maturation_rate_pct: number | null;
+  notes: string | null;
+}
+
+export interface OocyteGradeSummary {
+  opu_id: number;
+  donor_tag: string | null;
+  opu_date: string;
+  oocytes_recovered: number | null;
+  grade_a_oocytes: number | null;
+  grade_b_oocytes: number | null;
+  grade_c_oocytes: number | null;
+  degenerated_oocytes: number | null;
+  graded_total: number;
+  ungraded: number | null;
+  ivm_batches: IVMBatch[];
+}

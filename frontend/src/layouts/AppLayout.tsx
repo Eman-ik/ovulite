@@ -26,6 +26,8 @@ import {
   CalendarClock,
   HeartPulse,
   ListOrdered,
+  Boxes,
+  Beaker,
 } from "lucide-react";
 import ovuliteLogo from "../pages/icon.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,7 +56,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Laboratory",
     items: [
+      { to: "laboratory", icon: Boxes, label: "Laboratory", permission: "canEnterLabData" },
       { to: "opu-ivf", icon: FlaskConical, label: "OPU & IVF Batches", permission: "canEnterLabData" },
+      { to: "oocyte-processing", icon: Beaker, label: "Oocytes & IVM", permission: "canEnterLabData" },
       { to: "embryo-grading", icon: Microscope, label: "Embryo Grading", permission: "canGradeEmbryos" },
       { to: "lab-qc", icon: Shield, label: "Lab QC", permission: "canEnterLabData" },
     ],

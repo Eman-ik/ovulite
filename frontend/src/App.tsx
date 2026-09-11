@@ -19,6 +19,8 @@ import ResearchPage from "@/pages/ResearchPage";
 import SynchronizationPage from "@/pages/SynchronizationPage";
 import ProtocolSchedulesPage from "@/pages/ProtocolSchedulesPage";
 import PregnancyDiagnosisPage from "@/pages/PregnancyDiagnosisPage";
+import LaboratoryPage from "@/pages/LaboratoryPage";
+import OocyteProcessingPage from "@/pages/OocyteProcessingPage";
 import CaseRecordsPage from "@/pages/CaseRecordsPage";
 import CaseDetailPage from "@/pages/CaseDetailPage";
 import ModelPerformancePage from "@/pages/ModelPerformancePage";
@@ -125,6 +127,24 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
       <AnalyticsPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="laboratory"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+      <LaboratoryPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="oocyte-processing"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+      <OocyteProcessingPage />
     </ProtectedRoute>
   }
 />

@@ -1,9 +1,10 @@
 """Pydantic schemas for IVF Batch CRUD operations."""
 
+from decimal import Decimal
 from datetime import date, datetime
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 
 
 class IVFBatchBase(BaseModel):
@@ -17,6 +18,12 @@ class IVFBatchBase(BaseModel):
     degenerated_embryos: Optional[int] = None
     culture_media: Optional[str] = None
     embryologist_id: Optional[int] = None
+    ivm_batch_id: Optional[int] = None
+    semen_type: Optional[Literal["Conventional", "Sexed"]] = None
+    semen_batch: Optional[str] = None
+    sperm_concentration: Optional[str] = None
+    fertilization_medium: Optional[str] = None
+    fertilization_hours: Optional[Decimal] = Field(default=None, ge=0, le=96)
     notes: Optional[str] = None
 
     @model_validator(mode="after")
@@ -57,6 +64,12 @@ class IVFBatchUpdate(BaseModel):
     degenerated_embryos: Optional[int] = None
     culture_media: Optional[str] = None
     embryologist_id: Optional[int] = None
+    ivm_batch_id: Optional[int] = None
+    semen_type: Optional[Literal["Conventional", "Sexed"]] = None
+    semen_batch: Optional[str] = None
+    sperm_concentration: Optional[str] = None
+    fertilization_medium: Optional[str] = None
+    fertilization_hours: Optional[Decimal] = Field(default=None, ge=0, le=96)
     notes: Optional[str] = None
 
 
