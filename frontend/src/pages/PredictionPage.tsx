@@ -29,6 +29,7 @@ import {
 
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
+import { getPermissions } from "@/lib/roleRoutes";
 import type { PaginatedResponse, Protocol, Technician } from "@/lib/types";
 import PredictionAssistantChatbox from "@/components/PredictionAssistantChatbox";
 
@@ -305,6 +306,10 @@ function KpiCard({
 export default function PredictionPage() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
+  // Researchers reach this page read-only: they can see predictions and the
+  // model's behaviour, but running one writes a Prediction row, so the API
+  // refuses it for them and the controls below are not offered.
+  const canWrite = getPermissions(user?.role).canEnterETData;
   const [form, setForm] = useState<FormState>(initialForm);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
@@ -698,18 +703,23 @@ export default function PredictionPage() {
                 <div className="text-xs text-[var(--pp-muted)]">
                   {canGenerate ? "Ready to generate prediction." : "Enter Recipient ID, Embryo ID, CL size, and Embryo Stage."}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" className="pp-button pp-button-ghost" onClick={clearForm}>
-                    <RotateCcw className="h-4 w-4" /> Clear
-                  </button>
-                  <button type="button" className="pp-button pp-button-outline">
-                    <Save className="h-4 w-4" /> Save Draft
-                  </button>
-                  <button type="button" onClick={generatePrediction} disabled={loading} className="pp-button pp-button-primary">
-                    <Sparkles className="h-4 w-4" />
-                    {loading ? "Analyzing..." : "Generate Prediction"}
-                  </button>
-                </div>
+                {canWrite ? (
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" className="pp-button pp-button-ghost" onClick={clearForm}>
+                      <RotateCcw className="h-4 w-4" /> Clear
+                    </button>
+                    <button type="button" onClick={generatePrediction} disabled={loading} className="pp-button pp-button-primary">
+                      <Sparkles className="h-4 w-4" />
+                      {loading ? "Analyzing..." : "Generate Prediction"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-[var(--pp-border)] bg-[var(--pp-foam)] px-4 py-3 text-sm text-[var(--pp-muted)]">
+                    <span className="font-semibold text-[var(--pp-foreground)]">Read-only access.</span>{" "}
+                    Your role can review predictions and model behaviour but not generate them —
+                    running a prediction records a case against this organization.
+                  </div>
+                )}
               </motion.div>
 
               {error && (
@@ -910,22 +920,14 @@ function ResultPanel({
                 </ul>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="pp-button pp-button-primary">
-                  <Save className="h-4 w-4" /> Save Prediction
-                </button>
-                <button type="button" className="pp-button pp-button-outline">
-                  <Download className="h-4 w-4" /> Download Report
-                </button>
-                <button type="button" className="pp-button pp-button-ghost" onClick={onOpenAssistant}>
-                  Ask Assistant
-                </button>
-                {prediction.prediction_id && (
-                  <button type="button" className="pp-button pp-button-ghost" onClick={onDecisionSupport}>
-                    Decision Support
-                  </button>
-                )}
-              </div>
+              {/* The buttons that were here ("Save Prediction", "Download
+                  Report") had no onClick and did nothing. The prediction is
+                  already persisted by the API when it is generated, so the
+                  save was also redundant; exports live on Reports & Export. */}
+              <p className="text-xs text-[var(--pp-muted)]">
+                This prediction is saved automatically and appears in Recent Predictions below.
+                Use Reports &amp; Export to download records as CSV.
+              </p>
             </motion.div>
           )}
         </AnimatePresence>

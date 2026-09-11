@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.prediction import Prediction
 from app.models.user import User
@@ -57,11 +57,14 @@ def _get_predictor():
         raise HTTPException(status_code=503, detail=f"Model loading error: {exc}")
 
 
+# Running a prediction writes a Prediction row, so it is a write path. Reads
+# below stay open to any authenticated role, which is what lets the
+# researcher role see predictions without being able to create them.
 @router.post("/pregnancy", response_model=PredictionOutput)
 def predict_pregnancy(
     input_data: PredictionInput,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     """Predict pregnancy probability for an ET transfer.
 
@@ -230,7 +233,7 @@ def _owned_prediction(prediction_id: int, db: Session, user: User) -> Prediction
 
 
 @router.patch("/{prediction_id}/selection", response_model=PredictionHistoryItem)
-def select_prediction(prediction_id: int, payload: PredictionSelectionInput, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def select_prediction(prediction_id: int, payload: PredictionSelectionInput, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES))):
     prediction = _owned_prediction(prediction_id, db, current_user)
     prediction.selected_for_case = payload.selected
     db.commit()
@@ -239,7 +242,7 @@ def select_prediction(prediction_id: int, payload: PredictionSelectionInput, db:
 
 
 @router.patch("/{prediction_id}/outcome", response_model=PredictionHistoryItem)
-def record_prediction_outcome(prediction_id: int, payload: PredictionOutcomeInput, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def record_prediction_outcome(prediction_id: int, payload: PredictionOutcomeInput, db: Session = Depends(get_db), current_user: User = Depends(require_role(*ET_WRITE_ROLES))):
     prediction = _owned_prediction(prediction_id, db, current_user)
     prediction.actual_outcome = payload.actual_outcome
     prediction.actual_outcome_recorded_at = datetime.now(timezone.utc)
