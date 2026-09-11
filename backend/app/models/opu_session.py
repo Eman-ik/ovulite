@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from app.models.donor import Donor
     from app.models.embryo import Embryo
     from app.models.ivf_batch import IVFBatch
+    from app.models.ivm_batch import IVMBatch
     from app.models.technician import Technician
 
 
@@ -33,6 +34,15 @@ class OPUSession(OrganizationScopedMixin, Base):
     total_follicles: Mapped[Optional[int]] = mapped_column(Integer)
     oocytes_recovered: Mapped[Optional[int]] = mapped_column(Integer)
     viable_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
+    # Oocyte quality at recovery, as counts per grade rather than a row per
+    # oocyte: COCs are graded in a dish and tallied, and 20 rows carrying only
+    # a grade would add storage without adding information.
+    grade_a_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
+    grade_b_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
+    grade_c_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
+    degenerated_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
+    oocyte_morphology_notes: Mapped[Optional[str]] = mapped_column(Text)
+
     notes: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
@@ -41,3 +51,6 @@ class OPUSession(OrganizationScopedMixin, Base):
     technician: Mapped[Optional["Technician"]] = relationship()
     embryos: Mapped[list["Embryo"]] = relationship(back_populates="opu_session")
     ivf_batches: Mapped[list["IVFBatch"]] = relationship(back_populates="opu_session")
+    ivm_batches: Mapped[list["IVMBatch"]] = relationship(
+        back_populates="opu_session", cascade="all, delete-orphan"
+    )

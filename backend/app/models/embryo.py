@@ -11,6 +11,7 @@ from app.models.mixins import OrganizationScopedMixin
 if TYPE_CHECKING:
     from app.models.donor import Donor
     from app.models.embryo_image import EmbryoImage
+    from app.models.embryo_observation import EmbryoObservation
     from app.models.et_transfer import ETTransfer
     from app.models.ivf_batch import IVFBatch
     from app.models.opu_session import OPUSession
@@ -37,6 +38,13 @@ class Embryo(OrganizationScopedMixin, Base):
     freezing_date: Mapped[Optional[date]] = mapped_column(Date)
     ai_grade: Mapped[Optional[int]] = mapped_column(Integer)
     ai_viability: Mapped[Optional[Decimal]] = mapped_column()
+    # Where the embryo is in its life, as distinct from what it looks like.
+    # "In Culture" -> "Transferable"/"Discarded" -> "Frozen"/"Assigned" ->
+    # "Transferred". Null means the lifecycle was never recorded, which is
+    # true of anything imported before this column existed.
+    status: Mapped[Optional[str]] = mapped_column(String(20))
+    discarded_reason: Mapped[Optional[str]] = mapped_column(Text)
+
     notes: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -49,6 +57,11 @@ class Embryo(OrganizationScopedMixin, Base):
     opu_session: Mapped[Optional["OPUSession"]] = relationship(back_populates="embryos")
     ivf_batch: Mapped[Optional["IVFBatch"]] = relationship(back_populates="embryos")
     images: Mapped[list["EmbryoImage"]] = relationship(back_populates="embryo")
+    observations: Mapped[list["EmbryoObservation"]] = relationship(
+        back_populates="embryo",
+        cascade="all, delete-orphan",
+        order_by="EmbryoObservation.day_number",
+    )
     transfers: Mapped[list["ETTransfer"]] = relationship(back_populates="embryo")
 
     __table_args__ = (
@@ -57,5 +70,10 @@ class Embryo(OrganizationScopedMixin, Base):
         CheckConstraint(
             "fresh_or_frozen IN ('Fresh', 'Frozen')",
             name="ck_embryos_fresh_or_frozen",
+        ),
+        CheckConstraint(
+            "status IS NULL OR status IN "
+            "('In Culture', 'Transferable', 'Frozen', 'Assigned', 'Transferred', 'Discarded')",
+            name="ck_embryos_status",
         ),
     )

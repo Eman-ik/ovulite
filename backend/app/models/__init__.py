@@ -6,6 +6,8 @@ from app.models.embryo import Embryo
 from app.models.embryo_image import EmbryoImage
 from app.models.et_transfer import ETTransfer
 from app.models.ivf_batch import IVFBatch
+from app.models.ivm_batch import IVMBatch
+from app.models.embryo_observation import EmbryoObservation
 from app.models.opu_session import OPUSession
 from app.models.organization import Organization, OrganizationInvitation, OrganizationMembership
 from app.models.prediction import Prediction
@@ -34,6 +36,8 @@ __all__ = [
     "EmbryoImage",
     "ETTransfer",
     "IVFBatch",
+    "IVMBatch",
+    "EmbryoObservation",
     "OPUSession",
     "Organization",
     "OrganizationInvitation",
