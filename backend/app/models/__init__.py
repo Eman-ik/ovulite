@@ -1,6 +1,7 @@
 """ORM models for Ovulite database — import all models so Alembic picks them up."""
 
 from app.models.anomaly import Anomaly
+from app.models.audit_event import AuditEvent
 from app.models.donor import Donor
 from app.models.embryo import Embryo
 from app.models.embryo_image import EmbryoImage
@@ -31,6 +32,7 @@ from app.models.intake_batch import IntakeBatch, TransferProvenance
 
 __all__ = [
     "Anomaly",
+    "AuditEvent",
     "Donor",
     "Embryo",
     "EmbryoImage",

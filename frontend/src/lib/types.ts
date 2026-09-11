@@ -844,3 +844,40 @@ export interface OocyteGradeSummary {
   ungraded: number | null;
   ivm_batches: IVMBatch[];
 }
+
+// ── Real model performance ───────────────────────────────
+
+export interface ModelMetricSet {
+  model_key: string;
+  display_name: string;
+  roc_auc: number | null;
+  pr_auc: number | null;
+  brier_score: number | null;
+  accuracy: number | null;
+  precision: number | null;
+  recall: number | null;
+  f1: number | null;
+  confusion_matrix: Record<string, number> | null;
+  /** A caveat the artifact recorded, e.g. that TabPFN was never installed. */
+  note: string | null;
+}
+
+export interface ModelPerformanceResponse {
+  available: boolean;
+  model_version: string | null;
+  trained_at: string | null;
+  best_model: string | null;
+  models: ModelMetricSet[];
+  n_features: number | null;
+  split: Record<string, unknown> | null;
+  shap_top_features: [string, number][] | null;
+  discrimination_vs_chance_pct: number | null;
+  is_better_than_chance: boolean | null;
+  interpretation: string;
+  unavailable_reason: string | null;
+}
+
+export interface ExportDataset {
+  key: string;
+  description: string;
+}

@@ -317,6 +317,64 @@ export default function PredictionPage() {
   const [outcomeOpen, setOutcomeOpen] = useState(false);
   const [outcomePredictionId, setOutcomePredictionId] = useState<number | null>(null);
   const [recentRefreshKey, setRecentRefreshKey] = useState(0);
+
+  // Real figures for the header KPIs. Anything that cannot be computed stays
+  // null and renders as an em dash rather than a plausible number.
+  const [stats, setStats] = useState<{
+    loading: boolean;
+    total: number | null;
+    sampled: number | null;
+    meanProbability: number | null;
+    pregnancyRate: number | null;
+    pendingOutcome: number | null;
+  }>({
+    loading: true,
+    total: null,
+    sampled: null,
+    meanProbability: null,
+    pregnancyRate: null,
+    pendingOutcome: null,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.allSettled([
+      api.get("/predict/history", { params: { limit: 500 } }),
+      api.get("/dashboard/kpis"),
+    ]).then(([historyResult, kpiResult]) => {
+      if (cancelled) return;
+      let total: number | null = null;
+      let sampled: number | null = null;
+      let meanProbability: number | null = null;
+      let pendingOutcome: number | null = null;
+      if (historyResult.status === "fulfilled") {
+        const body = historyResult.value.data as {
+          total?: number;
+          predictions?: { probability: number; actual_outcome?: string | null }[];
+        };
+        const rows = body.predictions ?? [];
+        total = body.total ?? rows.length;
+        sampled = rows.length;
+        if (rows.length > 0) {
+          const mean = rows.reduce((sum, r) => sum + (r.probability ?? 0), 0) / rows.length;
+          // The API returns a 0-1 probability; render it as a percentage.
+          meanProbability = Math.round(mean * (mean <= 1 ? 100 : 1) * 10) / 10;
+          pendingOutcome = rows.filter((r) => !r.actual_outcome).length;
+        } else {
+          pendingOutcome = 0;
+        }
+      }
+      let pregnancyRate: number | null = null;
+      if (kpiResult.status === "fulfilled") {
+        const kpis = (kpiResult.value.data as { kpis?: { key: string; value: number | null }[] }).kpis ?? [];
+        pregnancyRate = kpis.find((k) => k.key === "pregnancy_rate")?.value ?? null;
+      }
+      setStats({ loading: false, total, sampled, meanProbability, pregnancyRate, pendingOutcome });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [recentRefreshKey]);
   const [assistantOpen, setAssistantOpen] = useState(false);
 
   const setField = <K extends keyof FormState>(key: K) => (value: FormState[K]) => {
@@ -435,11 +493,43 @@ export default function PredictionPage() {
             </p>
           </motion.div>
 
+          {/* Computed from /predict/history and /dashboard/kpis. These were
+              four hardcoded values ("248", "54%", "47%", "132") sitting beside
+              a genuinely API-backed form, which is the most effective way to
+              make someone trust the fake ones. */}
           <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KpiCard icon={Activity} label="Total Predictions" value="248" caption="Predictions generated this month" delay={0.05} />
-            <KpiCard icon={TrendingUp} label="Average Predicted Success" value="54%" caption="Based on recent ET records" delay={0.12} />
-            <KpiCard icon={CheckCircle2} label="Confirmed Pregnancy Rate" value="47%" caption="From updated diagnosis outcomes" delay={0.19} />
-            <KpiCard icon={ShieldCheck} label="High Confidence Cases" value="132" caption="Predictions with strong data quality" delay={0.26} />
+            <KpiCard
+              icon={Activity}
+              label="Total Predictions"
+              value={stats.loading ? "…" : stats.total === null ? "—" : stats.total.toLocaleString()}
+              caption={stats.loading ? "Loading" : "Predictions recorded for your organization"}
+              delay={0.05}
+            />
+            <KpiCard
+              icon={TrendingUp}
+              label="Average Predicted Probability"
+              value={stats.meanProbability === null ? "—" : `${stats.meanProbability}%`}
+              caption={
+                stats.total === 0
+                  ? "No predictions recorded yet"
+                  : `Mean across ${stats.sampled ?? 0} recent prediction(s)`
+              }
+              delay={0.12}
+            />
+            <KpiCard
+              icon={CheckCircle2}
+              label="Observed Pregnancy Rate"
+              value={stats.pregnancyRate === null ? "—" : `${stats.pregnancyRate}%`}
+              caption="Actual PC1 outcomes, not predictions"
+              delay={0.19}
+            />
+            <KpiCard
+              icon={ShieldCheck}
+              label="Awaiting Outcome"
+              value={stats.pendingOutcome === null ? "—" : stats.pendingOutcome.toLocaleString()}
+              caption="Predictions with no recorded result yet"
+              delay={0.26}
+            />
           </div>
 
           {initLoading && (

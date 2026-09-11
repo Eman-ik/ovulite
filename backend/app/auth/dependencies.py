@@ -2,7 +2,7 @@
 
 from typing import Callable
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Request, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -11,11 +11,13 @@ from app.database import get_db
 from app.models.organization import Organization
 from app.models.token_blacklist import RevokedToken
 from app.models.user import User
+from app.services.audit import set_audit_actor
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_current_user(
+    request: Request,
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> User:
@@ -57,6 +59,19 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token organization mismatch",
         )
+
+    # Bind the actor for this request so the session-level audit listener can
+    # attribute any write it observes. Done here rather than in middleware
+    # because this is the one place the authenticated user is resolved, so a
+    # new router cannot forget it.
+    set_audit_actor(
+        db,
+        user_id=user.user_id,
+        username=user.username,
+        role=user.role,
+        organization_id=user.organization_id,
+        request=request,
+    )
     return user
 
 

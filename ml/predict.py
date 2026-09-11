@@ -230,6 +230,17 @@ class PregnancyPredictor:
                     "base_value": float(self.model.predict_proba(center.reshape(1, -1))[0, 1]),
                     "contributions": contributions[:15],
                     "method": "calibrated_linear_surrogate",
+                    "is_true_shap": False,
+                    "method_label": "Linear surrogate (not SHAP)",
+                    "method_explanation": (
+                        "Contributions are the calibrated logistic model's coefficients times "
+                        "this case's deviation from the training mean — not Shapley values. "
+                        "They agree with SHAP for a linear model but carry no interaction "
+                        "terms, so a contribution here is that feature's own effect only. "
+                        "Generic permutation SHAP takes 20-30s per request on the supported "
+                        "farm hardware, which is why it is not used online; the SHAP reported "
+                        "at training time is genuine."
+                    ),
                 }
         try:
             import shap
@@ -259,10 +270,24 @@ class PregnancyPredictor:
                 "base_value": base_val,
                 "contributions": contributions[:15],
                 "method": "shap",
+                "is_true_shap": True,
+                "method_label": "SHAP",
+                "method_explanation": "Shapley values from the shap library.",
             }
         except Exception as exc:
             logger.warning("SHAP failed for single prediction: %s", exc)
-            return {"base_value": 0, "contributions": [], "method": "unavailable"}
+            return {
+                "base_value": 0,
+                "contributions": [],
+                "method": "unavailable",
+                "is_true_shap": False,
+                "method_label": "Unavailable",
+                "method_explanation": (
+                    "No explanation could be produced for this prediction. The contributions "
+                    "list is empty rather than zero-filled, so nothing here should be read as "
+                    "a feature having no effect."
+                ),
+            }
 
 
 # Module-level singleton (lazy loaded)

@@ -22,6 +22,8 @@ from app.api.dashboard import router as dashboard_router
 from app.api.research import router as research_router
 from app.api.vet import router as vet_router
 from app.api.lab import router as lab_router
+from app.api.audit import router as audit_router
+from app.api.reports import router as reports_router
 from app.api.donors import router as donors_router
 from app.api.embryos import router as embryos_router
 from app.api.import_data import router as import_router
@@ -186,6 +188,8 @@ app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(research_router, prefix="/research", tags=["research"])
 app.include_router(vet_router, prefix="/vet", tags=["vet"])
 app.include_router(lab_router, prefix="/lab", tags=["lab"])
+app.include_router(audit_router, prefix="/audit", tags=["audit"])
+app.include_router(reports_router, prefix="/reports", tags=["reports"])
 app.include_router(organizations_router)
 app.include_router(health_router, tags=["health"])
 app.include_router(literature_router, prefix="/literature", tags=["literature"])

@@ -1,313 +1,170 @@
-﻿import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
-import { 
-  Download, FileText, Zap, Sparkles, Database, Info, 
-  BarChart3, TrendingUp, CheckCircle2
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, FileText, Info } from "lucide-react";
+import api from "@/lib/api";
+import type { ExportDataset } from "@/lib/types";
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-type ReportsTab = "generate" | "templates" | "exports";
+/**
+ * Data export.
+ *
+ * The previous version of this page called no API at all: `handleGenerateReport`
+ * ran a `setTimeout`, fired confetti, and told the user "Your report has been
+ * downloaded successfully" while producing no file. That is worse than having
+ * no export button, because it teaches people the export works and they stop
+ * checking.
+ *
+ * This version calls `/reports/export/{dataset}` and hands back the actual CSV
+ * the server produced. If the request fails, it says so and no file appears.
+ */
+function errorText(err: unknown): string {
+  const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  return err instanceof Error ? err.message : "Export failed";
+}
 
 export default function ReportsExportPage() {
-  const [activeTab, setActiveTab] = useState<ReportsTab>("generate");
-  
-  const [reportType, setReportType] = useState("summary");
-  const [exportFormat, setExportFormat] = useState("pdf");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [includeAnalytics, setIncludeAnalytics] = useState(true);
-  const [includePredictions, setIncludePredictions] = useState(true);
-  const [includeQC, setIncludeQC] = useState(true);
-  const [includeAuditTrail, setIncludeAuditTrail] = useState(false);
-
-  const [loading, setLoading] = useState(false);
+  const [datasets, setDatasets] = useState<ExportDataset[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [lastExport, setLastExport] = useState<{ name: string; rows: number } | null>(null);
+  const [range, setRange] = useState({ date_from: "", date_to: "" });
 
-  // Mint & Glass Theme Colors
-  const mintBg = "#F0F4F4";
-  const deepGreen = "#004D40";
-  const emeraldMint = "#66BB6A";
+  useEffect(() => {
+    api
+      .get<{ datasets: ExportDataset[] }>("/reports/datasets")
+      .then((r) => setDatasets(r.data.datasets))
+      .catch((err) => setError(errorText(err)));
+  }, []);
 
-  const handleGenerateReport = async () => {
-    setLoading(true);
+  const download = async (dataset: string) => {
+    setBusy(dataset);
     setError(null);
-
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: [emeraldMint, deepGreen, "#ffffff"]
+    setLastExport(null);
+    try {
+      const { data, headers } = await api.get(`/reports/export/${dataset}`, {
+        responseType: "blob",
+        params: {
+          ...(range.date_from ? { date_from: range.date_from } : {}),
+          ...(range.date_to ? { date_to: range.date_to } : {}),
+        },
       });
-      setShowSuccessModal(true);
-    }, 1200);
+
+      const blob = data as Blob;
+      // Row count from the file itself, so the confirmation describes what was
+      // actually written rather than what was requested.
+      const text = await blob.text();
+      const lines = text.trim().split("\n");
+      const rows = text.startsWith("no_rows_matched") ? 0 : Math.max(0, lines.length - 1);
+
+      const disposition = String(headers?.["content-disposition"] ?? "");
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      const filename = match?.[1] ?? `ovulite-${dataset}.csv`;
+
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+
+      setLastExport({ name: filename, rows });
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(null);
+    }
   };
 
-  const reportTypes = [
-    { id: "summary", name: "Summary Report", icon: BarChart3, color: "from-emerald-500 to-teal-600" },
-    { id: "detailed", name: "Detailed Report", icon: FileText, color: "from-teal-600 to-cyan-600" },
-    { id: "analytics", name: "Analytics Report", icon: TrendingUp, color: "from-cyan-500 to-emerald-500" },
-  ];
-
-  const exportFormats = [
-    { id: "pdf", name: "PDF", icon: FileText, color: "text-rose-600" },
-    { id: "excel", name: "Excel", icon: Download, color: "text-emerald-600" },
-    { id: "csv", name: "CSV", icon: Database, color: "text-amber-600" },
-  ];
-
   return (
-    <div className="min-h-screen" style={{ background: `linear-gradient(to bottom right, ${mintBg}, #E0F2F1)` }}>
-      <div className="max-w-[1600px] mx-auto p-6 lg:p-10 space-y-8">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-start"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-[#1A202C]">Reports & Export</h1>
-              <p className="text-[#475569] mt-1">Professional reports with glassmorphism aesthetics</p>
-            </div>
-          </div>
-
-          <Button 
-            onClick={() => setShowInfoModal(true)}
-            variant="outline"
-            className="border-emerald-200 hover:bg-emerald-50"
-          >
-            <Info className="w-4 h-4 mr-2" /> Help
-          </Button>
-        </motion.div>
-
-        {/* Tabs */}
-        <div className="inline-flex bg-white/70 backdrop-blur-xl border border-white rounded-3xl p-1.5 shadow-xl">
-          {[
-            { id: "generate", label: "Generate Report", icon: Zap },
-            { id: "templates", label: "Templates", icon: FileText },
-            { id: "exports", label: "Bulk Exports", icon: Database },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as ReportsTab)}
-              className={`px-8 py-3 rounded-2xl font-medium flex items-center gap-2 transition-all ${
-                activeTab === tab.id 
-                  ? "bg-gradient-to-r from-[#004D40] to-emerald-700 text-white shadow-lg" 
-                  : "text-[#475569] hover:bg-white/50"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <AnimatePresence mode="wait">
-          {/* GENERATE TAB */}
-          {activeTab === "generate" && (
-            <motion.div
-              key="generate"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-1 lg:grid-cols-5 gap-8"
-            >
-              <div className="lg:col-span-3">
-                <Card className="bg-white/80 backdrop-blur-2xl border border-white/60 shadow-2xl">
-                  <CardHeader>
-                    <CardTitle className="text-2xl text-[#1A202C]">Create Custom Report</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-8">
-                    {/* Report Type */}
-                    <div>
-                      <label className="text-sm font-semibold text-[#334155] mb-4 block">Report Type</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {reportTypes.map((type) => (
-                          <motion.button
-                            key={type.id}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setReportType(type.id)}
-                            className={`p-6 rounded-3xl border transition-all ${
-                              reportType === type.id 
-                                ? "border-emerald-600 bg-emerald-50 shadow-md" 
-                                : "border-white/60 hover:border-emerald-200"
-                            }`}
-                          >
-                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${type.color} flex items-center justify-center mb-4`}>
-                              <type.icon className="w-6 h-6 text-white" />
-                            </div>
-                            <p className="font-semibold text-[#1A202C]">{type.name}</p>
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Format */}
-                    <div>
-                      <label className="text-sm font-semibold text-[#334155] mb-4 block">Export Format</label>
-                      <div className="grid grid-cols-3 gap-4">
-                        {exportFormats.map((fmt) => (
-                          <motion.button
-                            key={fmt.id}
-                            whileHover={{ scale: 1.03 }}
-                            onClick={() => setExportFormat(fmt.id)}
-                            className={`p-5 rounded-3xl border text-center transition-all ${
-                              exportFormat === fmt.id 
-                                ? "border-emerald-600 bg-white shadow" 
-                                : "border-white/60 hover:border-emerald-200"
-                            }`}
-                          >
-                            <fmt.icon className={`mx-auto mb-2 w-8 h-8 ${fmt.color}`} />
-                            <p className="font-medium">{fmt.name}</p>
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Date Range + Content Options */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div>
-                        <label className="text-sm font-semibold text-[#334155] mb-3 block">Date Range</label>
-                        <div className="space-y-4">
-                          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white" />
-                          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-semibold text-[#334155] mb-3 block">Include</label>
-                        <div className="space-y-3">
-                          {[
-                            { label: "Analytics & KPIs", checked: includeAnalytics, setter: setIncludeAnalytics },
-                            { label: "Predictions", checked: includePredictions, setter: setIncludePredictions },
-                            { label: "QC Analysis", checked: includeQC, setter: setIncludeQC },
-                            { label: "Audit Trail", checked: includeAuditTrail, setter: setIncludeAuditTrail },
-                          ].map((item, i) => (
-                            <label key={i} className="flex items-center gap-3 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={item.checked}
-                                onChange={(e) => item.setter(e.target.checked)}
-                                className="w-5 h-5 accent-emerald-600"
-                              />
-                              <span className="text-[#475569]">{item.label}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={handleGenerateReport}
-                      disabled={loading}
-                      size="lg"
-                      className="w-full h-14 text-lg bg-gradient-to-r from-[#004D40] to-emerald-700 hover:brightness-110"
-                    >
-                      {loading ? "Generating Report..." : "Generate & Download Report"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Right Sidebar Info */}
-              <div className="lg:col-span-2">
-                <Card className="bg-white/70 backdrop-blur-2xl border border-white/60 h-full">
-                  <CardContent className="pt-8">
-                    <h3 className="font-semibold text-xl mb-6 flex items-center gap-3">
-                      <Sparkles className="text-emerald-600" /> Quick Tips
-                    </h3>
-                    <div className="space-y-6 text-sm">
-                      <p className="text-[#475569]">PDF is best for sharing and printing.</p>
-                      <p className="text-[#475569]">Excel/CSV are ideal for further analysis.</p>
-                      <p className="text-[#475569]">Include Audit Trail only when you need full traceability.</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Other tabs (Templates & Exports) can be expanded similarly with glass cards */}
-          {activeTab === "templates" && (
-            <div className="text-center py-20 text-[#475569]">
-              Templates tab coming soon with glass cards...
-            </div>
-          )}
-          {activeTab === "exports" && (
-            <div className="text-center py-20 text-[#475569]">
-              Bulk exports tab with glassmorphism cards...
-            </div>
-          )}
-        </AnimatePresence>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-2xl font-semibold dash-heading">Reports &amp; Export</h1>
+        <p className="mt-1 text-sm dash-muted">
+          Export your records as CSV. Every file is generated by the server from live data and
+          scoped to your organization.
+        </p>
       </div>
 
-      {/* Success Modal */}
-      <AnimatePresence>
-        {showSuccessModal && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white rounded-3xl p-10 max-w-md text-center shadow-2xl"
-            >
-              <CheckCircle2 className="w-20 h-20 text-emerald-600 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-[#1A202C] mb-2">Report Generated!</h3>
-              <p className="text-[#475569] mb-8">Your report has been downloaded successfully.</p>
-              <Button onClick={() => setShowSuccessModal(false)} className="w-full bg-emerald-700">
-                Done
-              </Button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {error && (
+        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+          <p className="font-semibold">Export failed</p>
+          <p className="mt-1">{error}</p>
+          <p className="mt-1 text-xs">No file was produced.</p>
+        </div>
+      )}
 
-      {/* Help Modal */}
-      <AnimatePresence>
-        {showInfoModal && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 max-w-lg shadow-2xl"
+      {lastExport && (
+        <div className="rounded-2xl border border-[rgba(134,197,164,0.34)] bg-[rgba(134,197,164,0.16)] p-4 text-sm text-[#2f7d5c]">
+          <p className="font-semibold">Downloaded {lastExport.name}</p>
+          <p className="mt-1">
+            {lastExport.rows === 0
+              ? "The file contains no rows — nothing matched the selected range."
+              : `${lastExport.rows.toLocaleString()} row${lastExport.rows === 1 ? "" : "s"}.`}
+          </p>
+        </div>
+      )}
+
+      <div className="dash-card">
+        <h2 className="text-base font-semibold dash-heading">Date range</h2>
+        <p className="mt-1 text-xs dash-muted">
+          Applies to transfers only; the embryo bank and OPU exports are complete inventories.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          <label className="text-xs dash-muted">
+            From
+            <input
+              type="date"
+              value={range.date_from}
+              onChange={(e) => setRange({ ...range, date_from: e.target.value })}
+              className="mt-1 block h-9 rounded-xl border border-[var(--border)] bg-[var(--input)] px-2.5 text-sm text-[var(--foreground)]"
+            />
+          </label>
+          <label className="text-xs dash-muted">
+            To
+            <input
+              type="date"
+              value={range.date_to}
+              onChange={(e) => setRange({ ...range, date_to: e.target.value })}
+              className="mt-1 block h-9 rounded-xl border border-[var(--border)] bg-[var(--input)] px-2.5 text-sm text-[var(--foreground)]"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {datasets.map((d) => (
+          <div key={d.key} className="dash-card flex flex-col">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 dash-muted" />
+              <h3 className="text-sm font-semibold dash-heading">
+                {d.key.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+              </h3>
+            </div>
+            <p className="mt-2 flex-1 text-xs leading-relaxed dash-muted">{d.description}</p>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => void download(d.key)}
+              className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
             >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                  <Info className="w-6 h-6 text-emerald-700" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-[#1A202C]">Reports help</h3>
-                  <p className="mt-3 text-[#475569]">
-                    Choose a report type, export format, date range, and the sections to include. PDF is best for sharing; CSV and Excel are best for downstream analysis.
-                  </p>
-                </div>
-              </div>
-              <Button onClick={() => setShowInfoModal(false)} className="mt-8 w-full bg-emerald-700">
-                Got it
-              </Button>
-            </motion.div>
+              <Download className="h-3.5 w-3.5" />
+              {busy === d.key ? "Generating…" : "Download CSV"}
+            </button>
           </div>
-        )}
-      </AnimatePresence>
+        ))}
+      </div>
+
+      {datasets.length === 0 && !error && <p className="text-sm dash-muted">Loading…</p>}
+
+      <div className="flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+        <Info className="mt-px h-3.5 w-3.5 shrink-0" />
+        <span>
+          Pregnancy results are exported normalised the same way the app displays them, so an
+          export cannot disagree with the screen. Raw values that do not resolve to Pregnant or
+          Open are exported blank rather than guessed.
+        </span>
+      </div>
     </div>
   );
 }

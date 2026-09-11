@@ -139,3 +139,46 @@ class PredictionSelectionInput(BaseModel):
 
 
 
+
+
+class ModelMetricSet(BaseModel):
+    """Holdout metrics for one trained model, exactly as the artifact records them."""
+
+    model_key: str
+    display_name: str
+    roc_auc: Optional[float] = None
+    pr_auc: Optional[float] = None
+    brier_score: Optional[float] = None
+    accuracy: Optional[float] = None
+    precision: Optional[float] = None
+    recall: Optional[float] = None
+    f1: Optional[float] = None
+    confusion_matrix: Optional[dict] = None
+    note: Optional[str] = None
+    """Any caveat the artifact itself recorded — e.g. that TabPFN was not
+    installed and a fallback was trained in its place."""
+
+
+class ModelPerformanceResponse(BaseModel):
+    """Real, artifact-derived model performance.
+
+    Every field comes from the trained artifact's metadata. There is no
+    fallback: if an artifact cannot be read the endpoint fails, because a
+    plausible-looking number here would be read as the model's actual
+    performance by someone deciding whether to trust it.
+    """
+
+    available: bool
+    model_version: Optional[str] = None
+    trained_at: Optional[str] = None
+    best_model: Optional[str] = None
+    models: list[ModelMetricSet] = []
+    n_features: Optional[int] = None
+    split: Optional[dict] = None
+    shap_top_features: Optional[list] = []
+
+    # Honest interpretation, computed rather than asserted.
+    discrimination_vs_chance_pct: Optional[float] = None
+    is_better_than_chance: Optional[bool] = None
+    interpretation: str
+    unavailable_reason: Optional[str] = None

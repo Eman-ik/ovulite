@@ -141,8 +141,12 @@ def train_xgboost(X_train, y_train, X_test, y_test) -> dict:
     }
 
 
-def train_tabpfn(X_train, y_train, X_test, y_test) -> dict:
-    """Train TabPFN primary model."""
+def train_tabpfn(X_train, y_train, X_test, y_test, cv=3) -> dict:
+    """Train TabPFN primary model.
+
+    ``cv`` is passed through to the CalibratedLR fallback so the fallback is
+    calibrated with the same donor grouping as everything else.
+    """
     try:
         from tabpfn import TabPFNClassifier
     except ImportError:
@@ -151,7 +155,7 @@ def train_tabpfn(X_train, y_train, X_test, y_test) -> dict:
         )
         # Fallback: calibrated LR as proxy
         base = LogisticRegression(**LOGISTIC_PARAMS)
-        model = CalibratedClassifierCV(base, cv=3, method="isotonic")
+        model = CalibratedClassifierCV(base, cv=cv, method="isotonic")
         model.fit(X_train, y_train)
         y_prob_train = model.predict_proba(X_train)[:, 1]
         y_prob_test = model.predict_proba(X_test)[:, 1]
@@ -179,7 +183,7 @@ def train_tabpfn(X_train, y_train, X_test, y_test) -> dict:
     except Exception as exc:
         logger.warning("TabPFN training failed: %s. Using calibrated LR fallback.", exc)
         base = LogisticRegression(**LOGISTIC_PARAMS)
-        model = CalibratedClassifierCV(base, cv=3, method="isotonic")
+        model = CalibratedClassifierCV(base, cv=cv, method="isotonic")
         model.fit(X_train, y_train)
         y_prob_train = model.predict_proba(X_train)[:, 1]
         y_prob_test = model.predict_proba(X_test)[:, 1]
@@ -193,9 +197,42 @@ def train_tabpfn(X_train, y_train, X_test, y_test) -> dict:
         }
 
 
-def calibrate_model(model, X_train, y_train, method: str = "isotonic"):
-    """Apply post-hoc calibration using isotonic or Platt scaling."""
-    calibrated = CalibratedClassifierCV(model, cv=3, method=method)
+def donor_grouped_cv(train_df, n_folds: int = N_FOLDS):
+    """Folds for calibration that never split a donor across train and validate.
+
+    A plain ``cv=3`` lets the same donor appear on both sides of the
+    calibration split. Donors contribute many transfers and their quality is
+    exactly what the model would otherwise memorise, so an ungrouped fold
+    calibrates against rows it has effectively already seen and reports a
+    calibration that will not hold in the field.
+
+    ``split.get_group_kfold_splits`` already implements the grouping the SRS
+    requires; it was imported here but never used until now.
+
+    Returns an explicit list of (train_idx, val_idx) pairs, which
+    ``CalibratedClassifierCV`` accepts in place of an integer. Falls back to
+    ungrouped ``cv=3`` only when there are too few distinct donors to form
+    folds, and says so.
+    """
+    if train_df is None or GROUP_COL not in train_df.columns:
+        logger.warning("No donor column available; calibrating with ungrouped cv=3")
+        return 3
+    n_groups = train_df[GROUP_COL].fillna("UNKNOWN").nunique()
+    if n_groups < 2:
+        logger.warning("Only %d distinct donor(s); calibrating with ungrouped cv=3", n_groups)
+        return 3
+    folds = get_group_kfold_splits(train_df, n_folds=min(n_folds, n_groups))
+    logger.info("Calibrating with %d donor-grouped folds over %d donors", len(folds), n_groups)
+    return folds
+
+
+def calibrate_model(model, X_train, y_train, method: str = "isotonic", cv=3):
+    """Apply post-hoc calibration using isotonic or Platt scaling.
+
+    ``cv`` should be donor-grouped folds from :func:`donor_grouped_cv`; the
+    integer default exists only for callers that have no grouping available.
+    """
+    calibrated = CalibratedClassifierCV(model, cv=cv, method=method)
     calibrated.fit(X_train, y_train)
     return calibrated
 
@@ -317,7 +354,9 @@ def run_full_pipeline(csv_path: str | None = None, version: str | None = None) -
     results["xgboost"] = train_xgboost(X_train, y_train, X_test, y_test)
 
     logger.info("Training TabPFN...")
-    results["tabpfn"] = train_tabpfn(X_train, y_train, X_test, y_test)
+    # Donor-grouped folds, reused for every calibration in this run.
+    calibration_cv = donor_grouped_cv(train_df)
+    results["tabpfn"] = train_tabpfn(X_train, y_train, X_test, y_test, cv=calibration_cv)
 
     # ── 5. Calibration ──
     logger.info("Calibrating models...")
@@ -325,7 +364,7 @@ def run_full_pipeline(csv_path: str | None = None, version: str | None = None) -
         model = results[key].get("model")
         if model is not None:
             try:
-                cal_model = calibrate_model(model, X_train, y_train)
+                cal_model = calibrate_model(model, X_train, y_train, cv=calibration_cv)
                 results[key]["calibrated_model"] = cal_model
                 cal_prob = cal_model.predict_proba(X_test)[:, 1]
                 results[key]["calibrated_metrics"] = _compute_metrics(y_test, cal_prob)

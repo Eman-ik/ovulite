@@ -18,6 +18,8 @@ from app.database import get_db
 from app.models.prediction import Prediction
 from app.models.user import User
 from app.schemas.prediction import (
+    ModelMetricSet,
+    ModelPerformanceResponse,
     ModelInfoResponse,
     PredictionHistoryItem,
     PredictionHistoryResponse,
@@ -245,3 +247,99 @@ def record_prediction_outcome(prediction_id: int, payload: PredictionOutcomeInpu
     db.refresh(prediction)
     return PredictionHistoryItem.model_validate(prediction, from_attributes=True)
 
+
+
+# Upper edge of the shuffled-label null for this dataset's size, measured by
+# permutation in ml/permutation_test.py (null 0.501 +/- 0.040). An AUC below
+# this is not evidence of learned signal.
+AUC_CHANCE_CEILING = 0.57
+
+
+@router.get("/performance", response_model=ModelPerformanceResponse)
+def model_performance(
+    _current_user: User = Depends(get_current_user),
+) -> ModelPerformanceResponse:
+    """Holdout metrics for the deployed artifact, as recorded at training time.
+
+    Deliberately has no fallback. The frontend previously called a
+    `/models/performance` route that never existed and silently substituted
+    hardcoded metrics (AUC 0.78, accuracy 0.81) on every single load — numbers
+    that describe no model, while the real artifact sits at 0.488. If the
+    artifact cannot be read, this returns `available: false` with the reason so
+    the page can say so, rather than showing a number someone might act on.
+    """
+    try:
+        from ml.predict import get_predictor
+
+        predictor = get_predictor()
+        metadata = predictor.metadata or {}
+    except Exception as exc:  # pragma: no cover - environment dependent
+        logger.warning("Model performance unavailable: %s", exc)
+        return ModelPerformanceResponse(
+            available=False,
+            interpretation="No trained model artifact could be loaded.",
+            unavailable_reason=str(exc),
+        )
+
+    models_meta = metadata.get("models") or {}
+    if not models_meta:
+        return ModelPerformanceResponse(
+            available=False,
+            interpretation="The loaded artifact records no model metrics.",
+            unavailable_reason="metadata.models is empty",
+        )
+
+    sets: list[ModelMetricSet] = []
+    for key, entry in models_meta.items():
+        metrics = entry.get("calibrated_metrics") or entry.get("holdout_metrics") or {}
+        sets.append(
+            ModelMetricSet(
+                model_key=key,
+                display_name=entry.get("name", key),
+                roc_auc=metrics.get("roc_auc"),
+                pr_auc=metrics.get("pr_auc"),
+                brier_score=metrics.get("brier_score"),
+                accuracy=metrics.get("accuracy"),
+                precision=metrics.get("precision"),
+                recall=metrics.get("recall"),
+                f1=metrics.get("f1"),
+                confusion_matrix=metrics.get("confusion_matrix"),
+                note=entry.get("note"),
+            )
+        )
+
+    best_key = metadata.get("best_model")
+    best = next((s for s in sets if s.model_key == best_key), sets[0] if sets else None)
+    auc = best.roc_auc if best else None
+
+    if auc is None:
+        interpretation = "The artifact records no ROC-AUC for the selected model."
+        better = None
+        vs_chance = None
+    else:
+        better = auc >= AUC_CHANCE_CEILING
+        vs_chance = round((auc - 0.5) * 200, 1)
+        interpretation = (
+            f"ROC-AUC {auc:.3f}. "
+            + (
+                "Above the permutation null for this dataset size, so there is measurable signal."
+                if better
+                else "This is inside the shuffled-label null measured for this dataset "
+                     "(0.501 +/- 0.040), so the model is NOT distinguishable from chance and has "
+                     "no demonstrated clinical utility yet. See ml/permutation_test.py."
+            )
+        )
+
+    return ModelPerformanceResponse(
+        available=True,
+        model_version=metadata.get("version") or getattr(predictor, "version", None),
+        trained_at=metadata.get("created_at"),
+        best_model=best_key,
+        models=sets,
+        n_features=metadata.get("n_features"),
+        split=metadata.get("split"),
+        shap_top_features=metadata.get("shap_top_features") or [],
+        discrimination_vs_chance_pct=vs_chance,
+        is_better_than_chance=better,
+        interpretation=interpretation,
+    )

@@ -5,7 +5,7 @@ import os
 import secrets
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Request, APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token as google_id_token
@@ -23,7 +23,16 @@ from app.auth.security import (
 )
 from app.database import get_db
 from app.models.token_blacklist import RevokedToken
+from app.database import SessionLocal
+from app.models.audit_event import (
+    AUTH_LOGIN_FAILURE,
+    AUTH_LOGIN_SUCCESS,
+    AUTH_LOGOUT,
+    OUTCOME_DENIED,
+    OUTCOME_FAILURE,
+)
 from app.models.user import User
+from app.services.audit import record, record_auth
 from app.models.organization import Organization, OrganizationMembership
 from app.schemas.organization import OrganizationRegistrationRequest, OrganizationRegistrationResponse
 from app.schemas.auth import GoogleAuthRequest, TokenResponse, RefreshTokenRequest
@@ -99,6 +108,7 @@ def ensure_default_admin(db: Session) -> bool:
 
 @router.post("/login", response_model=TokenResponse)
 def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ) -> TokenResponse:
@@ -118,6 +128,18 @@ def login(
         .first()
     )
     if user is None or not verify_password(form_data.password, user.password_hash):
+        # Recorded on its own session: a failed login has no successful
+        # transaction to ride along with, and it is the event most worth
+        # keeping. The attempted identifier is kept; the password never is.
+        record_auth(
+            SessionLocal,
+            AUTH_LOGIN_FAILURE,
+            actor=user,
+            actor_label=login_value,
+            outcome=OUTCOME_FAILURE,
+            message="Unknown user" if user is None else "Bad password",
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
@@ -125,6 +147,15 @@ def login(
         )
 
     if not user.active:
+        record_auth(
+            SessionLocal,
+            AUTH_LOGIN_FAILURE,
+            actor=user,
+            actor_label=login_value,
+            outcome=OUTCOME_DENIED,
+            message="Account is disabled",
+            request=request,
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is disabled",
@@ -132,6 +163,8 @@ def login(
 
     # Update last_login timestamp
     user.last_login = datetime.now(timezone.utc)
+    record(db, AUTH_LOGIN_SUCCESS, actor=user, target_type="user",
+           target_id=user.user_id, request=request)
     db.commit()
 
     access_token = create_access_token(
@@ -258,6 +291,7 @@ def get_me(current_user: User = Depends(get_current_user)) -> User:
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(
+    request: Request,
     token: str = Depends(oauth2_scheme),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -271,6 +305,8 @@ def logout(
             datetime.fromtimestamp(exp_ts, tz=timezone.utc) if exp_ts else datetime.now(timezone.utc)
         )
         db.add(RevokedToken(jti=jti, expires_at=expires_at, revoked_at=datetime.now(timezone.utc)))
+        record(db, AUTH_LOGOUT, actor=current_user, target_type="user",
+               target_id=current_user.user_id, request=request)
         db.commit()
     logger.info("User '%s' logged out", current_user.username)
     return None
