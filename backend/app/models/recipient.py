@@ -10,6 +10,7 @@ from app.models.mixins import OrganizationScopedMixin
 if TYPE_CHECKING:
     from app.models.et_transfer import ETTransfer
     from app.models.recipient_evaluation import RecipientEvaluation
+    from app.models.synchronization_enrollment import SynchronizationEnrollment
 
 
 class Recipient(OrganizationScopedMixin, Base):
@@ -46,6 +47,9 @@ class Recipient(OrganizationScopedMixin, Base):
     # Relationships
     transfers: Mapped[list["ETTransfer"]] = relationship(back_populates="recipient")
     evaluations: Mapped[list["RecipientEvaluation"]] = relationship(
+        back_populates="recipient", cascade="all, delete-orphan"
+    )
+    enrollments: Mapped[list["SynchronizationEnrollment"]] = relationship(
         back_populates="recipient", cascade="all, delete-orphan"
     )
 

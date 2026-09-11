@@ -14,6 +14,10 @@ from pydantic import BaseModel
 class ProtocolLogBase(BaseModel):
     transfer_id: Optional[int] = None
     protocol_id: Optional[int] = None
+    # A treatment belongs to an enrolled animal. transfer_id is retained only
+    # for callers written before synchronization enrollments existed.
+    enrollment_id: Optional[int] = None
+    step_id: Optional[int] = None
     step_name: Optional[str] = None
     step_date: Optional[date] = None
     drug_name: Optional[str] = None
@@ -28,6 +32,8 @@ class ProtocolLogCreate(ProtocolLogBase):
 class ProtocolLogUpdate(BaseModel):
     transfer_id: Optional[int] = None
     protocol_id: Optional[int] = None
+    enrollment_id: Optional[int] = None
+    step_id: Optional[int] = None
     step_name: Optional[str] = None
     step_date: Optional[date] = None
     drug_name: Optional[str] = None

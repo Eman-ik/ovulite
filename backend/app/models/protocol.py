@@ -10,6 +10,8 @@ from app.models.mixins import OrganizationScopedMixin
 if TYPE_CHECKING:
     from app.models.et_transfer import ETTransfer
     from app.models.protocol_log import ProtocolLog
+    from app.models.protocol_step import ProtocolStep
+    from app.models.synchronization_enrollment import SynchronizationEnrollment
 
 
 class Protocol(OrganizationScopedMixin, Base):
@@ -23,6 +25,14 @@ class Protocol(OrganizationScopedMixin, Base):
     # Relationships
     transfers: Mapped[list["ETTransfer"]] = relationship(back_populates="protocol")
     protocol_logs: Mapped[list["ProtocolLog"]] = relationship(
+        back_populates="protocol"
+    )
+    steps: Mapped[list["ProtocolStep"]] = relationship(
+        back_populates="protocol",
+        cascade="all, delete-orphan",
+        order_by="ProtocolStep.day_offset",
+    )
+    enrollments: Mapped[list["SynchronizationEnrollment"]] = relationship(
         back_populates="protocol"
     )
 

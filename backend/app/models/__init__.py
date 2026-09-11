@@ -11,6 +11,8 @@ from app.models.organization import Organization, OrganizationInvitation, Organi
 from app.models.prediction import Prediction
 from app.models.protocol import Protocol
 from app.models.protocol_log import ProtocolLog
+from app.models.protocol_step import ProtocolStep
+from app.models.synchronization_enrollment import SynchronizationEnrollment
 from app.models.recipient import Recipient
 from app.models.recipient_evaluation import RecipientEvaluation
 from app.models.pregnancy_check import PregnancyCheck
@@ -39,6 +41,8 @@ __all__ = [
     "Prediction",
     "Protocol",
     "ProtocolLog",
+    "ProtocolStep",
+    "SynchronizationEnrollment",
     "Recipient",
     "RecipientEvaluation",
     "PregnancyCheck",

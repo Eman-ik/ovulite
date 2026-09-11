@@ -177,3 +177,127 @@ class RetentionResponse(BaseModel):
     of reporting a live birth rate of zero."""
     live_birth: Optional[RetentionStage] = None
     note: str
+
+
+# ── Synchronization scheduling ───────────────────────────
+
+EnrollmentStatus = Literal["Active", "Completed", "Withdrawn"]
+StepState = Literal["Done", "Overdue", "Due today", "Upcoming"]
+
+
+class ProtocolStepBase(BaseModel):
+    day_offset: int = Field(ge=-30, le=365)
+    """Days from the enrollment start date, zero-based: day_offset 0 is the
+    start date itself. A protocol written as "Day 1 GnRH" is offset 0."""
+    step_name: str
+    drug_name: Optional[str] = None
+    dosage: Optional[str] = None
+    route: Optional[str] = None
+    is_transfer_day: bool = False
+    notes: Optional[str] = None
+
+
+class ProtocolStepCreate(ProtocolStepBase):
+    pass
+
+
+class ProtocolStepUpdate(BaseModel):
+    day_offset: Optional[int] = Field(default=None, ge=-30, le=365)
+    step_name: Optional[str] = None
+    drug_name: Optional[str] = None
+    dosage: Optional[str] = None
+    route: Optional[str] = None
+    is_transfer_day: Optional[bool] = None
+    notes: Optional[str] = None
+
+
+class ProtocolStepResponse(ProtocolStepBase):
+    step_id: int
+    protocol_id: int
+
+    model_config = {"from_attributes": True}
+
+
+class EnrollmentBase(BaseModel):
+    recipient_id: int
+    protocol_id: int
+    start_date: date
+    technician_id: Optional[int] = None
+    notes: Optional[str] = None
+
+
+class EnrollmentCreate(EnrollmentBase):
+    pass
+
+
+class EnrollmentUpdate(BaseModel):
+    start_date: Optional[date] = None
+    status: Optional[EnrollmentStatus] = None
+    withdrawn_reason: Optional[str] = None
+    technician_id: Optional[int] = None
+    transfer_id: Optional[int] = None
+    notes: Optional[str] = None
+
+
+class ScheduledStepResponse(BaseModel):
+    step_id: int
+    day_offset: int
+    step_name: str
+    drug_name: Optional[str]
+    dosage: Optional[str]
+    route: Optional[str]
+    is_transfer_day: bool
+    due_date: date
+    state: StepState
+    completed_on: Optional[date]
+    days_from_today: int
+
+
+class EnrollmentScheduleResponse(BaseModel):
+    enrollment_id: int
+    recipient_id: int
+    recipient_tag: Optional[str]
+    protocol_id: int
+    protocol_name: Optional[str]
+    start_date: date
+    status: str
+    transfer_id: Optional[int]
+    steps: list[ScheduledStepResponse]
+    has_schedule: bool
+    """False when the protocol has no steps defined — Ovulite does not guess
+    treatment days, so it says the schedule is undefined rather than showing
+    an empty one as 'nothing due'."""
+    next_step: Optional[ScheduledStepResponse]
+    overdue_count: int
+    completed_count: int
+    total_steps: int
+    transfer_due_date: Optional[date]
+    current_stage: str
+
+
+class BoardCount(BaseModel):
+    key: str
+    label: str
+    count: int
+    is_estimated: bool = False
+    basis: str
+    """What was actually counted, so a number on the board can be checked."""
+
+
+class VetBoardResponse(BaseModel):
+    as_of: date
+    counts: list[BoardCount]
+    protocols_without_steps: list[str]
+    """Protocols in use that have no step template yet — every enrollment on
+    one of these is unschedulable until a vet defines its days."""
+    note: str
+
+
+class TreatmentLogCreate(BaseModel):
+    """Record that a scheduled step was actually administered."""
+
+    step_id: int
+    step_date: date
+    drug_name: Optional[str] = None
+    dosage: Optional[str] = None
+    notes: Optional[str] = None

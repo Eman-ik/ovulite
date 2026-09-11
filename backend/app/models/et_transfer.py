@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from app.models.calving_record import CalvingRecord
     from app.models.pregnancy_check import PregnancyCheck
     from app.models.recipient_evaluation import RecipientEvaluation
+    from app.models.synchronization_enrollment import SynchronizationEnrollment
 
 
 class ETTransfer(OrganizationScopedMixin, Base):
@@ -108,6 +109,9 @@ class ETTransfer(OrganizationScopedMixin, Base):
         back_populates="transfer", cascade="all, delete-orphan", uselist=False
     )
     evaluations: Mapped[list["RecipientEvaluation"]] = relationship(
+        back_populates="transfer"
+    )
+    enrollments: Mapped[list["SynchronizationEnrollment"]] = relationship(
         back_populates="transfer"
     )
 

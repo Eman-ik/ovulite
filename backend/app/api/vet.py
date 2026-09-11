@@ -11,7 +11,8 @@ builder, so they cannot simply be abandoned — but they are a derived view,
 not a second place to record a diagnosis.
 """
 
-from datetime import date
+from dataclasses import asdict
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, joinedload
@@ -21,11 +22,17 @@ from app.database import get_db
 from app.models.calving_record import CalvingRecord
 from app.models.et_transfer import ETTransfer
 from app.models.pregnancy_check import PregnancyCheck
+from app.models.protocol import Protocol
+from app.models.protocol_log import ProtocolLog
+from app.models.protocol_step import ProtocolStep
 from app.models.recipient import Recipient
 from app.models.recipient_evaluation import RecipientEvaluation
+from app.models.synchronization_enrollment import SynchronizationEnrollment
 from app.models.technician import Technician
 from app.models.user import User
+from app.services.synchronization import build_schedule
 from app.schemas.vet import (
+    BoardCount,
     CalvingRecordCreate,
     CalvingRecordResponse,
     CalvingRecordUpdate,
@@ -35,9 +42,17 @@ from app.schemas.vet import (
     RecipientEvaluationCreate,
     RecipientEvaluationResponse,
     RecipientEvaluationUpdate,
+    EnrollmentCreate,
+    EnrollmentScheduleResponse,
+    EnrollmentUpdate,
+    ProtocolStepCreate,
+    ProtocolStepResponse,
+    ProtocolStepUpdate,
     RetentionResponse,
     RetentionStage,
     TransferOutcomeChain,
+    TreatmentLogCreate,
+    VetBoardResponse,
 )
 
 router = APIRouter()
@@ -81,6 +96,70 @@ def _owned_recipient(db: Session, recipient_id: int, org_id: int) -> Recipient:
     if recipient is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Recipient not found in your organization")
     return recipient
+
+
+
+def _owned_protocol(db: Session, protocol_id: int, org_id: int) -> Protocol:
+    protocol = (
+        db.query(Protocol)
+        .filter(Protocol.protocol_id == protocol_id, Protocol.organization_id == org_id)
+        .first()
+    )
+    if protocol is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Protocol not found in your organization")
+    return protocol
+
+
+def _owned_step(db: Session, step_id: int, org_id: int) -> ProtocolStep:
+    step = (
+        db.query(ProtocolStep)
+        .filter(ProtocolStep.step_id == step_id, ProtocolStep.organization_id == org_id)
+        .first()
+    )
+    if step is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Protocol step not found in your organization")
+    return step
+
+
+def _owned_enrollment(db: Session, enrollment_id: int, org_id: int) -> SynchronizationEnrollment:
+    enrollment = (
+        db.query(SynchronizationEnrollment)
+        .options(
+            joinedload(SynchronizationEnrollment.recipient),
+            joinedload(SynchronizationEnrollment.protocol),
+            joinedload(SynchronizationEnrollment.logs),
+        )
+        .filter(
+            SynchronizationEnrollment.enrollment_id == enrollment_id,
+            SynchronizationEnrollment.organization_id == org_id,
+        )
+        .first()
+    )
+    if enrollment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Enrollment not found in your organization")
+    return enrollment
+
+
+def _steps_by_protocol(db: Session, org_id: int) -> dict[int, list[ProtocolStep]]:
+    """All step templates for the org, grouped — one query for the whole board."""
+    grouped: dict[int, list[ProtocolStep]] = {}
+    for step in db.query(ProtocolStep).filter(ProtocolStep.organization_id == org_id).all():
+        grouped.setdefault(step.protocol_id, []).append(step)
+    return grouped
+
+
+def _schedule_response(
+    db: Session, enrollment: SynchronizationEnrollment, org_id: int
+) -> EnrollmentScheduleResponse:
+    steps = (
+        db.query(ProtocolStep)
+        .filter(
+            ProtocolStep.protocol_id == enrollment.protocol_id,
+            ProtocolStep.organization_id == org_id,
+        )
+        .all()
+    )
+    return EnrollmentScheduleResponse(**asdict(build_schedule(enrollment, steps)))
 
 
 def _check_response(check: PregnancyCheck) -> PregnancyCheckResponse:
@@ -558,3 +637,436 @@ def retention(
             )
         ),
     )
+
+
+# ── Protocol step templates ──────────────────────────────
+
+
+@router.get("/protocols/{protocol_id}/steps", response_model=list[ProtocolStepResponse])
+def list_protocol_steps(
+    protocol_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """The step template for one protocol, in day order.
+
+    An empty list is a real answer: this database's protocol names encode the
+    drugs but not the days, so no protocol has a schedule until a vet enters
+    one. Ovulite does not guess treatment days.
+    """
+    _owned_protocol(db, protocol_id, current_user.organization_id)
+    return (
+        db.query(ProtocolStep)
+        .filter(
+            ProtocolStep.protocol_id == protocol_id,
+            ProtocolStep.organization_id == current_user.organization_id,
+        )
+        .order_by(ProtocolStep.day_offset, ProtocolStep.step_name)
+        .all()
+    )
+
+
+@router.post(
+    "/protocols/{protocol_id}/steps",
+    response_model=ProtocolStepResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_protocol_step(
+    protocol_id: int,
+    payload: ProtocolStepCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    _owned_protocol(db, protocol_id, current_user.organization_id)
+    duplicate = (
+        db.query(ProtocolStep)
+        .filter(
+            ProtocolStep.protocol_id == protocol_id,
+            ProtocolStep.day_offset == payload.day_offset,
+            ProtocolStep.step_name == payload.step_name,
+        )
+        .first()
+    )
+    if duplicate:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "This protocol already has a step with that name on that day",
+        )
+    step = ProtocolStep(
+        protocol_id=protocol_id, organization_id=current_user.organization_id, **payload.model_dump()
+    )
+    db.add(step)
+    db.commit()
+    db.refresh(step)
+    return step
+
+
+@router.patch("/protocol-steps/{step_id}", response_model=ProtocolStepResponse)
+def update_protocol_step(
+    step_id: int,
+    payload: ProtocolStepUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    step = _owned_step(db, step_id, current_user.organization_id)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(step, field, value)
+    db.commit()
+    db.refresh(step)
+    return step
+
+
+@router.delete("/protocol-steps/{step_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_protocol_step(
+    step_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    """Remove a step from the template.
+
+    Refused while treatments have been logged against it: deleting would
+    orphan a record of something that was actually administered.
+    """
+    step = _owned_step(db, step_id, current_user.organization_id)
+    logged = db.query(ProtocolLog).filter(ProtocolLog.step_id == step_id).count()
+    if logged:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"{logged} treatment(s) are logged against this step; it cannot be deleted",
+        )
+    db.delete(step)
+    db.commit()
+
+
+# ── Enrollments ──────────────────────────────────────────
+
+
+@router.post(
+    "/enrollments", response_model=EnrollmentScheduleResponse, status_code=status.HTTP_201_CREATED
+)
+def create_enrollment(
+    payload: EnrollmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    """Place a recipient on a protocol from a start date.
+
+    Returns the derived schedule immediately, so the caller sees the treatment
+    days without a second request — and sees at once if the protocol has no
+    template defined.
+    """
+    _owned_recipient(db, payload.recipient_id, current_user.organization_id)
+    _owned_protocol(db, payload.protocol_id, current_user.organization_id)
+
+    active = (
+        db.query(SynchronizationEnrollment)
+        .filter(
+            SynchronizationEnrollment.recipient_id == payload.recipient_id,
+            SynchronizationEnrollment.organization_id == current_user.organization_id,
+            SynchronizationEnrollment.status == "Active",
+        )
+        .first()
+    )
+    if active:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"Recipient is already on an active enrollment (id {active.enrollment_id}); "
+            "complete or withdraw it first",
+        )
+
+    enrollment = SynchronizationEnrollment(
+        organization_id=current_user.organization_id, status="Active", **payload.model_dump()
+    )
+    db.add(enrollment)
+    db.commit()
+    db.refresh(enrollment)
+    return _schedule_response(db, enrollment, current_user.organization_id)
+
+
+@router.patch("/enrollments/{enrollment_id}", response_model=EnrollmentScheduleResponse)
+def update_enrollment(
+    enrollment_id: int,
+    payload: EnrollmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    enrollment = _owned_enrollment(db, enrollment_id, current_user.organization_id)
+    values = payload.model_dump(exclude_unset=True)
+    if values.get("transfer_id") is not None:
+        _owned_transfer(db, values["transfer_id"], current_user.organization_id)
+    if values.get("status") == "Withdrawn" and not (
+        values.get("withdrawn_reason") or enrollment.withdrawn_reason
+    ):
+        raise HTTPException(422, "withdrawn_reason is required when withdrawing an enrollment")
+    for field, value in values.items():
+        setattr(enrollment, field, value)
+    db.commit()
+    db.refresh(enrollment)
+    return _schedule_response(db, enrollment, current_user.organization_id)
+
+
+@router.get("/enrollments/{enrollment_id}", response_model=EnrollmentScheduleResponse)
+def get_enrollment(
+    enrollment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    enrollment = _owned_enrollment(db, enrollment_id, current_user.organization_id)
+    return _schedule_response(db, enrollment, current_user.organization_id)
+
+
+@router.get("/schedule", response_model=list[EnrollmentScheduleResponse])
+def schedule_board(
+    status_filter: str | None = Query(None, alias="status"),
+    overdue_only: bool = Query(False),
+    due_within_days: int | None = Query(None, ge=0, le=90),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Every enrollment with its derived schedule.
+
+    Defaults to active enrollments, which is what a vet planning the day
+    needs; pass ``status`` to see completed or withdrawn ones.
+    """
+    query = (
+        db.query(SynchronizationEnrollment)
+        .options(
+            joinedload(SynchronizationEnrollment.recipient),
+            joinedload(SynchronizationEnrollment.protocol),
+            joinedload(SynchronizationEnrollment.logs),
+        )
+        .filter(SynchronizationEnrollment.organization_id == current_user.organization_id)
+        .filter(SynchronizationEnrollment.status == (status_filter or "Active"))
+    )
+
+    steps_by_protocol = _steps_by_protocol(db, current_user.organization_id)
+    schedules = [build_schedule(e, steps_by_protocol.get(e.protocol_id, [])) for e in query.all()]
+
+    if overdue_only:
+        schedules = [s for s in schedules if s.overdue_count > 0]
+    if due_within_days is not None:
+        schedules = [
+            s
+            for s in schedules
+            if s.next_step is not None and s.next_step.days_from_today <= due_within_days
+        ]
+
+    # Soonest action first; enrollments with nothing pending sort last.
+    schedules.sort(
+        key=lambda s: (
+            0 if s.overdue_count else 1,
+            s.next_step.days_from_today if s.next_step else 10**6,
+        )
+    )
+    return [EnrollmentScheduleResponse(**asdict(s)) for s in schedules]
+
+
+@router.get("/board", response_model=VetBoardResponse)
+def vet_board(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """The counts a veterinarian opens the day with.
+
+    Each count carries the query it came from, so a number can be checked
+    rather than trusted.
+    """
+    org_id = current_user.organization_id
+    today = date.today()
+
+    enrollments = (
+        db.query(SynchronizationEnrollment)
+        .options(
+            joinedload(SynchronizationEnrollment.recipient),
+            joinedload(SynchronizationEnrollment.protocol),
+            joinedload(SynchronizationEnrollment.logs),
+        )
+        .filter(
+            SynchronizationEnrollment.organization_id == org_id,
+            SynchronizationEnrollment.status == "Active",
+        )
+        .all()
+    )
+    steps_by_protocol = _steps_by_protocol(db, org_id)
+    schedules = [
+        build_schedule(e, steps_by_protocol.get(e.protocol_id, []), today) for e in enrollments
+    ]
+
+    in_sync = len(schedules)
+    overdue = sum(1 for s in schedules if s.overdue_count)
+    due_today = sum(
+        1 for s in schedules if s.next_step is not None and s.next_step.days_from_today == 0
+    )
+    transfer_due_today = sum(1 for s in schedules if s.transfer_due_date == today)
+    unschedulable = [s for s in schedules if not s.has_schedule]
+
+    evaluated_ids = {
+        row[0]
+        for row in db.query(RecipientEvaluation.recipient_id)
+        .filter(RecipientEvaluation.organization_id == org_id)
+        .all()
+    }
+    awaiting_evaluation = sum(
+        1
+        for s in schedules
+        if s.transfer_due_date is not None
+        and s.transfer_due_date >= today
+        and s.recipient_id not in evaluated_ids
+    )
+
+    eligible = (
+        db.query(RecipientEvaluation)
+        .filter(
+            RecipientEvaluation.organization_id == org_id,
+            RecipientEvaluation.eligibility.in_(("Excellent", "Acceptable")),
+            RecipientEvaluation.transfer_id.is_(None),
+        )
+        .count()
+    )
+
+    transfers_today = (
+        db.query(ETTransfer)
+        .filter(ETTransfer.organization_id == org_id, ETTransfer.et_date == today)
+        .count()
+    )
+
+    pd_due = (
+        db.query(ETTransfer)
+        .outerjoin(PregnancyCheck, PregnancyCheck.transfer_id == ETTransfer.transfer_id)
+        .filter(
+            ETTransfer.organization_id == org_id,
+            ETTransfer.et_date.isnot(None),
+            ETTransfer.et_date <= today - timedelta(days=28),
+            ETTransfer.et_date >= today - timedelta(days=120),
+            PregnancyCheck.check_id.is_(None),
+        )
+        .count()
+    )
+
+    counts = [
+        BoardCount(
+            key="in_synchronization",
+            label="Recipients in synchronization",
+            count=in_sync,
+            basis="Active synchronization enrollments",
+        ),
+        BoardCount(
+            key="steps_overdue",
+            label="Enrollments with an overdue step",
+            count=overdue,
+            basis="Active enrollments with a step due before today and no treatment logged",
+        ),
+        BoardCount(
+            key="steps_due_today",
+            label="Treatments due today",
+            count=due_today,
+            basis="Active enrollments whose next unlogged step falls on today",
+        ),
+        BoardCount(
+            key="awaiting_cl_evaluation",
+            label="Awaiting CL evaluation",
+            count=awaiting_evaluation,
+            is_estimated=True,
+            basis=(
+                "Active enrollments with a transfer day still ahead and no recorded evaluation "
+                "for that recipient — approximate, since an evaluation is not tied to an enrollment"
+            ),
+        ),
+        BoardCount(
+            key="eligible_for_et",
+            label="Eligible for ET",
+            count=eligible,
+            basis="Evaluations graded Excellent or Acceptable that are not yet linked to a transfer",
+        ),
+        BoardCount(
+            key="transfer_day_today",
+            label="Scheduled transfer day today",
+            count=transfer_due_today,
+            basis="Active enrollments whose transfer-day step falls on today",
+        ),
+        BoardCount(
+            key="transfers_recorded_today",
+            label="Transfers recorded today",
+            count=transfers_today,
+            basis="et_transfers dated today",
+        ),
+        BoardCount(
+            key="pregnancy_diagnosis_due",
+            label="Pregnancy diagnosis due",
+            count=pd_due,
+            basis="Transfers 28-120 days old with no pregnancy check recorded",
+        ),
+    ]
+
+    return VetBoardResponse(
+        as_of=today,
+        counts=counts,
+        protocols_without_steps=sorted({s.protocol_name for s in unschedulable if s.protocol_name}),
+        note=(
+            "Counts are derived from enrollments, evaluations and transfers as they stand now. "
+            + (
+                f"{len(unschedulable)} active enrollment(s) are on protocols with no step "
+                "template, so no treatment can be scheduled for them until one is defined."
+                if unschedulable
+                else "Every active enrollment is on a protocol with a defined schedule."
+            )
+        ),
+    )
+
+
+@router.post(
+    "/enrollments/{enrollment_id}/treatments",
+    response_model=EnrollmentScheduleResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def log_treatment(
+    enrollment_id: int,
+    payload: TreatmentLogCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+):
+    """Record that a scheduled step was administered, and return the new schedule.
+
+    Returning the whole schedule rather than the log row is deliberate: the
+    caller's next question is always "what is due now?", and recomputing it
+    here avoids a second request that could observe a different day.
+
+    The drug and dose default to the template's, so the common case — the
+    treatment was given as specified — needs only the step and the date. A
+    substitution is recorded by passing them explicitly.
+    """
+    enrollment = _owned_enrollment(db, enrollment_id, current_user.organization_id)
+    step = _owned_step(db, payload.step_id, current_user.organization_id)
+    if step.protocol_id != enrollment.protocol_id:
+        raise HTTPException(
+            422, "That step belongs to a different protocol than this enrollment"
+        )
+
+    existing = (
+        db.query(ProtocolLog)
+        .filter(ProtocolLog.enrollment_id == enrollment_id, ProtocolLog.step_id == payload.step_id)
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "This step is already recorded for this enrollment",
+        )
+
+    db.add(
+        ProtocolLog(
+            organization_id=current_user.organization_id,
+            enrollment_id=enrollment_id,
+            step_id=payload.step_id,
+            protocol_id=enrollment.protocol_id,
+            transfer_id=enrollment.transfer_id,
+            step_name=step.step_name,
+            step_date=payload.step_date,
+            drug_name=payload.drug_name or step.drug_name,
+            dosage=payload.dosage or step.dosage,
+            notes=payload.notes,
+        )
+    )
+    db.commit()
+    db.refresh(enrollment)
+    return _schedule_response(db, enrollment, current_user.organization_id)
