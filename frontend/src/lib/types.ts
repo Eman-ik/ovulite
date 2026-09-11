@@ -576,3 +576,145 @@ export interface AttributionResponse {
   dimensions_tested: string[];
   note: string;
 }
+
+// ── Vet / ET workflow ────────────────────────────────────
+
+export type Eligibility = "Excellent" | "Acceptable" | "Not Recommended";
+export type Quality = "Good" | "Fair" | "Poor";
+export type CheckResult = "Pregnant" | "Open" | "Recheck" | "Lost";
+export type CheckMethod = "Ultrasound" | "Rectal Palpation" | "Blood Test" | "Other";
+export type CalvingOutcome = "Live Birth" | "Stillbirth" | "Abortion";
+export type StepState = "Done" | "Overdue" | "Due today" | "Upcoming";
+
+export interface RecipientEvaluation {
+  evaluation_id: number;
+  recipient_id: number;
+  recipient_tag: string | null;
+  evaluation_date: string;
+  technician_id: number | null;
+  technician_name: string | null;
+  cl_present: boolean | null;
+  cl_side: "Left" | "Right" | null;
+  cl_diameter_mm: string | number | null;
+  cl_quality: Quality | null;
+  follicle_count: number | null;
+  largest_follicle_mm: string | number | null;
+  uterine_tone: Quality | null;
+  progesterone_ng_ml: string | number | null;
+  body_condition_score: string | number | null;
+  eligibility: Eligibility | null;
+  notes: string | null;
+  transfer_id: number | null;
+}
+
+export interface PregnancyCheck {
+  check_id: number;
+  transfer_id: number;
+  check_date: string;
+  days_post_transfer: number | null;
+  result: CheckResult;
+  method: CheckMethod | null;
+  technician_name: string | null;
+  /** Check dated before its own transfer, or improbably long after it. */
+  implausible_offset: boolean;
+  notes: string | null;
+}
+
+export interface CalvingRecord {
+  calving_id: number;
+  transfer_id: number;
+  calving_date: string;
+  outcome: CalvingOutcome;
+  calf_sex: "Male" | "Female" | "Unknown" | null;
+  calf_weight_kg: string | number | null;
+  gestation_days: number | null;
+  assisted: boolean | null;
+  notes: string | null;
+}
+
+export interface TransferOutcomeChain {
+  transfer_id: number;
+  et_date: string | null;
+  recipient_tag: string | null;
+  checks: PregnancyCheck[];
+  calving: CalvingRecord | null;
+  current_status: string;
+}
+
+export interface RetentionStage {
+  label: string;
+  n: number;
+  pregnant: number;
+  rate_pct: number | null;
+  retained_from_previous_pct: number | null;
+}
+
+export interface RetentionResponse {
+  stages: RetentionStage[];
+  live_birth_tracked: boolean;
+  live_birth: RetentionStage | null;
+  note: string;
+}
+
+export interface ProtocolStep {
+  step_id: number;
+  protocol_id: number;
+  /** Days from the enrollment start, zero-based: 0 is the start date. */
+  day_offset: number;
+  step_name: string;
+  drug_name: string | null;
+  dosage: string | null;
+  route: string | null;
+  is_transfer_day: boolean;
+  notes: string | null;
+}
+
+export interface ScheduledStep {
+  step_id: number;
+  day_offset: number;
+  step_name: string;
+  drug_name: string | null;
+  dosage: string | null;
+  route: string | null;
+  is_transfer_day: boolean;
+  due_date: string;
+  state: StepState;
+  completed_on: string | null;
+  days_from_today: number;
+}
+
+export interface EnrollmentSchedule {
+  enrollment_id: number;
+  recipient_id: number;
+  recipient_tag: string | null;
+  protocol_id: number;
+  protocol_name: string | null;
+  start_date: string;
+  status: string;
+  transfer_id: number | null;
+  steps: ScheduledStep[];
+  /** False when the protocol has no step template defined yet. */
+  has_schedule: boolean;
+  next_step: ScheduledStep | null;
+  overdue_count: number;
+  completed_count: number;
+  total_steps: number;
+  transfer_due_date: string | null;
+  current_stage: string;
+}
+
+export interface BoardCount {
+  key: string;
+  label: string;
+  count: number;
+  is_estimated: boolean;
+  /** What was actually counted, so the number can be checked. */
+  basis: string;
+}
+
+export interface VetBoardResponse {
+  as_of: string;
+  counts: BoardCount[];
+  protocols_without_steps: string[];
+  note: string;
+}

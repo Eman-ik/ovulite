@@ -23,6 +23,9 @@ import {
   Search,
   Bell,
   GitCompare,
+  CalendarClock,
+  HeartPulse,
+  ListOrdered,
 } from "lucide-react";
 import ovuliteLogo from "../pages/icon.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,6 +62,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Clinical",
     items: [
+      { to: "synchronization", icon: CalendarClock, label: "Synchronization", permission: "canEnterETData" },
+      { to: "pregnancy-diagnosis", icon: HeartPulse, label: "Pregnancy Diagnosis", permission: "canEnterETData" },
+      { to: "protocol-schedules", icon: ListOrdered, label: "Protocol Schedules", permission: "canEnterETData" },
       { to: "data-entry", icon: FileInput, label: "Data Entry", permission: "canEnterETData" },
       { to: "predictions", icon: Brain, label: "Predictions", permission: "canEnterETData" },
     ],

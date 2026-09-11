@@ -16,6 +16,9 @@ import OPUIVFPage from "@/pages/OPUIVFPage";
 import QCDashboardPage from "@/pages/QCDashboardPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import ResearchPage from "@/pages/ResearchPage";
+import SynchronizationPage from "@/pages/SynchronizationPage";
+import ProtocolSchedulesPage from "@/pages/ProtocolSchedulesPage";
+import PregnancyDiagnosisPage from "@/pages/PregnancyDiagnosisPage";
 import CaseRecordsPage from "@/pages/CaseRecordsPage";
 import CaseDetailPage from "@/pages/CaseDetailPage";
 import ModelPerformancePage from "@/pages/ModelPerformancePage";
@@ -122,6 +125,33 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
       <AnalyticsPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="synchronization"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+      <SynchronizationPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="protocol-schedules"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+      <ProtocolSchedulesPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="pregnancy-diagnosis"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+      <PregnancyDiagnosisPage />
     </ProtectedRoute>
   }
 />
