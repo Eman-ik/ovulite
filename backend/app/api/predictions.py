@@ -13,7 +13,12 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
+from app.auth.dependencies import (
+    ET_WRITE_ROLES,
+    PREDICTION_RUN_ROLES,
+    get_current_user,
+    require_role,
+)
 from app.database import get_db
 from app.models.prediction import Prediction
 from app.models.user import User
@@ -57,14 +62,15 @@ def _get_predictor():
         raise HTTPException(status_code=503, detail=f"Model loading error: {exc}")
 
 
-# Running a prediction writes a Prediction row, so it is a write path. Reads
-# below stay open to any authenticated role, which is what lets the
-# researcher role see predictions without being able to create them.
+# Generating a prediction writes a Prediction row, so it is a write path — but
+# a different one from recording a clinical fact. PREDICTION_RUN_ROLES includes
+# the lab; selection and outcome below stay ET-only. Reads are open to any
+# authenticated role.
 @router.post("/pregnancy", response_model=PredictionOutput)
 def predict_pregnancy(
     input_data: PredictionInput,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
+    current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
 ):
     """Predict pregnancy probability for an ET transfer.
 

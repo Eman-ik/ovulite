@@ -119,6 +119,27 @@ CANONICAL_ROLES = (
 LAB_WRITE_ROLES = ("admin", "organization_admin", "embryologist")
 ET_WRITE_ROLES = ("admin", "organization_admin", "et team", "veterinarian")
 
+# Running a prediction is a third thing, and lumping it into ET_WRITE_ROLES
+# conflated three different privileges:
+#
+#   generate a prediction  — asks the model a question about a candidate
+#                            transfer. An embryologist deciding whether to
+#                            freeze or transfer an embryo has a real use for
+#                            it, and it commits nothing clinically.
+#   select for a case      — declares which prediction drives this transfer.
+#                            A clinical decision, ET-side.
+#   record the outcome     — states whether the recipient was pregnant. An
+#                            observation only the ET side makes.
+#
+# So only the first opens to the lab. The other two stay on ET_WRITE_ROLES.
+PREDICTION_RUN_ROLES = (
+    "admin",
+    "organization_admin",
+    "et team",
+    "veterinarian",
+    "embryologist",
+)
+
 
 def require_role(*allowed_roles: str) -> Callable:
     """Return a dependency that restricts access to users with specific roles.

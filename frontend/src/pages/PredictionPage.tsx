@@ -306,10 +306,15 @@ function KpiCard({
 export default function PredictionPage() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
-  // Researchers reach this page read-only: they can see predictions and the
-  // model's behaviour, but running one writes a Prediction row, so the API
-  // refuses it for them and the controls below are not offered.
-  const canWrite = getPermissions(user?.role).canEnterETData;
+  // Two separate privileges, deliberately not one flag:
+  //   canRunPredictions — ask the model about a candidate transfer. Open to
+  //     the lab, because choosing whether to freeze or transfer an embryo is
+  //     a real use for it and it commits nothing clinically.
+  //   canEnterETData    — record whether the recipient actually became
+  //     pregnant. An ET-side observation; the lab never makes it.
+  const permissions = getPermissions(user?.role);
+  const canRun = permissions.canRunPredictions;
+  const canRecordOutcome = permissions.canEnterETData;
   const [form, setForm] = useState<FormState>(initialForm);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
@@ -703,7 +708,7 @@ export default function PredictionPage() {
                 <div className="text-xs text-[var(--pp-muted)]">
                   {canGenerate ? "Ready to generate prediction." : "Enter Recipient ID, Embryo ID, CL size, and Embryo Stage."}
                 </div>
-                {canWrite ? (
+                {canRun ? (
                   <div className="flex flex-wrap gap-2">
                     <button type="button" className="pp-button pp-button-ghost" onClick={clearForm}>
                       <RotateCcw className="h-4 w-4" /> Clear
@@ -749,10 +754,16 @@ export default function PredictionPage() {
 
           <RecentPredictions
             refreshKey={recentRefreshKey}
-            onUpdateOutcome={(predictionId) => {
-              setOutcomePredictionId(predictionId);
-              setOutcomeOpen(true);
-            }}
+            // Undefined for roles that cannot record an outcome, so the row
+            // offers no control rather than one the API will refuse.
+            onUpdateOutcome={
+              canRecordOutcome
+                ? (predictionId) => {
+                    setOutcomePredictionId(predictionId);
+                    setOutcomeOpen(true);
+                  }
+                : undefined
+            }
           />
         </main>
 
@@ -966,7 +977,8 @@ function RecentPredictions({
   onUpdateOutcome,
   refreshKey,
 }: {
-  onUpdateOutcome: (predictionId: number) => void;
+  /** Undefined when the viewing role cannot record outcomes. */
+  onUpdateOutcome?: (predictionId: number) => void;
   refreshKey: number;
 }) {
   const [items, setItems] = useState<HistoryItem[]>([]);
@@ -1049,7 +1061,9 @@ function RecentPredictions({
                       <td className="px-4 py-3"><span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${outcomeStyle[outcomeLabel] ?? outcomeStyle.Pending}`}><Circle className="h-2 w-2 fill-current" />{outcomeDisplay}</span></td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
-                          <button type="button" className="pp-table-button" onClick={() => onUpdateOutcome(item.prediction_id)}>Update Outcome</button>
+                          {onUpdateOutcome && (
+                            <button type="button" className="pp-table-button" onClick={() => onUpdateOutcome(item.prediction_id)}>Update Outcome</button>
+                          )}
                         </div>
                       </td>
                     </tr>

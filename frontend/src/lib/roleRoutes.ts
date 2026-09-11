@@ -91,13 +91,17 @@ type PermissionSet = {
   canExportReports: boolean;
   /** Model evaluation, dataset explorer, protocol comparison. */
   canViewResearch: boolean;
-  /**
-   * See the prediction surface. Deliberately separate from canEnterETData,
-   * which governs *running* a prediction — that writes a Prediction row and
-   * needs recipient data the lab does not hold at grading time. Several roles
-   * can read predictions; only the ET side can create them.
-   */
+  /** See the prediction surface. */
   canViewPredictions: boolean;
+  /**
+   * Generate a prediction. Split out of canEnterETData because asking the
+   * model about a candidate transfer is not the same privilege as writing
+   * clinical records: it commits nothing, and an embryologist choosing
+   * between freezing and transferring an embryo has a genuine use for it.
+   * Recording the actual outcome — whether the recipient was pregnant — is
+   * an ET-side observation and stays on canEnterETData.
+   */
+  canRunPredictions: boolean;
 };
 
 const VET_PERMISSIONS: PermissionSet = {
@@ -111,6 +115,7 @@ const VET_PERMISSIONS: PermissionSet = {
   canExportReports: true,
   canViewResearch: false,
   canViewPredictions: true,
+  canRunPredictions: true,
 };
 
 const ADMIN_PERMISSIONS: PermissionSet = {
@@ -124,6 +129,7 @@ const ADMIN_PERMISSIONS: PermissionSet = {
   canExportReports: true,
   canViewResearch: true,
   canViewPredictions: true,
+  canRunPredictions: true,
 };
 
 export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
@@ -146,10 +152,11 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canEditSettings: false,
     canExportReports: true,
     canViewResearch: false,
-    // Read-only: an embryologist wants to see what was predicted for embryos
-    // they produced, but running a prediction is a transfer-time decision
-    // that needs recipient findings they do not have.
     canViewPredictions: true,
+    // Can ask the model about a candidate transfer — useful when deciding
+    // whether to freeze or transfer an embryo — but cannot record whether the
+    // recipient became pregnant, which is an ET-side observation.
+    canRunPredictions: true,
   },
 
   veterinarian: VET_PERMISSIONS,
@@ -168,6 +175,9 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canExportReports: true,
     canViewResearch: true,
     canViewPredictions: true,
+    // Read-only by definition: the research role analyses outcomes, it does
+    // not create records of any kind.
+    canRunPredictions: false,
   },
 
   viewer: {
@@ -181,6 +191,7 @@ export const ROLE_PERMISSIONS: Record<CanonicalRole, PermissionSet> & {
     canExportReports: false,
     canViewResearch: false,
     canViewPredictions: false,
+    canRunPredictions: false,
   },
 
   "et team": VET_PERMISSIONS,
