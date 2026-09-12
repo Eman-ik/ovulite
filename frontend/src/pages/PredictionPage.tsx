@@ -1260,25 +1260,25 @@ function formatFeatureName(name: string): string {
 
 const predictionPageStyles = `
   .pp-page {
-    --pp-background: #f7f5f0;
-    --pp-foreground: #16181a;
+    --pp-background: #f2f7f3;
+    --pp-foreground: #051F20;
     --pp-card: rgba(255,255,255,0.9);
-    --pp-muted: #6f7680;
-    --pp-muted-bg: #f1eee9;
-    --pp-border: rgba(22, 24, 26, 0.1);
-    --pp-primary: #16181a;
-    --pp-sage: #86c5a4;
-    --pp-ocean: #8fb8de;
-    --pp-leaf: #eaba6b;
-    --pp-foam: #faf9f6;
-    --pp-success: #2f7d5c;
-    --pp-warning: #a1741c;
-    --pp-destructive: #b8433d;
+    --pp-muted: #5c7268;
+    --pp-muted-bg: #eaf3ec;
+    --pp-border: rgba(5, 31, 32, 0.1);
+    --pp-primary: #051F20;
+    --pp-sage: #8EB69B;
+    --pp-ocean: #3d6f81;
+    --pp-leaf: #8EB69B;
+    --pp-foam: #f6faf7;
+    --pp-success: #235347;
+    --pp-warning: #7a5a12;
+    --pp-destructive: #9d3730;
     min-height: 100vh;
     color: var(--pp-foreground);
     background:
-      radial-gradient(ellipse at top left, rgba(246, 223, 174, 0.5), transparent 45%),
-      radial-gradient(ellipse at bottom right, rgba(233, 226, 214, 0.6), transparent 45%),
+      radial-gradient(ellipse at top left, rgba(142, 182, 155, 0.30), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(218, 241, 222, 0.55), transparent 45%),
       var(--pp-background);
     border-radius: 28px;
     overflow: hidden;
@@ -1287,13 +1287,13 @@ const predictionPageStyles = `
   .pp-glass-card {
     background: var(--pp-card);
     border: 1px solid var(--pp-border);
-    box-shadow: 0 18px 48px -26px rgba(22, 24, 26, 0.3), inset 0 1px 0 rgba(255,255,255,0.7);
+    box-shadow: 0 18px 48px -26px rgba(5, 31, 32, 0.3), inset 0 1px 0 rgba(255,255,255,0.7);
     backdrop-filter: blur(16px) saturate(1.15);
     -webkit-backdrop-filter: blur(16px) saturate(1.15);
   }
 
   .pp-gradient-primary {
-    background: linear-gradient(135deg, #16181a, #3c4046);
+    background: linear-gradient(135deg, #051F20, #235347);
   }
 
   .pp-input {
@@ -1309,8 +1309,8 @@ const predictionPageStyles = `
   }
 
   .pp-input:focus {
-    border-color: rgba(33, 165, 133, 0.7);
-    box-shadow: 0 0 0 5px rgba(33, 165, 133, 0.12);
+    border-color: rgba(35, 83, 71, 0.7);
+    box-shadow: 0 0 0 5px rgba(35, 83, 71, 0.12);
     background: white;
   }
 
@@ -1342,9 +1342,9 @@ const predictionPageStyles = `
 
   .pp-button-primary {
     border: 1px solid transparent;
-    background: linear-gradient(135deg, #16181a, #3c4046);
+    background: linear-gradient(135deg, #051F20, #235347);
     color: white;
-    box-shadow: 0 10px 30px -14px rgba(33, 165, 133, 0.8);
+    box-shadow: 0 10px 30px -14px rgba(35, 83, 71, 0.55);
   }
 
   .pp-button-outline {
@@ -1392,7 +1392,7 @@ const predictionPageStyles = `
   }
 
   .pp-badge-success { border-color: rgba(27,155,103,0.3); background: rgba(27,155,103,0.12); color: var(--pp-success); }
-  .pp-badge-sage { border-color: rgba(134,197,164,0.45); background: rgba(134,197,164,0.2); color: var(--pp-foreground); }
+  .pp-badge-sage { border-color: rgba(142,182,155,0.45); background: rgba(142,182,155,0.2); color: var(--pp-foreground); }
   .pp-badge-warning { border-color: rgba(214,158,46,0.38); background: rgba(214,158,46,0.15); color: #8a5a00; }
   .pp-badge-destructive { border-color: rgba(217,77,77,0.3); background: rgba(217,77,77,0.12); color: var(--pp-destructive); }
 

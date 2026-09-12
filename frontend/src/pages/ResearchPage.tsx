@@ -10,21 +10,47 @@ import type {
   RateCell,
 } from "@/lib/types";
 
-/** Cream → amber → rose. Deliberately sequential, not diverging: pregnancy
- *  rate has no meaningful midpoint to diverge around. */
-function heatColor(pct: number | null): string {
-  if (pct === null) return "#f1eee9";
+/** Pale mint → sage → deep emerald. Deliberately sequential, not diverging:
+ *  pregnancy rate has no meaningful midpoint to diverge around. */
+function heatRGB(pct: number | null): [number, number, number] {
+  if (pct === null) return [234, 243, 236];
   const t = Math.max(0, Math.min(1, pct / 60));
+  // The dark end stops at a mid sage rather than continuing to #163832. Going
+  // darker lands the cell in a luminance band where neither a dark nor a light
+  // label reaches 4.5:1 — the scale is bounded so one ink always works.
   const stops: [number, [number, number, number]][] = [
-    [0, [246, 243, 236]],
-    [0.5, [234, 186, 107]],
-    [1, [199, 106, 106]],
+    [0, [237, 246, 239]],
+    [0.5, [168, 203, 180]],
+    [1, [95, 144, 124]],
   ];
   let [lo, hi] = [stops[0], stops[1]];
   if (t > 0.5) [lo, hi] = [stops[1], stops[2]];
   const f = (t - lo[0]) / (hi[0] - lo[0]);
-  const c = lo[1].map((v, i) => Math.round(v + (hi[1][i] - v) * f));
-  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+  return lo[1].map((v, i) => Math.round(v + (hi[1][i] - v) * f)) as [number, number, number];
+}
+
+function heatColor(pct: number | null): string {
+  const [r, g, b] = heatRGB(pct);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/**
+ * The label colour follows the cell, not the palette. The previous warm scale
+ * used one fixed ink across the whole range and left `n=5` at 2.06:1 on the
+ * darkest cells.
+ *
+ * With the bounded scale above every cell sits in the dark-ink branch; the
+ * light branch is the guard that keeps this correct if the stops are ever
+ * changed. 0.23 is where #051F20 stops reaching 4.5:1.
+ */
+function heatInk(pct: number | null): string {
+  const [r, g, b] = heatRGB(pct);
+  const lin = (v: number) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  const luminance = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  return luminance > 0.23 ? "#051F20" : "#FFFFFF";
 }
 
 function Rate({ cell }: { cell: RateCell }) {
@@ -50,11 +76,11 @@ function IntervalBar({ cell, scaleMax = 60 }: { cell: RateCell; scaleMax?: numbe
   return (
     <div className="relative h-1.5 w-full rounded-full bg-black/[0.05]">
       <div
-        className="absolute h-1.5 rounded-full bg-[rgba(143,184,222,0.55)]"
+        className="absolute h-1.5 rounded-full bg-[rgba(106,165,184,0.55)]"
         style={{ left: pos(cell.ci_low_pct ?? 0), width: `calc(${pos(cell.ci_high_pct ?? 0)} - ${pos(cell.ci_low_pct ?? 0)})` }}
       />
       <div
-        className="absolute top-[-2px] h-[10px] w-[2px] rounded-full bg-[#4d7ba6]"
+        className="absolute top-[-2px] h-[10px] w-[2px] rounded-full bg-[#3f7c91]"
         style={{ left: pos(cell.rate_pct) }}
       />
     </div>
@@ -65,8 +91,8 @@ function Diff({ value, bold, strike }: { value: number | null; bold?: boolean; s
   if (value === null) return <span className="dash-muted">—</span>;
   return (
     <span
-      className={`${value > 0 ? "text-[#2f7d5c]" : "text-[#b8433d]"} ${bold ? "font-semibold" : ""} ${
-        strike ? "line-through decoration-[#b8433d]/50" : ""
+      className={`${value > 0 ? "text-[#235347]" : "text-[#9d3730]"} ${bold ? "font-semibold" : ""} ${
+        strike ? "line-through decoration-[#9d3730]/50" : ""
       }`}
     >
       {value > 0 ? "+" : ""}
@@ -88,7 +114,7 @@ function PValue({
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        significant ? "bg-[rgba(234,186,107,0.22)] text-[#a1741c]" : "dash-muted"
+        significant ? "bg-[rgba(208,164,94,0.22)] text-[#7a5a12]" : "dash-muted"
       } ${strike ? "line-through" : ""}`}
     >
       {value < 0.001 ? "<0.001" : value}
@@ -98,7 +124,7 @@ function PValue({
 
 function SectionNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+    <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
       <Info className="mt-px h-3.5 w-3.5 shrink-0" />
       <span>{children}</span>
     </div>
@@ -145,7 +171,7 @@ export default function ResearchPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -198,17 +224,17 @@ export default function ResearchPage() {
         ) : (
           <>
             {protocols.confounding_detected && protocols.warning && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(210,86,79,0.3)] bg-[rgba(231,154,154,0.14)] px-4 py-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#b8433d]" />
-                <div className="text-sm text-[#8f3f3a]">
-                  <p className="font-semibold text-[#b8433d]">Confounded by time period</p>
+              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(179,69,63,0.3)] bg-[rgba(185,142,168,0.14)] px-4 py-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#9d3730]" />
+                <div className="text-sm text-[#8a3b36]">
+                  <p className="font-semibold text-[#9d3730]">Confounded by time period</p>
                   <p className="mt-1 leading-relaxed">{protocols.warning}</p>
                 </div>
               </div>
             )}
 
             {protocols.period_rates.length > 1 && (
-              <div className="mt-4 rounded-2xl bg-[#faf9f6] p-4">
+              <div className="mt-4 rounded-2xl bg-[#f6faf7] p-4">
                 <p className="text-xs font-medium uppercase tracking-wide dash-muted">
                   Programme rate by month
                 </p>
@@ -219,7 +245,7 @@ export default function ResearchPage() {
                         {p.rate_pct === null ? "" : `${Math.round(p.rate_pct)}%`}
                       </span>
                       <div
-                        className="w-full rounded-t bg-[#8fb8de]"
+                        className="w-full rounded-t bg-[#6aa5b8]"
                         style={{ height: `${Math.max(2, ((p.rate_pct ?? 0) / 60) * 52)}px` }}
                         title={`${p.period}: ${p.successes}/${p.n}`}
                       />
@@ -244,7 +270,7 @@ export default function ResearchPage() {
                     <th className="border-b border-[var(--border)] pb-1 pr-4 text-center font-medium" colSpan={2}>
                       Pooled (ignores timing)
                     </th>
-                    <th className="border-b border-[rgba(22,24,26,0.25)] pb-1 text-center font-medium text-[var(--foreground)]" colSpan={2}>
+                    <th className="border-b border-[rgba(5,31,32,0.25)] pb-1 text-center font-medium text-[var(--foreground)]" colSpan={2}>
                       Adjusted for month
                     </th>
                   </tr>
@@ -269,7 +295,7 @@ export default function ResearchPage() {
                           </span>
                         )}
                         {r.confounded && (
-                          <p className="mt-1.5 max-w-[26rem] text-[11px] leading-relaxed text-[#b8433d]">
+                          <p className="mt-1.5 max-w-[26rem] text-[11px] leading-relaxed text-[#9d3730]">
                             {r.confound_reason}
                           </p>
                         )}
@@ -361,7 +387,7 @@ export default function ResearchPage() {
                         const cell = cellFor(d, s);
                         if (!cell) {
                           return (
-                            <td key={s} className="h-[52px] w-[52px] rounded-lg bg-[#faf9f6]" />
+                            <td key={s} className="h-[52px] w-[52px] rounded-lg bg-[#f6faf7]" />
                           );
                         }
                         const shown = cell.rate_pct !== null;
@@ -372,12 +398,20 @@ export default function ResearchPage() {
                               shown ? ` (${cell.rate_pct}%)` : " · below minimum sample"
                             }`}
                             className="h-[52px] w-[52px] rounded-lg text-center align-middle"
-                            style={{ background: shown ? heatColor(cell.rate_pct) : "#f1eee9" }}
+                            style={{ background: shown ? heatColor(cell.rate_pct) : "#eaf3ec" }}
                           >
-                            <div className={shown ? "font-semibold text-[#22262a]" : "dash-muted"}>
+                            <div
+                              className={shown ? "font-semibold" : "dash-muted"}
+                              style={shown ? { color: heatInk(cell.rate_pct) } : undefined}
+                            >
                               {shown ? `${Math.round(cell.rate_pct!)}%` : "–"}
                             </div>
-                            <div className="text-[9px] text-[#5f5540]">n={cell.n}</div>
+                            <div
+                              className="text-[9px]"
+                              style={{ color: shown ? heatInk(cell.rate_pct) : "#3c5a4e" }}
+                            >
+                              n={cell.n}
+                            </div>
                           </td>
                         );
                       })}
@@ -391,11 +425,11 @@ export default function ResearchPage() {
               <span>0%</span>
               <div
                 className="h-2 w-40 rounded-full"
-                style={{ background: "linear-gradient(90deg, #f6f3ec, #eaba6b, #c76a6a)" }}
+                style={{ background: "linear-gradient(90deg, #f6f3ec, #d0a45e, #c76a6a)" }}
               />
               <span>60%+</span>
               <span className="ml-3 flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded bg-[#f1eee9]" /> below minimum sample
+                <span className="inline-block h-3 w-3 rounded bg-[#eaf3ec]" /> below minimum sample
               </span>
             </div>
             <SectionNote>{donorSire.note}</SectionNote>

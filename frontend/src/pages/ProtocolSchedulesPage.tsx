@@ -105,7 +105,7 @@ export default function ProtocolSchedulesPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -144,8 +144,8 @@ export default function ProtocolSchedulesPage() {
           {selected !== null && (
             <>
               {steps.length === 0 ? (
-                <div className="mt-4 rounded-2xl border border-[rgba(224,171,53,0.32)] bg-[rgba(234,186,107,0.14)] px-4 py-3 text-sm text-[#7a5a14]">
-                  <p className="font-semibold text-[#a1741c]">No schedule defined</p>
+                <div className="mt-4 rounded-2xl border border-[rgba(35,131,111,0.32)] bg-[rgba(208,164,94,0.14)] px-4 py-3 text-sm text-[#6b5a1c]">
+                  <p className="font-semibold text-[#7a5a12]">No schedule defined</p>
                   <p className="mt-1 leading-relaxed">
                     This protocol's name records which drugs are used but not on which days, and
                     Ovulite does not guess treatment days. Add the steps below to make enrollments
@@ -174,7 +174,7 @@ export default function ProtocolSchedulesPage() {
                           <td className="py-2.5 pr-4">
                             <span className="dash-heading">{s.step_name}</span>
                             {s.is_transfer_day && (
-                              <span className="ml-2 rounded-full bg-[rgba(195,166,224,0.24)] px-1.5 py-0.5 text-[9px] font-semibold text-[#8663a8]">
+                              <span className="ml-2 rounded-full bg-[rgba(141,151,196,0.24)] px-1.5 py-0.5 text-[9px] font-semibold text-[#5f6ba0]">
                                 transfer day
                               </span>
                             )}
@@ -188,7 +188,7 @@ export default function ProtocolSchedulesPage() {
                                 type="button"
                                 onClick={() => void removeStep(s.step_id)}
                                 title="Remove step"
-                                className="rounded-lg p-1.5 dash-muted transition hover:bg-[rgba(231,154,154,0.2)] hover:text-[#b8433d]"
+                                className="rounded-lg p-1.5 dash-muted transition hover:bg-[rgba(185,142,168,0.2)] hover:text-[#9d3730]"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -202,7 +202,7 @@ export default function ProtocolSchedulesPage() {
               )}
 
               {canWrite && (
-                <div className="mt-5 rounded-2xl bg-[#faf9f6] p-4">
+                <div className="mt-5 rounded-2xl bg-[#f6faf7] p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide dash-muted">Add a step</p>
                   <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-6">
                     <label className="text-[11px] dash-muted">
@@ -256,7 +256,7 @@ export default function ProtocolSchedulesPage() {
                         type="checkbox"
                         checked={draft.is_transfer_day}
                         onChange={(e) => setDraft({ ...draft, is_transfer_day: e.target.checked })}
-                        className="h-3.5 w-3.5 accent-[#8663a8]"
+                        className="h-3.5 w-3.5 accent-[#5f6ba0]"
                       />
                       This is the transfer day
                     </label>
@@ -264,7 +264,7 @@ export default function ProtocolSchedulesPage() {
                       type="button"
                       disabled={!draft.step_name || saving}
                       onClick={() => void addStep()}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       {saving ? "Adding…" : "Add step"}
@@ -273,7 +273,7 @@ export default function ProtocolSchedulesPage() {
                 </div>
               )}
 
-              <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+              <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
                 <Info className="mt-px h-3.5 w-3.5 shrink-0" />
                 <span>
                   Day 1 is the enrollment start date, so a recipient enrolled on the 1st has its Day

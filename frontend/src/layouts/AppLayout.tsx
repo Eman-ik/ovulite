@@ -153,7 +153,7 @@ export default function AppLayout() {
       <div className="flex items-center gap-3 px-5 py-5">
         <div
           className="ov-pulse-ring flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl"
-          style={{ background: "linear-gradient(135deg, #f6dfae, #e0ab35)" }}
+          style={{ background: "linear-gradient(135deg, #8EB69B, #235347)" }}
         >
           <img src={ovuliteLogo} alt="" className="h-full w-full object-cover" />
         </div>

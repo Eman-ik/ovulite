@@ -12,7 +12,7 @@ import type { DashboardTrendResponse } from "@/lib/types";
 export default function TrendChart({
   data,
   title,
-  color = "#8fb8de",
+  color = "#6aa5b8",
 }: {
   data: DashboardTrendResponse | null;
   title: string;
@@ -37,10 +37,10 @@ export default function TrendChart({
                 <stop offset="95%" stopColor={color} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,24,26,0.07)" vertical={false} />
-            <XAxis dataKey="label" stroke="#9aa1aa" tickLine={false} axisLine={false} fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" vertical={false} />
+            <XAxis dataKey="label" stroke="#8a9a92" tickLine={false} axisLine={false} fontSize={11} />
             <YAxis
-              stroke="#9aa1aa"
+              stroke="#8a9a92"
               tickLine={false}
               axisLine={false}
               fontSize={11}
@@ -55,13 +55,13 @@ export default function TrendChart({
               }
               contentStyle={{
                 borderRadius: 14,
-                border: "1px solid rgba(22,24,26,0.1)",
+                border: "1px solid rgba(5,31,32,0.1)",
                 background: "#ffffff",
-                boxShadow: "0 12px 32px -18px rgba(22,24,26,0.35)",
-                color: "#16181a",
+                boxShadow: "0 12px 32px -18px rgba(5,31,32,0.35)",
+                color: "#051F20",
               }}
-              labelStyle={{ color: "#6f7680" }}
-              cursor={{ stroke: "rgba(22,24,26,0.18)" }}
+              labelStyle={{ color: "#5c7268" }}
+              cursor={{ stroke: "rgba(5,31,32,0.18)" }}
             />
             <Area
               type="monotone"

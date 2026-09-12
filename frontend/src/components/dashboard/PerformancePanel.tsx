@@ -14,7 +14,7 @@ const DIMENSION_LABEL: Record<Dimension, string> = {
 };
 
 /** Green shades cycled across bars so rows stay separable. */
-const BAR_COLORS = ["#e79a9a", "#8fb8de", "#86c5a4", "#c3a6e0", "#eaba6b", "#79c6bb", "#e3a3c4", "#adbb84"];
+const BAR_COLORS = ["#b98ea8", "#6aa5b8", "#8EB69B", "#8d97c4", "#d0a45e", "#4f8f7d", "#c98fae", "#a8b87e"];
 
 export default function PerformancePanel({
   filters,
@@ -79,7 +79,7 @@ export default function PerformancePanel({
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
                       <XAxis
                         type="number"
-                        stroke="#9aa1aa"
+                        stroke="#8a9a92"
                         tickLine={false}
                         axisLine={false}
                         fontSize={11}
@@ -89,7 +89,7 @@ export default function PerformancePanel({
                         type="category"
                         dataKey="label"
                         width={92}
-                        stroke="#9aa1aa"
+                        stroke="#8a9a92"
                         tickLine={false}
                         axisLine={false}
                         fontSize={11}
@@ -98,10 +98,10 @@ export default function PerformancePanel({
                         formatter={((value: unknown) => [`${value}%`, "Pregnancy Rate"]) as (value: unknown) => [string, string]}
                         contentStyle={{
                           borderRadius: 14,
-                          border: "1px solid rgba(22,24,26,0.1)",
+                          border: "1px solid rgba(5,31,32,0.1)",
                           background: "#ffffff",
-                          boxShadow: "0 12px 32px -18px rgba(22,24,26,0.35)",
-                          color: "#16181a",
+                          boxShadow: "0 12px 32px -18px rgba(5,31,32,0.35)",
+                          color: "#051F20",
                         }}
                         cursor={{ fill: "rgba(255,255,255,0.04)" }}
                       />

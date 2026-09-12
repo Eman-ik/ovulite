@@ -63,7 +63,7 @@ export default function ModelPerformancePage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           <p className="font-semibold">Could not load model performance</p>
           <p className="mt-1">{error}</p>
           <p className="mt-2 text-xs">
@@ -74,8 +74,8 @@ export default function ModelPerformancePage() {
       )}
 
       {data && !data.available && (
-        <div className="rounded-2xl border border-[rgba(224,171,53,0.32)] bg-[rgba(234,186,107,0.14)] p-4 text-sm text-[#7a5a14]">
-          <p className="font-semibold text-[#a1741c]">No model artifact available</p>
+        <div className="rounded-2xl border border-[rgba(35,131,111,0.32)] bg-[rgba(208,164,94,0.14)] p-4 text-sm text-[#6b5a1c]">
+          <p className="font-semibold text-[#7a5a12]">No model artifact available</p>
           <p className="mt-1">{data.interpretation}</p>
           {data.unavailable_reason && <p className="mt-1 text-xs">{data.unavailable_reason}</p>}
         </div>
@@ -87,20 +87,20 @@ export default function ModelPerformancePage() {
           <div
             className={`dash-card border-l-4 ${
               data.is_better_than_chance
-                ? "border-l-[#86c5a4]"
-                : "border-l-[#d2564f]"
+                ? "border-l-[#8EB69B]"
+                : "border-l-[#9d3730]"
             }`}
           >
             <div className="flex items-start gap-3">
               {data.is_better_than_chance ? (
-                <TrendingUp className="mt-0.5 h-5 w-5 text-[#2f7d5c]" />
+                <TrendingUp className="mt-0.5 h-5 w-5 text-[#235347]" />
               ) : (
-                <AlertTriangle className="mt-0.5 h-5 w-5 text-[#b8433d]" />
+                <AlertTriangle className="mt-0.5 h-5 w-5 text-[#9d3730]" />
               )}
               <div>
                 <p
                   className={`text-base font-semibold ${
-                    data.is_better_than_chance ? "text-[#2f7d5c]" : "text-[#b8433d]"
+                    data.is_better_than_chance ? "text-[#235347]" : "text-[#9d3730]"
                   }`}
                 >
                   {data.is_better_than_chance
@@ -148,7 +148,7 @@ export default function ModelPerformancePage() {
                   {/* A matrix with no true positives is a constant predictor.
                       Worth stating outright rather than leaving to be noticed. */}
                   {Number(best.confusion_matrix.tp ?? 0) === 0 && (
-                    <p className="mt-2 text-xs text-[#b8433d]">
+                    <p className="mt-2 text-xs text-[#9d3730]">
                       Zero true positives: this model predicts the majority class for every case,
                       so precision and recall for pregnancy are both zero.
                     </p>
@@ -185,7 +185,7 @@ export default function ModelPerformancePage() {
                       <td className="py-2.5 pr-4 dash-muted">{m.roc_auc?.toFixed(3) ?? "—"}</td>
                       <td className="py-2.5 pr-4 dash-muted">{m.pr_auc?.toFixed(3) ?? "—"}</td>
                       <td className="py-2.5 pr-4 dash-muted">{m.brier_score?.toFixed(3) ?? "—"}</td>
-                      <td className="py-2.5 text-xs text-[#a1741c]">{m.note ?? ""}</td>
+                      <td className="py-2.5 text-xs text-[#7a5a12]">{m.note ?? ""}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -210,7 +210,7 @@ export default function ModelPerformancePage() {
                       </span>
                       <div className="h-3 rounded bg-black/[0.04]">
                         <div
-                          className="h-3 rounded bg-[#8fb8de]"
+                          className="h-3 rounded bg-[#6aa5b8]"
                           style={{ width: `${(Math.abs(value) / max) * 100}%` }}
                         />
                       </div>
@@ -230,7 +230,7 @@ export default function ModelPerformancePage() {
                   {JSON.stringify(data.split, null, 2)}
                 </pre>
               </div>
-              <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+              <div className="mt-3 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
                 <Info className="mt-px h-3.5 w-3.5 shrink-0" />
                 <span>
                   The split is temporal and falls on a regime boundary: pregnancy rate roughly

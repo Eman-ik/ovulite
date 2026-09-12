@@ -87,7 +87,7 @@ export default function ReportsExportPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           <p className="font-semibold">Export failed</p>
           <p className="mt-1">{error}</p>
           <p className="mt-1 text-xs">No file was produced.</p>
@@ -95,7 +95,7 @@ export default function ReportsExportPage() {
       )}
 
       {lastExport && (
-        <div className="rounded-2xl border border-[rgba(134,197,164,0.34)] bg-[rgba(134,197,164,0.16)] p-4 text-sm text-[#2f7d5c]">
+        <div className="rounded-2xl border border-[rgba(142,182,155,0.34)] bg-[rgba(142,182,155,0.16)] p-4 text-sm text-[#235347]">
           <p className="font-semibold">Downloaded {lastExport.name}</p>
           <p className="mt-1">
             {lastExport.rows === 0
@@ -146,7 +146,7 @@ export default function ReportsExportPage() {
               type="button"
               disabled={busy !== null}
               onClick={() => void download(d.key)}
-              className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+              className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
             >
               <Download className="h-3.5 w-3.5" />
               {busy === d.key ? "Generating…" : "Download CSV"}
@@ -157,7 +157,7 @@ export default function ReportsExportPage() {
 
       {datasets.length === 0 && !error && <p className="text-sm dash-muted">Loading…</p>}
 
-      <div className="flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+      <div className="flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
         <Info className="mt-px h-3.5 w-3.5 shrink-0" />
         <span>
           Pregnancy results are exported normalised the same way the app displays them, so an

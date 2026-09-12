@@ -7,7 +7,7 @@ import type { OocyteGradeSummary } from "@/lib/types";
 
 type OpuOption = { opu_id: number; opu_date: string; donor_id: number; donor_tag?: string | null };
 
-const GRADE_COLORS = ["#86c5a4", "#8fb8de", "#eaba6b", "#e79a9a"] as const;
+const GRADE_COLORS = ["#8EB69B", "#6aa5b8", "#d0a45e", "#b98ea8"] as const;
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -142,7 +142,7 @@ export default function OocyteProcessingPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -199,7 +199,7 @@ export default function OocyteProcessingPage() {
             )}
 
             {canWrite && (
-              <div className="mt-5 rounded-2xl bg-[#faf9f6] p-4">
+              <div className="mt-5 rounded-2xl bg-[#f6faf7] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide dash-muted">
                   Record grading
                 </p>
@@ -228,7 +228,7 @@ export default function OocyteProcessingPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void saveGrades()}
-                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
                     >
                       {busy ? "Saving…" : "Save"}
                     </button>
@@ -303,7 +303,7 @@ export default function OocyteProcessingPage() {
             )}
 
             {canWrite && (
-              <div className="mt-5 rounded-2xl bg-[#faf9f6] p-4">
+              <div className="mt-5 rounded-2xl bg-[#f6faf7] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide dash-muted">
                   Add an IVM batch
                 </p>
@@ -337,7 +337,7 @@ export default function OocyteProcessingPage() {
                     type="button"
                     disabled={busy}
                     onClick={() => void addIvm()}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     {busy ? "Adding…" : "Add batch"}
@@ -346,7 +346,7 @@ export default function OocyteProcessingPage() {
               </div>
             )}
 
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
               <Info className="mt-px h-3.5 w-3.5 shrink-0" />
               <span>
                 Maturation rate is shown only when both counts are present — a rate without its

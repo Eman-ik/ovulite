@@ -102,9 +102,9 @@ const SEVERITY_CONFIG: Record<
   string,
   { icon: typeof AlertCircle; color: string; badge: "destructive" | "default" | "secondary" }
 > = {
-  critical: { icon: AlertCircle, color: "text-red-500", badge: "destructive" },
+  critical: { icon: AlertCircle, color: "text-[#9d3730]", badge: "destructive" },
   warning: { icon: AlertTriangle, color: "text-yellow-500", badge: "default" },
-  info: { icon: Info, color: "text-blue-400", badge: "secondary" },
+  info: { icon: Info, color: "text-[#1f5468]", badge: "secondary" },
 };
 
 /* ─── Page Component ────────────────────────────────────── */
@@ -199,7 +199,7 @@ export default function QCDashboardPage() {
     if (val > 0.02)
       return <TrendingUp className="h-3 w-3 text-green-500" />;
     if (val < -0.02)
-      return <TrendingDown className="h-3 w-3 text-red-500" />;
+      return <TrendingDown className="h-3 w-3 text-[#9d3730]" />;
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
 
@@ -391,7 +391,7 @@ export default function QCDashboardPage() {
                           />
                           {point.out_of_control && (
                             <div className="absolute -top-4">
-                              <AlertTriangle className="h-3 w-3 text-red-500" />
+                              <AlertTriangle className="h-3 w-3 text-[#9d3730]" />
                             </div>
                           )}
                         </div>
@@ -412,7 +412,7 @@ export default function QCDashboardPage() {
                     <span>
                       LCL: {currentChart.ewma[0]?.lcl.toFixed(3)}
                     </span>
-                    <span className="text-red-500">
+                    <span className="text-[#9d3730]">
                       ▲ = Out of control ({currentChart.ewma.filter((p) => p.out_of_control).length})
                     </span>
                   </div>
@@ -455,9 +455,9 @@ export default function QCDashboardPage() {
                     })}
                   </div>
                   <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
-                    <span className="text-blue-400">■ C+ (positive shift)</span>
-                    <span className="text-blue-300">■ C− (negative shift)</span>
-                    <span className="text-red-500">
+                    <span className="text-[#1f5468]">■ C+ (positive shift)</span>
+                    <span className="text-[#35748a]">■ C− (negative shift)</span>
+                    <span className="text-[#9d3730]">
                       Shifts detected: {currentChart.cusum.filter((p) => p.shift_detected).length}
                     </span>
                   </div>

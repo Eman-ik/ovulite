@@ -13,12 +13,12 @@ import {
 } from "@/lib/types";
 
 const STATUS_STYLE: Record<string, string> = {
-  "In Culture": "bg-[rgba(143,184,222,0.22)] text-[#4d7ba6]",
-  Transferable: "bg-[rgba(134,197,164,0.22)] text-[#2f7d5c]",
-  Frozen: "bg-[rgba(121,198,187,0.22)] text-[#3d8a80]",
-  Assigned: "bg-[rgba(195,166,224,0.24)] text-[#8663a8]",
+  "In Culture": "bg-[rgba(106,165,184,0.22)] text-[#3f7c91]",
+  Transferable: "bg-[rgba(142,182,155,0.22)] text-[#235347]",
+  Frozen: "bg-[rgba(79,143,125,0.22)] text-[#2f6b5c]",
+  Assigned: "bg-[rgba(141,151,196,0.24)] text-[#5f6ba0]",
   Transferred: "bg-black/[0.05] dash-muted",
-  Discarded: "bg-[rgba(231,154,154,0.24)] text-[#b8433d]",
+  Discarded: "bg-[rgba(185,142,168,0.24)] text-[#9d3730]",
 };
 
 function todayISO() {
@@ -39,7 +39,7 @@ function BoardTile({ count }: { count: LabCount }) {
           {count.label}
         </p>
         {count.is_estimated && (
-          <span className="shrink-0 rounded-full bg-[rgba(234,186,107,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#a1741c]">
+          <span className="shrink-0 rounded-full bg-[rgba(208,164,94,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
             est.
           </span>
         )}
@@ -156,7 +156,7 @@ export default function LaboratoryPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -187,7 +187,7 @@ export default function LaboratoryPage() {
                     <div key={w.label} className="flex items-stretch">
                       <div
                         className={`flex w-[150px] flex-col justify-between rounded-2xl p-3 ${
-                          unavailable ? "bg-[#f4f2ed]" : "bg-[#faf9f6]"
+                          unavailable ? "bg-[#f2f7f3]" : "bg-[#f6faf7]"
                         }`}
                         title={w.unavailable_reason ?? undefined}
                       >
@@ -196,8 +196,8 @@ export default function LaboratoryPage() {
                         </p>
                         {unavailable ? (
                           <>
-                            <p className="mt-2 text-lg font-semibold text-[#a1741c]">n/a</p>
-                            <p className="mt-0.5 text-[10px] leading-tight text-[#a1741c]">
+                            <p className="mt-2 text-lg font-semibold text-[#7a5a12]">n/a</p>
+                            <p className="mt-0.5 text-[10px] leading-tight text-[#7a5a12]">
                               {w.unavailable_reason}
                             </p>
                           </>
@@ -209,7 +209,7 @@ export default function LaboratoryPage() {
                       </div>
                       {i < board.workflow.length - 1 && (
                         <div className="flex items-center px-1.5">
-                          <div className="h-0.5 w-4 rounded bg-[#e2ded6]" />
+                          <div className="h-0.5 w-4 rounded bg-[#cfe0d5]" />
                         </div>
                       )}
                     </div>
@@ -218,7 +218,7 @@ export default function LaboratoryPage() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
               <Info className="mt-px h-3.5 w-3.5 shrink-0" />
               <span>{board.note} Hover a tile to see exactly what it counted.</span>
             </div>
@@ -348,7 +348,7 @@ export default function LaboratoryPage() {
                     </tr>
                     {openEmbryo === r.embryo_id && (
                       <tr key={`${r.embryo_id}-timeline`}>
-                        <td colSpan={7} className="bg-[#faf9f6] px-3 py-4">
+                        <td colSpan={7} className="bg-[#f6faf7] px-3 py-4">
                           {!timeline ? (
                             <p className="text-sm dash-muted">Loading timeline…</p>
                           ) : (
@@ -368,7 +368,7 @@ export default function LaboratoryPage() {
                                           <div
                                             className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
                                             style={{
-                                              background: o.is_arrested ? "#d2564f" : "#8fb8de",
+                                              background: o.is_arrested ? "#9d3730" : "#6aa5b8",
                                             }}
                                           >
                                             D{o.day_number}
@@ -386,7 +386,7 @@ export default function LaboratoryPage() {
                                           )}
                                         </div>
                                         {i < timeline.observations.length - 1 && (
-                                          <div className="mt-3 h-0.5 w-5 shrink-0 rounded bg-[#cfdced]" />
+                                          <div className="mt-3 h-0.5 w-5 shrink-0 rounded bg-[#c3dbd0]" />
                                         )}
                                       </div>
                                     ))}
@@ -444,7 +444,7 @@ export default function LaboratoryPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => void addObservation()}
-                                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
                                   >
                                     <Plus className="h-3 w-3" />
                                     {busy ? "Saving…" : "Record look"}
@@ -493,7 +493,7 @@ export default function LaboratoryPage() {
         )}
 
         {inventory && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+          <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
             <Info className="mt-px h-3.5 w-3.5 shrink-0" />
             <span>{inventory.note}</span>
           </div>

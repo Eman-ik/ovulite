@@ -14,10 +14,10 @@ const RESULTS: CheckResult[] = ["Pregnant", "Open", "Recheck", "Lost"];
 const METHODS: CheckMethod[] = ["Ultrasound", "Rectal Palpation", "Blood Test", "Other"];
 
 const RESULT_STYLE: Record<CheckResult, string> = {
-  Pregnant: "bg-[rgba(134,197,164,0.22)] text-[#2f7d5c]",
+  Pregnant: "bg-[rgba(142,182,155,0.22)] text-[#235347]",
   Open: "bg-black/[0.05] dash-muted",
-  Recheck: "bg-[rgba(234,186,107,0.24)] text-[#a1741c]",
-  Lost: "bg-[rgba(231,154,154,0.24)] text-[#b8433d]",
+  Recheck: "bg-[rgba(208,164,94,0.24)] text-[#7a5a12]",
+  Lost: "bg-[rgba(185,142,168,0.24)] text-[#9d3730]",
 };
 
 function todayISO() {
@@ -91,7 +91,7 @@ export default function PregnancyDiagnosisPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -138,7 +138,7 @@ export default function PregnancyDiagnosisPage() {
                           {s.retained_from_previous_pct === null ? (
                             <span className="dash-muted">—</span>
                           ) : (
-                            <span className="font-medium text-[#2f7d5c]">
+                            <span className="font-medium text-[#235347]">
                               {s.retained_from_previous_pct}%
                             </span>
                           )}
@@ -150,15 +150,15 @@ export default function PregnancyDiagnosisPage() {
               </table>
             </div>
             {!retention.live_birth_tracked && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(224,171,53,0.32)] bg-[rgba(234,186,107,0.14)] px-4 py-3 text-sm text-[#7a5a14]">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#a1741c]" />
+              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(35,131,111,0.32)] bg-[rgba(208,164,94,0.14)] px-4 py-3 text-sm text-[#6b5a1c]">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#7a5a12]" />
                 <span>
                   Live birth is not tracked yet — no calving records exist, so the rate is withheld
                   rather than shown as 0%.
                 </span>
               </div>
             )}
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
               <Info className="mt-px h-3.5 w-3.5 shrink-0" />
               <span>{retention.note}</span>
             </div>
@@ -194,7 +194,7 @@ export default function PregnancyDiagnosisPage() {
 
         {chain && (
           <div className="mt-5">
-            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-2xl bg-[#faf9f6] p-4">
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 rounded-2xl bg-[#f6faf7] p-4">
               <p className="text-sm dash-muted">
                 Transfer <span className="font-semibold dash-heading">#{chain.transfer_id}</span>
               </p>
@@ -232,7 +232,7 @@ export default function PregnancyDiagnosisPage() {
                             <span className="dash-muted">—</span>
                           ) : c.implausible_offset ? (
                             <span
-                              className="rounded-full bg-[rgba(231,154,154,0.24)] px-2 py-0.5 text-xs font-medium text-[#b8433d]"
+                              className="rounded-full bg-[rgba(185,142,168,0.24)] px-2 py-0.5 text-xs font-medium text-[#9d3730]"
                               title="This check is dated before its own transfer, or improbably long after it — a date-entry error upstream."
                             >
                               {c.days_post_transfer} ⚠
@@ -258,8 +258,8 @@ export default function PregnancyDiagnosisPage() {
             )}
 
             {chain.calving && (
-              <div className="mt-4 rounded-2xl bg-[rgba(134,197,164,0.14)] p-4 text-sm">
-                <p className="font-semibold text-[#2f7d5c]">{chain.calving.outcome}</p>
+              <div className="mt-4 rounded-2xl bg-[rgba(142,182,155,0.14)] p-4 text-sm">
+                <p className="font-semibold text-[#235347]">{chain.calving.outcome}</p>
                 <p className="mt-1 dash-muted">
                   {chain.calving.calving_date}
                   {chain.calving.gestation_days && ` · ${chain.calving.gestation_days} days gestation`}
@@ -270,7 +270,7 @@ export default function PregnancyDiagnosisPage() {
             )}
 
             {canWrite && (
-              <div className="mt-5 rounded-2xl bg-[#faf9f6] p-4">
+              <div className="mt-5 rounded-2xl bg-[#f6faf7] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide dash-muted">
                   Record a diagnosis
                 </p>
@@ -317,7 +317,7 @@ export default function PregnancyDiagnosisPage() {
                       type="button"
                       disabled={saving}
                       onClick={() => void addCheck()}
-                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
                     >
                       {saving ? "Saving…" : "Record"}
                     </button>

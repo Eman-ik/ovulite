@@ -552,7 +552,7 @@ export function LoginPage() {
                 Username or Email Address
               </span>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#FFFFFF" }} />
+                <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#FFFFFF" }} />
                 <input id="email" type="text" required placeholder="name@company.com" value={username} onChange={(e) => setUsername(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
               </div>
             </label>
@@ -562,9 +562,9 @@ export function LoginPage() {
                 Password
               </span>
               <div className="relative">
-                <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
+                <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                 <input id="password" type={showPassword ? "text" : "password"} required placeholder="" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={{...inputStyle, fontSize: "15px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }} />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors" style={{ color: isDark ? "#52525b" : "#94a3b8" }} aria-label={showPassword ? "Hide password" : "Show password"}>
+                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
@@ -609,7 +609,7 @@ export function LoginPage() {
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
-            <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#52525b" : "#94a3b8" }}>or</span>
+            <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>or</span>
             <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
           </div>
 
@@ -619,7 +619,7 @@ export function LoginPage() {
             onError={setError}
           />
 
-          <p className="mt-10 text-center text-sm" style={{ color: isDark ? "#52525b" : "#64748b", fontSize: "14px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }}>
+          <p className="mt-10 text-center text-sm" style={{ color: isDark ? "#7d9a89" : "#64748b", fontSize: "14px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }}>
             Don't have an account?{" "}
             <button type="button" onClick={() => navigate("/signup")} className="font-bold underline underline-offset-4" style={{
               color: isDark ? "#e4e4e7" : "#0f172a",

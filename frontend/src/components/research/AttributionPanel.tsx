@@ -2,8 +2,8 @@ import { useState } from "react";
 import { ChevronDown, Info, TrendingUp, TrendingDown } from "lucide-react";
 import type { AttributionResponse, Decomposition } from "@/lib/types";
 
-const MIX = "#c3a6e0"; // composition changed
-const RATE = "#79c6bb"; // performance within groups changed
+const MIX = "#8d97c4"; // composition changed
+const RATE = "#4f8f7d"; // performance within groups changed
 
 const DIMENSION_LABELS: Record<string, string> = {
   cl_side: "CL Side",
@@ -50,12 +50,12 @@ function DecompositionRow({ d, max }: { d: Decomposition; max: number }) {
       >
         <span className="text-sm font-medium dash-heading">{prettyDimension(d.dimension)}</span>
         <ContributionBar value={d.mix_pp} max={max} color={MIX} />
-        <span className={`text-right text-xs font-semibold ${compositional ? "text-[#8663a8]" : "dash-muted"}`}>
+        <span className={`text-right text-xs font-semibold ${compositional ? "text-[#5f6ba0]" : "dash-muted"}`}>
           {d.mix_pp > 0 ? "+" : ""}
           {d.mix_pp} pp
         </span>
         <ContributionBar value={d.rate_pp} max={max} color={RATE} />
-        <span className={`text-right text-xs font-semibold ${compositional ? "dash-muted" : "text-[#3d8a80]"}`}>
+        <span className={`text-right text-xs font-semibold ${compositional ? "dash-muted" : "text-[#2f6b5c]"}`}>
           {d.rate_pp > 0 ? "+" : ""}
           {d.rate_pp} pp
         </span>
@@ -84,7 +84,7 @@ function DecompositionRow({ d, max }: { d: Decomposition; max: number }) {
                     <td className="py-1.5 pr-3 dash-heading">
                       {g.label}
                       {g.only_in && (
-                        <span className="ml-1.5 rounded-full bg-[rgba(195,166,224,0.22)] px-1.5 py-px text-[9px] font-semibold text-[#8663a8]">
+                        <span className="ml-1.5 rounded-full bg-[rgba(141,151,196,0.22)] px-1.5 py-px text-[9px] font-semibold text-[#5f6ba0]">
                           {g.only_in} only
                         </span>
                       )}
@@ -135,13 +135,13 @@ export default function AttributionPanel({ data }: { data: AttributionResponse |
 
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl bg-[#faf9f6] p-4">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-2xl bg-[#f6faf7] p-4">
         <div className="flex items-center gap-3">
           <div
             className="flex h-11 w-11 items-center justify-center rounded-2xl"
             style={{
-              background: rose ? "rgba(134,197,164,0.2)" : "rgba(231,154,154,0.2)",
-              color: rose ? "#2f7d5c" : "#b8433d",
+              background: rose ? "rgba(142,182,155,0.2)" : "rgba(185,142,168,0.2)",
+              color: rose ? "#235347" : "#9d3730",
             }}
           >
             {rose ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
@@ -189,7 +189,7 @@ export default function AttributionPanel({ data }: { data: AttributionResponse |
         <DecompositionRow key={d.dimension} d={d} max={max} />
       ))}
 
-      <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+      <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
         <Info className="mt-px h-3.5 w-3.5 shrink-0" />
         <span>{data.note}</span>
       </div>

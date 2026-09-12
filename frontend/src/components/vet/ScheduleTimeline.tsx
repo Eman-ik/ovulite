@@ -3,10 +3,10 @@ import type { ScheduledStep, StepState } from "@/lib/types";
 
 /** Colour carries the same meaning everywhere on this page. */
 export const STATE_STYLE: Record<StepState, { dot: string; text: string; chip: string }> = {
-  Done: { dot: "#86c5a4", text: "text-[#2f7d5c]", chip: "bg-[rgba(134,197,164,0.2)] text-[#2f7d5c]" },
-  Overdue: { dot: "#d2564f", text: "text-[#b8433d]", chip: "bg-[rgba(231,154,154,0.22)] text-[#b8433d]" },
-  "Due today": { dot: "#e0ab35", text: "text-[#a1741c]", chip: "bg-[rgba(234,186,107,0.26)] text-[#a1741c]" },
-  Upcoming: { dot: "#c9c6bf", text: "dash-muted", chip: "bg-black/[0.05] dash-muted" },
+  Done: { dot: "#8EB69B", text: "text-[#235347]", chip: "bg-[rgba(142,182,155,0.2)] text-[#235347]" },
+  Overdue: { dot: "#9d3730", text: "text-[#9d3730]", chip: "bg-[rgba(185,142,168,0.22)] text-[#9d3730]" },
+  "Due today": { dot: "#235347", text: "text-[#7a5a12]", chip: "bg-[rgba(208,164,94,0.26)] text-[#7a5a12]" },
+  Upcoming: { dot: "#b7c9bd", text: "dash-muted", chip: "bg-black/[0.05] dash-muted" },
 };
 
 function StateIcon({ state }: { state: StepState }) {
@@ -60,7 +60,7 @@ export default function ScheduleTimeline({
                   {step.step_name}
                 </p>
                 {step.is_transfer_day && (
-                  <span className="mt-0.5 rounded-full bg-[rgba(195,166,224,0.24)] px-1.5 py-px text-[9px] font-semibold text-[#8663a8]">
+                  <span className="mt-0.5 rounded-full bg-[rgba(141,151,196,0.24)] px-1.5 py-px text-[9px] font-semibold text-[#5f6ba0]">
                     transfer
                   </span>
                 )}
@@ -87,7 +87,7 @@ export default function ScheduleTimeline({
                 <div
                   className="mt-3 h-0.5 w-6 shrink-0 rounded"
                   style={{
-                    background: steps[i + 1].state === "Done" ? STATE_STYLE.Done.dot : "#e2ded6",
+                    background: steps[i + 1].state === "Done" ? STATE_STYLE.Done.dot : "#cfe0d5",
                   }}
                 />
               )}

@@ -33,14 +33,14 @@ function BoardTile({ count }: { count: BoardCount }) {
           {count.label}
         </p>
         {count.is_estimated && (
-          <span className="shrink-0 rounded-full bg-[rgba(234,186,107,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#a1741c]">
+          <span className="shrink-0 rounded-full bg-[rgba(208,164,94,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
             est.
           </span>
         )}
       </div>
       <p
         className="mt-2 text-[26px] font-semibold leading-none"
-        style={{ color: emphasis ? "#b8433d" : "#16181a" }}
+        style={{ color: emphasis ? "#9d3730" : "#051F20" }}
       >
         {count.count}
       </p>
@@ -170,7 +170,7 @@ export default function SynchronizationPage() {
             <button
               type="button"
               onClick={() => setShowNew((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832]"
             >
               <Plus className="h-3.5 w-3.5" />
               Enroll recipient
@@ -180,7 +180,7 @@ export default function SynchronizationPage() {
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-[rgba(210,86,79,0.28)] bg-[rgba(231,154,154,0.16)] p-4 text-sm text-[#b8433d]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
           {error}
         </div>
       )}
@@ -233,7 +233,7 @@ export default function SynchronizationPage() {
                 type="button"
                 disabled={!form.recipient_id || !form.protocol_id || !form.start_date}
                 onClick={() => void createEnrollment()}
-                className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#25292d] disabled:opacity-40"
+                className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
               >
                 Enroll
               </button>
@@ -263,10 +263,10 @@ export default function SynchronizationPage() {
               ))}
             </div>
             {board.protocols_without_steps.length > 0 && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(224,171,53,0.32)] bg-[rgba(234,186,107,0.14)] px-4 py-3 text-sm">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#a1741c]" />
-                <div className="text-[#7a5a14]">
-                  <p className="font-semibold text-[#a1741c]">No schedule defined</p>
+              <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[rgba(35,131,111,0.32)] bg-[rgba(208,164,94,0.14)] px-4 py-3 text-sm">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#7a5a12]" />
+                <div className="text-[#6b5a1c]">
+                  <p className="font-semibold text-[#7a5a12]">No schedule defined</p>
                   <p className="mt-1 leading-relaxed">
                     {board.protocols_without_steps.join(", ")} — Ovulite does not guess treatment
                     days, so nothing can be scheduled for recipients on{" "}
@@ -276,7 +276,7 @@ export default function SynchronizationPage() {
                 </div>
               </div>
             )}
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#faf9f6] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
+            <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#f6faf7] px-3 py-2.5 text-[11px] leading-relaxed dash-muted">
               <Info className="mt-px h-3.5 w-3.5 shrink-0" />
               <span>
                 {board.note} Hover any tile to see exactly what it counted. "Overdue" means a
@@ -299,7 +299,7 @@ export default function SynchronizationPage() {
               type="checkbox"
               checked={overdueOnly}
               onChange={(e) => setOverdueOnly(e.target.checked)}
-              className="h-3.5 w-3.5 accent-[#b8433d]"
+              className="h-3.5 w-3.5 accent-[#9d3730]"
             />
             Overdue only
           </label>
@@ -347,7 +347,7 @@ export default function SynchronizationPage() {
                           )}
                         </>
                       ) : (
-                        <span className="text-[#a1741c]">no template</span>
+                        <span className="text-[#7a5a12]">no template</span>
                       )}
                     </span>
                     <span className="text-right">
@@ -381,7 +381,7 @@ export default function SynchronizationPage() {
         )}
 
         {unschedulable > 0 && (
-          <p className="mt-3 text-[11px] text-[#a1741c]">
+          <p className="mt-3 text-[11px] text-[#7a5a12]">
             {unschedulable} enrollment{unschedulable === 1 ? "" : "s"} shown with no step template —
             their schedule cannot be derived.
           </p>

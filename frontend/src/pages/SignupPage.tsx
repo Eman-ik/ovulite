@@ -353,7 +353,7 @@ export function SignupPage() {
               <label className="block">
                 <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Full Name</span>
                 <div className="relative">
-                  <User className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
+                  <User className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type="text" required placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={inputStyle} />
                 </div>
               </label>
@@ -362,7 +362,7 @@ export function SignupPage() {
               <label className="block">
                 <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Email Address</span>
                 <div className="relative">
-                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type="email" required placeholder="name@company.com" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={inputStyle} />
                 </div>
               </label>
@@ -371,9 +371,9 @@ export function SignupPage() {
               <label className="block">
                 <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Password</span>
                 <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
+                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type={showPassword ? "text" : "password"} required placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={inputStyle} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }}>
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
@@ -383,9 +383,9 @@ export function SignupPage() {
               <label className="block">
                 <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Confirm Password</span>
                 <div className="relative">
-                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }} />
+                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type={showConfirmPassword ? "text" : "password"} required placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={inputStyle} />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: isDark ? "#52525b" : "#94a3b8" }}>
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
@@ -421,7 +421,7 @@ export function SignupPage() {
 
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
-              <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#52525b" : "#94a3b8" }}>or</span>
+              <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>or</span>
               <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
             </div>
 
@@ -431,7 +431,7 @@ export function SignupPage() {
               onError={setError}
             />
 
-            <p className="mt-8 text-center text-sm" style={{ color: isDark ? "#52525b" : "#64748b" }}>
+            <p className="mt-8 text-center text-sm" style={{ color: isDark ? "#7d9a89" : "#64748b" }}>
               Already have an account?{" "}
               <button type="button" onClick={() => navigate("/login")} className="font-bold underline underline-offset-4" style={{ color: isDark ? "#e4e4e7" : "#0f172a" }}>
                 Sign In

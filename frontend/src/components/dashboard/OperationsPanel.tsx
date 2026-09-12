@@ -31,7 +31,7 @@ export default function OperationsPanel({
             <div className="flex items-start justify-between gap-2">
               <p className="text-[11px] font-medium uppercase tracking-wide dash-muted">{tile.label}</p>
               {data.estimated_fields.includes(tile.key) && (
-                <span className="shrink-0 rounded-full bg-[rgba(234,186,107,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#a1741c]">
+                <span className="shrink-0 rounded-full bg-[rgba(208,164,94,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
                   est.
                 </span>
               )}

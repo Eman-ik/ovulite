@@ -5,14 +5,14 @@ export type KpiDelta = { pct: number; direction: "up" | "down" | "flat"; suffix?
 
 /** Soft pastels — each metric gets its own identity without shouting. */
 export const KPI_COLORS = {
-  rose: { solid: "#e79a9a", soft: "rgba(231, 154, 154, 0.18)", ink: "#b25f5f" },
-  blue: { solid: "#8fb8de", soft: "rgba(143, 184, 222, 0.18)", ink: "#4d7ba6" },
-  green: { solid: "#86c5a4", soft: "rgba(134, 197, 164, 0.18)", ink: "#3f8a68" },
-  violet: { solid: "#c3a6e0", soft: "rgba(195, 166, 224, 0.18)", ink: "#8663a8" },
-  amber: { solid: "#eaba6b", soft: "rgba(234, 186, 107, 0.22)", ink: "#a97a1e" },
-  teal: { solid: "#79c6bb", soft: "rgba(121, 198, 187, 0.18)", ink: "#3d8a80" },
-  pink: { solid: "#e3a3c4", soft: "rgba(227, 163, 196, 0.18)", ink: "#ac6489" },
-  olive: { solid: "#adbb84", soft: "rgba(173, 187, 132, 0.22)", ink: "#74814d" },
+  rose: { solid: "#b98ea8", soft: "rgba(185, 142, 168, 0.18)", ink: "#8c5a70" },
+  blue: { solid: "#6aa5b8", soft: "rgba(106, 165, 184, 0.18)", ink: "#3f7c91" },
+  green: { solid: "#8EB69B", soft: "rgba(142, 182, 155, 0.18)", ink: "#235347" },
+  violet: { solid: "#8d97c4", soft: "rgba(141, 151, 196, 0.18)", ink: "#5f6ba0" },
+  amber: { solid: "#d0a45e", soft: "rgba(208, 164, 94, 0.22)", ink: "#7a5a12" },
+  teal: { solid: "#4f8f7d", soft: "rgba(79, 143, 125, 0.18)", ink: "#2f6b5c" },
+  pink: { solid: "#c98fae", soft: "rgba(227, 163, 196, 0.18)", ink: "#96546f" },
+  olive: { solid: "#a8b87e", soft: "rgba(173, 187, 132, 0.22)", ink: "#6b7a44" },
 } as const;
 
 export type KpiColor = keyof typeof KPI_COLORS;
@@ -96,9 +96,9 @@ export default function KpiCard({
           <span
             className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-semibold ${
               delta.direction === "up"
-                ? "bg-[rgba(134,197,164,0.22)] text-[#2f7d5c]"
+                ? "bg-[rgba(142,182,155,0.22)] text-[#235347]"
                 : delta.direction === "down"
-                ? "bg-[rgba(231,154,154,0.24)] text-[#b8433d]"
+                ? "bg-[rgba(185,142,168,0.24)] text-[#9d3730]"
                 : "bg-black/[0.05] text-[var(--muted-foreground)]"
             }`}
           >
