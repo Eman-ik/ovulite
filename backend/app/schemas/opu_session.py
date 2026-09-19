@@ -11,6 +11,10 @@ class OPUSessionBase(BaseModel):
     opu_date: date
     technician_id: Optional[int] = None
     farm_location: Optional[str] = None
+    # The site this record belongs to. ``farm_location`` above is the
+    # imported free text, kept as the source record; new writes should
+    # set this instead. See app/models/laboratory.py.
+    laboratory_id: Optional[int] = None
     total_follicles: Optional[int] = None
     oocytes_recovered: Optional[int] = None
     viable_oocytes: Optional[int] = None
@@ -69,6 +73,7 @@ class OPUSessionUpdate(BaseModel):
     opu_date: Optional[date] = None
     technician_id: Optional[int] = None
     farm_location: Optional[str] = None
+    laboratory_id: Optional[int] = None
     total_follicles: Optional[int] = None
     oocytes_recovered: Optional[int] = None
     viable_oocytes: Optional[int] = None

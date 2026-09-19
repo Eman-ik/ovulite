@@ -15,6 +15,10 @@ class ETTransferBase(BaseModel):
     customer_id: Optional[str] = None
     et_date: date
     farm_location: Optional[str] = None
+    # The site this record belongs to. ``farm_location`` above is the
+    # imported free text, kept as the source record; new writes should
+    # set this instead. See app/models/laboratory.py.
+    laboratory_id: Optional[int] = None
     recipient_id: Optional[int] = None
     bc_score: Optional[Decimal] = Field(default=None, ge=1, le=5)
     cl_side: Optional[str] = None
@@ -75,6 +79,7 @@ class ETTransferUpdate(BaseModel):
     customer_id: Optional[str] = None
     et_date: Optional[date] = None
     farm_location: Optional[str] = None
+    laboratory_id: Optional[int] = None
     recipient_id: Optional[int] = None
     bc_score: Optional[Decimal] = None
     cl_side: Optional[str] = None

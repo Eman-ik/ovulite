@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
+import SitePicker from "@/components/SitePicker";
 import type {
   PaginatedResponse,
   Donor,
@@ -29,6 +30,7 @@ interface FormData {
   et_date: string;
   customer_id: string;
   farm_location: string;
+  laboratory_id: number | null;
   recipient_id: string;
   bc_score: string;
   cl_side: string;
@@ -54,6 +56,7 @@ const emptyForm: FormData = {
   et_date: "",
   customer_id: "",
   farm_location: "",
+  laboratory_id: null,
   recipient_id: "",
   bc_score: "",
   cl_side: "",
@@ -158,6 +161,7 @@ export default function TransferFormPage() {
           et_date: t.et_date ?? "",
           customer_id: t.customer_id ?? "",
           farm_location: t.farm_location ?? "",
+          laboratory_id: t.laboratory_id ?? null,
           recipient_id: t.recipient_id?.toString() ?? "",
           bc_score: t.bc_score?.toString() ?? "",
           cl_side: t.cl_side ?? "",
@@ -270,7 +274,7 @@ export default function TransferFormPage() {
       };
       if (form.et_number) payload.et_number = parseInt(form.et_number);
       if (form.customer_id) payload.customer_id = form.customer_id;
-      if (form.farm_location) payload.farm_location = form.farm_location;
+      if (form.laboratory_id !== null) payload.laboratory_id = form.laboratory_id;
       if (form.recipient_id)
         payload.recipient_id = parseInt(form.recipient_id);
       if (form.bc_score) payload.bc_score = parseFloat(form.bc_score);
@@ -367,11 +371,12 @@ export default function TransferFormPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="farm_location">Farm Location</Label>
-              <Input
-                id="farm_location"
-                value={form.farm_location}
-                onChange={set("farm_location")}
+              <Label htmlFor="laboratory_id">Site</Label>
+              <SitePicker
+                id="laboratory_id"
+                value={form.laboratory_id}
+                legacyText={form.farm_location || null}
+                onChange={(laboratory_id) => setForm((f) => ({ ...f, laboratory_id }))}
               />
             </div>
             <div className="space-y-2">

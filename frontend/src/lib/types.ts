@@ -35,6 +35,9 @@ export interface Recipient {
   recipient_id: number;
   tag_id: string;
   farm_location: string | null;
+  /** Site this record belongs to. `farm_location` is the imported free
+   *  text kept as the source record; this is what new writes set. */
+  laboratory_id: number | null;
   cow_or_heifer: string | null;
   notes: string | null;
   created_at: string;
@@ -64,6 +67,9 @@ export interface OPUSession {
   technician_id: number | null;
   technician_name: string | null;
   farm_location: string | null;
+  /** Site this record belongs to. `farm_location` is the imported free
+   *  text kept as the source record; this is what new writes set. */
+  laboratory_id: number | null;
   total_follicles: number | null;
   oocytes_recovered: number | null;
   viable_oocytes: number | null;
@@ -123,6 +129,9 @@ export interface ETTransfer {
   customer_id: string | null;
   et_date: string;
   farm_location: string | null;
+  /** Site this record belongs to. `farm_location` is the imported free
+   *  text kept as the source record; this is what new writes set. */
+  laboratory_id: number | null;
   recipient_id: number | null;
   bc_score: number | null;
   cl_side: string | null;
@@ -362,6 +371,10 @@ export interface DashboardFunnelStage {
   value: number;
   conversion_pct_from_previous: number | null;
   conversion_pct_from_first: number | null;
+  // Set where the stage above counts a different set of animals, so the
+  // conversion percentage is deliberately absent rather than nonsensical.
+  cohort_break?: boolean;
+  cohort_note?: string | null;
 }
 
 export interface DashboardOmittedStage {
@@ -880,4 +893,58 @@ export interface ModelPerformanceResponse {
 export interface ExportDataset {
   key: string;
   description: string;
+}
+
+
+// ── Administration ────────────────────────────────────────────────────────
+
+export interface AdminUser {
+  user_id: number;
+  username: string;
+  role: string | null;
+  full_name: string | null;
+  email: string | null;
+  active: boolean;
+  organization_id: number | null;
+  created_at: string | null;
+  last_login: string | null;
+}
+
+/** A role plus what it actually grants, served from the same tuples the API
+ *  enforces — so the picker cannot drift from the real permissions. */
+export interface RoleDescriptor {
+  role: string;
+  label: string;
+  description: string;
+  can_write_lab: boolean;
+  can_write_et: boolean;
+  can_run_predictions: boolean;
+  is_admin: boolean;
+}
+
+export interface Laboratory {
+  laboratory_id: number;
+  organization_id: number;
+  name: string;
+  code: string | null;
+  site_type: string | null;
+  address: string | null;
+  city: string | null;
+  country: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  active: boolean;
+  notes: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+/** How many records point at a site. Shown before deactivating one. */
+export interface LaboratoryUsage {
+  laboratory_id: number;
+  name: string;
+  transfers: number;
+  opu_sessions: number;
+  recipients: number;
 }

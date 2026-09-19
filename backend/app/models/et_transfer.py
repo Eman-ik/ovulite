@@ -17,6 +17,7 @@ from app.database import Base
 from app.models.mixins import OrganizationScopedMixin
 
 if TYPE_CHECKING:
+    from app.models.laboratory import Laboratory
     from app.models.embryo import Embryo
     from app.models.prediction import Prediction
     from app.models.protocol import Protocol
@@ -38,7 +39,12 @@ class ETTransfer(OrganizationScopedMixin, Base):
     satellite: Mapped[Optional[str]] = mapped_column(String(50))
     customer_id: Mapped[Optional[str]] = mapped_column(String(50))
     et_date: Mapped[date] = mapped_column(Date, nullable=False)
+    # Kept as the imported source record. New writes set laboratory_id;
+    # see app/models/laboratory.py.
     farm_location: Mapped[Optional[str]] = mapped_column(String(200))
+    laboratory_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("laboratories.laboratory_id"), index=True
+    )
 
     # Recipient
     recipient_id: Mapped[Optional[int]] = mapped_column(
@@ -83,6 +89,7 @@ class ETTransfer(OrganizationScopedMixin, Base):
     )
 
     # Relationships
+    laboratory: Mapped[Optional["Laboratory"]] = relationship(back_populates="transfers")
     recipient: Mapped[Optional["Recipient"]] = relationship(
         back_populates="transfers"
     )

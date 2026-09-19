@@ -1,13 +1,14 @@
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import CheckConstraint, Date, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.mixins import OrganizationScopedMixin
 
 if TYPE_CHECKING:
+    from app.models.laboratory import Laboratory
     from app.models.et_transfer import ETTransfer
     from app.models.recipient_evaluation import RecipientEvaluation
     from app.models.synchronization_enrollment import SynchronizationEnrollment
@@ -18,7 +19,12 @@ class Recipient(OrganizationScopedMixin, Base):
 
     recipient_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     tag_id: Mapped[str] = mapped_column(String(50), nullable=False)
+    # Kept as the imported source record. New writes set laboratory_id;
+    # see app/models/laboratory.py.
     farm_location: Mapped[Optional[str]] = mapped_column(String(200))
+    laboratory_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("laboratories.laboratory_id"), index=True
+    )
     cow_or_heifer: Mapped[Optional[str]] = mapped_column(String(20))
 
     # ── Animal profile ──
@@ -45,6 +51,7 @@ class Recipient(OrganizationScopedMixin, Base):
     )
 
     # Relationships
+    laboratory: Mapped[Optional["Laboratory"]] = relationship(back_populates="recipients")
     transfers: Mapped[list["ETTransfer"]] = relationship(back_populates="recipient")
     evaluations: Mapped[list["RecipientEvaluation"]] = relationship(
         back_populates="recipient", cascade="all, delete-orphan"
@@ -75,6 +82,6 @@ class Recipient(OrganizationScopedMixin, Base):
         # at a different farm (see scripts/ingest_et_data.py's
         # get_or_create_recipient, which has always matched this way).
         UniqueConstraint(
-            "organization_id", "tag_id", "farm_location", name="uq_recipients_org_tag_id_farm"
+            "organization_id", "tag_id", "laboratory_id", name="uq_recipients_org_tag_lab"
         ),
     )

@@ -33,6 +33,12 @@ class FunnelStage(BaseModel):
     value: int
     conversion_pct_from_previous: Optional[float] = None
     conversion_pct_from_first: Optional[float] = None
+    # True where the stage above it counts a different set of animals, so a
+    # conversion percentage between the two would be meaningless. The embryos
+    # banked inside a date window are not the embryos transferred inside it,
+    # which is how the funnel used to report a 243% conversion.
+    cohort_break: bool = False
+    cohort_note: Optional[str] = None
 
 
 class OmittedFunnelStage(BaseModel):

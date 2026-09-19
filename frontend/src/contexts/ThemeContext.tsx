@@ -12,7 +12,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem("ovulite_theme");
-    return (saved as Theme) || "light";
+    // Dark is the product default; a stored value still wins.
+    return saved === "light" || saved === "dark" ? (saved as Theme) : "dark";
   });
 
   useEffect(() => {

@@ -28,6 +28,7 @@ import {
   ListOrdered,
   Boxes,
   Beaker,
+  UserCog,
 } from "lucide-react";
 import ovuliteLogo from "../pages/icon.png";
 import { useAuth } from "@/contexts/AuthContext";
@@ -80,6 +81,12 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { to: "research", icon: GitCompare, label: "Research", permission: "canViewResearch" },
       { to: "model-performance", icon: TrendingUp, label: "Model Performance", permission: "canViewResearch" },
       { to: "literature", icon: BookOpen, label: "Literature" },
+    ],
+  },
+  {
+    label: "Administration",
+    items: [
+      { to: "admin", icon: UserCog, label: "Users & Sites", permission: "canManageUsers" },
     ],
   },
   {

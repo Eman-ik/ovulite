@@ -8,6 +8,7 @@ from app.database import Base
 from app.models.mixins import OrganizationScopedMixin
 
 if TYPE_CHECKING:
+    from app.models.laboratory import Laboratory
     from app.models.donor import Donor
     from app.models.embryo import Embryo
     from app.models.ivf_batch import IVFBatch
@@ -30,7 +31,12 @@ class OPUSession(OrganizationScopedMixin, Base):
     donor_id: Mapped[int] = mapped_column(ForeignKey("donors.donor_id"), nullable=False)
     opu_date: Mapped[date] = mapped_column(Date, nullable=False)
     technician_id: Mapped[Optional[int]] = mapped_column(ForeignKey("technicians.technician_id"))
+    # Kept as the imported source record. New writes set laboratory_id;
+    # see app/models/laboratory.py.
     farm_location: Mapped[Optional[str]] = mapped_column(String(200))
+    laboratory_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("laboratories.laboratory_id"), index=True
+    )
     total_follicles: Mapped[Optional[int]] = mapped_column(Integer)
     oocytes_recovered: Mapped[Optional[int]] = mapped_column(Integer)
     viable_oocytes: Mapped[Optional[int]] = mapped_column(Integer)
@@ -47,6 +53,7 @@ class OPUSession(OrganizationScopedMixin, Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
+    laboratory: Mapped[Optional["Laboratory"]] = relationship(back_populates="opu_sessions")
     donor: Mapped["Donor"] = relationship(back_populates="opu_sessions")
     technician: Mapped[Optional["Technician"]] = relationship()
     embryos: Mapped[list["Embryo"]] = relationship(back_populates="opu_session")

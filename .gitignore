@@ -62,3 +62,15 @@ ovulite_training_*.csv
 # Project-local literature model binaries and weights
 .runtime/
 outputs/release60-smoke*.db
+
+# Clinical data must never be served as a static asset — it is reachable
+# without authentication. The dataset lives in docs/dataset/ and the database.
+frontend/public/datasets/
+
+# Database dumps — full clinical records. Never commit these.
+backups/
+
+# Extracted Rocha blastocyst images. The archive at
+# docs/dataset/Blastocystimages.zip is the tracked source; extracting it here
+# would duplicate 29 MB of binaries into history.
+docs/Blastocystimages/

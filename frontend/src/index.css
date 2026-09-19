@@ -25,6 +25,10 @@
     --secondary-foreground: #163832;
     --muted: #eaf3ec;
     --muted-foreground: #5c7268;
+    /* Muted text reaches 5.17:1 on a white card but only 4.03-4.40:1 once it
+       sits on a tinted surface — the page ground or a control strip. Use the
+       strong variant anywhere the background is not --card. */
+    --muted-foreground-strong: #4f6359;
     --accent: #8EB69B;
     --accent-foreground: #051F20;
     --destructive: #9d3730;
@@ -167,6 +171,10 @@
 
   .dash-muted {
     color: var(--muted-foreground);
+  }
+
+  .dash-muted-strong {
+    color: var(--muted-foreground-strong);
   }
 
   /* Editorial serif for hero headlines, as in the reference layouts. */

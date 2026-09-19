@@ -300,6 +300,116 @@ class EmbryoGradeClassifier(nn.Module):
         return self.classifier_head(features)
 
 
+class EmbryoGradeOrdinalFusion(nn.Module):
+    """Image + morphometrics, trained with a rank-consistent ordinal head.
+
+    Two changes from :class:`EmbryoGradeClassifier`, each aimed at a specific
+    measured weakness of that model:
+
+    1. **Ordinal head (CORAL).** Emits ``n_grades - 1`` cumulative logits
+       sharing one weight vector with independent biases, so predictions are
+       rank-monotonic by construction. Cross-entropy gave the middle grade no
+       reason to stay a band between its neighbours and its recall fell to
+       0.192; an ordered loss penalises a 1-vs-3 error more than a 1-vs-2 one.
+
+    2. **Metadata branch.** The 36 published morphometric variables (GLCM
+       texture over the refractive ring and trophectoderm, grey-level
+       statistics, ICM geometry) run through a small MLP and are concatenated
+       with the image embedding before the head. Late fusion rather than early:
+       the two branches describe the embryo at different levels, and with only
+       482 images a late join is far less prone to overfitting than forcing the
+       CNN to rediscover geometry it can simply be told.
+
+    ``metadata`` is optional at inference so the same artifact still answers for
+    an image whose morphometrics have not been computed; the branch contributes
+    zeros in that case.
+    """
+
+    def __init__(
+        self,
+        n_grades: int = 3,
+        n_metadata_features: int = 36,
+        freeze_backbone: bool = True,
+        metadata_dim: int = 32,
+        head: str = "coral",
+        use_metadata: bool = True,
+        bias_init=None,
+    ):
+        super().__init__()
+        if head not in ("coral", "softmax"):
+            raise ValueError("head must be 'coral' or 'softmax'")
+        self.head_type = head
+        self.use_metadata = use_metadata
+        if not HAS_TORCH:
+            raise ImportError("PyTorch required")
+
+        from torchvision.models import EfficientNet_B0_Weights, efficientnet_b0
+
+        self.n_grades = n_grades
+        self.n_metadata_features = n_metadata_features
+
+        self.backbone = efficientnet_b0(weights=EfficientNet_B0_Weights.DEFAULT)
+        feature_dim = self.backbone.classifier[1].in_features
+        self.backbone.classifier = nn.Identity()
+
+        if freeze_backbone:
+            # Same policy as the baseline so the comparison isolates the loss
+            # and the fusion rather than the amount of trainable backbone.
+            for name, param in self.backbone.named_parameters():
+                if "features.8" not in name and "features.7" not in name:
+                    param.requires_grad = False
+
+        if use_metadata:
+            self.metadata_branch = nn.Sequential(
+                nn.Linear(n_metadata_features, 64),
+                nn.BatchNorm1d(64),
+                nn.ReLU(),
+                nn.Dropout(0.2),
+                nn.Linear(64, metadata_dim),
+                nn.ReLU(),
+            )
+            fusion_in = feature_dim + metadata_dim
+        else:
+            self.metadata_branch = None
+            fusion_in = feature_dim
+
+        self.fusion = nn.Sequential(
+            nn.Linear(fusion_in, 128),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+        )
+
+        if head == "coral":
+            # One shared weight vector, n_grades-1 independent biases. The
+            # biases start at the training set's cumulative log-odds: left at
+            # zero they never separated and the middle band closed entirely.
+            self.coral_weights = nn.Linear(128, 1, bias=False)
+            init = (
+                torch.as_tensor(bias_init, dtype=torch.float32)
+                if bias_init is not None
+                else torch.zeros(n_grades - 1)
+            )
+            self.coral_bias = nn.Parameter(init.clone())
+        else:
+            self.softmax_head = nn.Linear(128, n_grades)
+
+    def forward(self, image, metadata=None):
+        image_features = self.backbone(image)
+        if self.use_metadata:
+            if metadata is None:
+                metadata = torch.zeros(
+                    image.size(0), self.n_metadata_features, device=image.device
+                )
+            image_features = torch.cat(
+                [image_features, self.metadata_branch(metadata)], dim=1
+            )
+        fused = self.fusion(image_features)
+        if self.head_type == "coral":
+            # Broadcast the shared projection across the ordered thresholds.
+            return self.coral_weights(fused) + self.coral_bias
+        return self.softmax_head(fused)
+
+
 class GradCAMClassifier:
     """Grad-CAM for EmbryoGradeClassifier (image-only forward signature)."""
 

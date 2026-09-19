@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, type FormEvent } from "react";
 import api from "@/lib/api";
+import SitePicker from "@/components/SitePicker";
 import type {
   PaginatedResponse,
   OPUSession,
@@ -472,6 +473,7 @@ function OPUSessionModal({
     opu_date: editing?.opu_date ?? "",
     technician_id: editing?.technician_id?.toString() ?? "",
     farm_location: editing?.farm_location ?? "",
+    laboratory_id: editing?.laboratory_id ?? null,
     total_follicles: editing?.total_follicles?.toString() ?? "",
     oocytes_recovered: editing?.oocytes_recovered?.toString() ?? "",
     viable_oocytes: editing?.viable_oocytes?.toString() ?? "",
@@ -497,7 +499,7 @@ function OPUSessionModal({
       opu_date: form.opu_date,
     };
     if (form.technician_id) payload.technician_id = parseInt(form.technician_id);
-    if (form.farm_location) payload.farm_location = form.farm_location;
+    if (form.laboratory_id !== null) payload.laboratory_id = form.laboratory_id;
     if (form.total_follicles) payload.total_follicles = parseInt(form.total_follicles);
     if (form.oocytes_recovered) payload.oocytes_recovered = parseInt(form.oocytes_recovered);
     if (form.viable_oocytes) payload.viable_oocytes = parseInt(form.viable_oocytes);
@@ -540,8 +542,13 @@ function OPUSessionModal({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="opu-farm">Farm Location</Label>
-            <Input id="opu-farm" value={form.farm_location} onChange={set("farm_location")} />
+            <Label htmlFor="opu-site">Site</Label>
+            <SitePicker
+              id="opu-site"
+              value={form.laboratory_id}
+              legacyText={form.farm_location || null}
+              onChange={(laboratory_id) => setForm((f) => ({ ...f, laboratory_id }))}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="opu-follicles">Total Follicles</Label>

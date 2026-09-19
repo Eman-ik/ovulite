@@ -30,7 +30,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import { getPermissions } from "@/lib/roleRoutes";
-import type { PaginatedResponse, Protocol, Technician } from "@/lib/types";
+import type { ModelPerformanceResponse, PaginatedResponse, Protocol, Technician } from "@/lib/types";
 import PredictionAssistantChatbox from "@/components/PredictionAssistantChatbox";
 
 interface ShapContribution {
@@ -424,8 +424,37 @@ export default function PredictionPage() {
 
   const canGenerate = Boolean(form.recipientId && form.embryoId && form.clSize && form.embryoStage);
 
+  // The deployed artifact records whether its discrimination clears the
+  // shuffled-label null for this dataset. It currently does not, and a 21%
+  // figure rendered at 6xl with no such caveat reads as a clinical finding.
+  // Fetched once per mount and shown beside every estimate.
+  const [modelQuality, setModelQuality] = useState<ModelQuality | null>(null);
+  useEffect(() => {
+    if (token === null) return;
+    let cancelled = false;
+    api
+      .get<ModelPerformanceResponse>("/predict/performance")
+      .then((r) => {
+        if (cancelled) return;
+        const data = r.data;
+        if (!data.available) return;
+        setModelQuality({
+          betterThanChance: Boolean(data.is_better_than_chance),
+          interpretation: data.interpretation ?? "",
+          version: data.model_version ?? null,
+        });
+      })
+      .catch(() => {
+        // A missing verdict must not block prediction; the banner simply
+        // does not render rather than showing an unverified reassurance.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   const dataQuality = useMemo(() => getDataQuality(form), [form]);
-  const confidenceLabel = useMemo(() => getConfidenceLabel(prediction, dataQuality.confidence), [prediction, dataQuality.confidence]);
+  const completenessLabel = useMemo(() => getCompletenessLabel(dataQuality.confidence), [dataQuality.confidence]);
   const probabilityTone = prediction ? getProbabilityTone(prediction.probability * 100) : null;
 
   const generatePrediction = async () => {
@@ -740,7 +769,8 @@ export default function PredictionPage() {
                 <ResultPanel
                   loading={loading}
                   prediction={prediction}
-                  confidenceLabel={confidenceLabel}
+                  completenessLabel={completenessLabel}
+                  modelQuality={modelQuality}
                   probabilityTone={probabilityTone}
                   dataQuality={dataQuality}
                   onOpenAssistant={() => setAssistantOpen(true)}
@@ -795,7 +825,8 @@ export default function PredictionPage() {
 function ResultPanel({
   loading,
   prediction,
-  confidenceLabel,
+  completenessLabel,
+  modelQuality,
   probabilityTone,
   dataQuality,
   onOpenAssistant,
@@ -803,7 +834,8 @@ function ResultPanel({
 }: {
   loading: boolean;
   prediction: PredictionResult | null;
-  confidenceLabel: string;
+  completenessLabel: string;
+  modelQuality: ModelQuality | null;
   probabilityTone: { label: string; tone: "success" | "sage" | "warning" | "destructive" } | null;
   dataQuality: DataQuality;
   onOpenAssistant: () => void;
@@ -851,6 +883,21 @@ function ResultPanel({
                   </ul>
                 </div>
               )}
+              {modelQuality && !modelQuality.betterThanChance && (
+                <div className="rounded-xl border border-[#9d3730]/35 bg-[#9d3730]/10 p-4">
+                  <div className="flex items-center gap-2 font-medium text-[#9d3730]">
+                    <AlertTriangle className="h-4 w-4" /> This model is not distinguishable from chance
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--pp-muted)]">
+                    {modelQuality.interpretation}
+                  </p>
+                  <p className="mt-2 text-xs text-[var(--pp-muted)]">
+                    The estimate below is what artifact {modelQuality.version ?? "—"} outputs for these
+                    inputs. It is not evidence about this animal, and it should not be used to decide
+                    whether to transfer.
+                  </p>
+                </div>
+              )}
               <div>
                 <div className="text-xs uppercase tracking-widest text-[var(--pp-muted)]">Pregnancy Success Probability</div>
                 <div className="mt-2 flex items-end gap-3">
@@ -867,12 +914,20 @@ function ResultPanel({
                 </p>
               </div>
 
+              {/* This tile used to be headed "Prediction Confidence" with a
+                  "High Confidence" chip. It is neither: the number is how many
+                  groups of the input form are filled in. Reading it as the
+                  model's own certainty is the single most misleading thing this
+                  page could do, so it now says what it measures. */}
               <div className="rounded-xl border border-[var(--pp-border)] bg-white/45 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-[var(--pp-foreground)]">Prediction Confidence</div>
-                  <span className="rounded-full bg-[var(--pp-ocean)]/15 px-2.5 py-1 text-xs text-[var(--pp-ocean)]">{confidenceLabel}</span>
+                  <div className="text-sm font-medium text-[var(--pp-foreground)]">Input completeness</div>
+                  <span className="rounded-full bg-[var(--pp-ocean)]/15 px-2.5 py-1 text-xs text-[var(--pp-ocean)]">{completenessLabel}</span>
                 </div>
                 <div className="mt-2 font-display text-3xl text-[var(--pp-ocean)]">{dataQuality.confidence}%</div>
+                <p className="mt-1 text-xs text-[var(--pp-muted)]">
+                  How much of the form is filled in — not the model's certainty in this estimate.
+                </p>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--pp-muted-bg)]">
                   <motion.div initial={{ width: 0 }} animate={{ width: `${dataQuality.confidence}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full bg-[var(--pp-ocean)]" />
                 </div>
@@ -1133,6 +1188,12 @@ function OutcomeModal({
   );
 }
 
+type ModelQuality = {
+  betterThanChance: boolean;
+  interpretation: string;
+  version: string | null;
+};
+
 type DataQuality = {
   label: string;
   confidence: number;
@@ -1170,11 +1231,10 @@ function getDataQuality(form: FormState): DataQuality {
   };
 }
 
-function getConfidenceLabel(prediction: PredictionResult | null, fallbackConfidence: number) {
-  if (!prediction) return "";
-  if (fallbackConfidence >= 80) return "High Confidence";
-  if (fallbackConfidence >= 60) return "Medium Confidence";
-  return "Low Confidence";
+function getCompletenessLabel(completeness: number) {
+  if (completeness >= 80) return "Mostly complete";
+  if (completeness >= 60) return "Partly complete";
+  return "Sparse input";
 }
 
 function getProbabilityTone(probability: number) {

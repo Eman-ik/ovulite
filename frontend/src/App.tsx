@@ -15,6 +15,7 @@ import GradingPage from "@/pages/GradingPage";
 import OPUIVFPage from "@/pages/OPUIVFPage";
 import QCDashboardPage from "@/pages/QCDashboardPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
+import AdminPage from "@/pages/AdminPage";
 import ResearchPage from "@/pages/ResearchPage";
 import SynchronizationPage from "@/pages/SynchronizationPage";
 import ProtocolSchedulesPage from "@/pages/ProtocolSchedulesPage";
@@ -175,6 +176,15 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
       <PregnancyDiagnosisPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="admin"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
+      <AdminPage />
     </ProtectedRoute>
   }
 />

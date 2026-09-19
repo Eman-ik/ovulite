@@ -56,20 +56,6 @@ const PAGE_STYLES = `
   .smoke-rise     { animation: smokeRise       20s ease-in-out infinite; }
   .spotlight-beam { animation: spotlightSweep  12s ease-in-out infinite,
                                spotlightFlicker 3s  ease-in-out infinite; }
-
-  @keyframes bubbleFloat {
-    0%   { transform: translateY(0px)    translateX(0px)   rotate(0deg); }
-    25%  { transform: translateY(-35px)  translateX(10px)  rotate(6deg); }
-    50%  { transform: translateY(-18px)  translateX(-8px)  rotate(-4deg); }
-    75%  { transform: translateY(-45px)  translateX(12px)  rotate(5deg); }
-    100% { transform: translateY(0px)    translateX(0px)   rotate(0deg); }
-  }
-  @keyframes bubbleShimmer {
-    0%,100% { opacity: 0.55; }
-    50%     { opacity: 0.80; }
-  }
-  .bubble { animation: bubbleFloat   var(--dur,10s) ease-in-out infinite var(--delay,0s),
-                       bubbleShimmer var(--sdur,6s) ease-in-out infinite var(--sdelay,0s); }
   @keyframes mistFloat {
     0% { transform: translateY(0px) translateX(0px); opacity: 0; }
     5% { opacity: 0.4; }
@@ -83,9 +69,9 @@ const PAGE_STYLES = `
 function NightAtmosphere() {
   return (
     <>
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 0%, #1a0f2e 0%, #0a0a14 40%, #050508 100%)", zIndex: 0 }} />
-      <div className="spotlight-beam pointer-events-none absolute" style={{ top: "-6%", right: "10%", width: 420, height: "110vh", transformOrigin: "50% 0%", background: "conic-gradient(from -6deg at 50% 0%, transparent 0deg, rgba(255,200,100,0.06) 8deg, rgba(255,180,60,0.13) 14deg, rgba(255,200,100,0.06) 20deg, transparent 28deg)", filter: "blur(6px)", zIndex: 2 }} />
-      <div className="spotlight-beam pointer-events-none absolute" style={{ top: "-4%", right: "16%", width: 180, height: "100vh", transformOrigin: "50% 0%", background: "linear-gradient(to bottom, rgba(255,220,140,0.28) 0%, rgba(255,180,60,0.10) 35%, rgba(255,140,40,0.03) 70%, transparent 100%)", clipPath: "polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)", filter: "blur(3px)", zIndex: 3, animationDelay: "0.3s" }} />
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 0%, #0B2B26 0%, #071F1C 40%, #030F10 100%)", zIndex: 0 }} />
+      <div className="spotlight-beam pointer-events-none absolute" style={{ top: "-6%", right: "10%", width: 420, height: "110vh", transformOrigin: "50% 0%", background: "conic-gradient(from -6deg at 50% 0%, transparent 0deg, rgba(143,212,166,0.06) 8deg, rgba(114,201,143,0.13) 14deg, rgba(143,212,166,0.06) 20deg, transparent 28deg)", filter: "blur(6px)", zIndex: 2 }} />
+      <div className="spotlight-beam pointer-events-none absolute" style={{ top: "-4%", right: "16%", width: 180, height: "100vh", transformOrigin: "50% 0%", background: "linear-gradient(to bottom, rgba(172,223,189,0.28) 0%, rgba(114,201,143,0.10) 35%, rgba(99,196,131,0.03) 70%, transparent 100%)", clipPath: "polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)", filter: "blur(3px)", zIndex: 3, animationDelay: "0.3s" }} />
       
       {/* Stars */}
       <svg className="pointer-events-none absolute inset-0 h-full w-full" style={{ zIndex: 1 }} xmlns="http://www.w3.org/2000/svg">
@@ -96,66 +82,21 @@ function NightAtmosphere() {
       </svg>
 
       {/* Fog & Smoke Layers */}
-      <div className="fog-layer-1 pointer-events-none absolute bottom-0 left-0 right-0" style={{ height: "28%", background: "linear-gradient(to top, rgba(60,30,10,0.65) 0%, rgba(80,40,15,0.35) 40%, transparent 100%)", filter: "blur(18px)", zIndex: 2 }} />
-      <div className="fog-layer-2 pointer-events-none absolute" style={{ bottom: "20%", left: "-10%", width: "70%", height: "22%", background: "radial-gradient(ellipse at 40% 60%, rgba(120,80,40,0.28) 0%, rgba(80,50,20,0.12) 60%, transparent 100%)", filter: "blur(28px)", zIndex: 2 }} />
-      <div className="fog-layer-3 pointer-events-none absolute" style={{ top: "28%", right: "-5%", width: "55%", height: "18%", background: "radial-gradient(ellipse at 60% 40%, rgba(60,60,80,0.22) 0%, rgba(40,40,60,0.08) 60%, transparent 100%)", filter: "blur(32px)", zIndex: 2 }} />
+      <div className="fog-layer-1 pointer-events-none absolute bottom-0 left-0 right-0" style={{ height: "28%", background: "linear-gradient(to top, rgba(19,51,30,0.65) 0%, rgba(26,69,40,0.35) 40%, transparent 100%)", filter: "blur(18px)", zIndex: 2 }} />
+      <div className="fog-layer-2 pointer-events-none absolute" style={{ bottom: "20%", left: "-10%", width: "70%", height: "22%", background: "radial-gradient(ellipse at 40% 60%, rgba(50,110,70,0.28) 0%, rgba(28,72,43,0.12) 60%, transparent 100%)", filter: "blur(28px)", zIndex: 2 }} />
+      <div className="fog-layer-3 pointer-events-none absolute" style={{ top: "28%", right: "-5%", width: "55%", height: "18%", background: "radial-gradient(ellipse at 60% 40%, rgba(63,78,72,0.22) 0%, rgba(43,57,52,0.08) 60%, transparent 100%)", filter: "blur(32px)", zIndex: 2 }} />
 
-      <div className="smoke-rise pointer-events-none absolute" style={{ bottom: "10%", left: "8%", width: 180, height: 260, background: "radial-gradient(ellipse at 50% 80%, rgba(100,70,40,0.22) 0%, transparent 70%)", filter: "blur(22px)", zIndex: 2 }} />
-      <div className="smoke-rise pointer-events-none absolute" style={{ bottom: "8%", right: "18%", width: 140, height: 200, background: "radial-gradient(ellipse at 50% 80%, rgba(80,60,30,0.18) 0%, transparent 70%)", filter: "blur(20px)", zIndex: 2, animationDelay: "7s" }} />
+      <div className="smoke-rise pointer-events-none absolute" style={{ bottom: "10%", left: "8%", width: 180, height: 260, background: "radial-gradient(ellipse at 50% 80%, rgba(48,93,63,0.22) 0%, transparent 70%)", filter: "blur(22px)", zIndex: 2 }} />
+      <div className="smoke-rise pointer-events-none absolute" style={{ bottom: "8%", right: "18%", width: 140, height: 200, background: "radial-gradient(ellipse at 50% 80%, rgba(36,74,49,0.18) 0%, transparent 70%)", filter: "blur(20px)", zIndex: 2, animationDelay: "7s" }} />
     </>
   );
 }
 
-const BUBBLES = [
-  { size: 90, left: "6%", top: "12%", dur: "11s", delay: "0s", sdur: "7s", sdelay: "0s" },
-  { size: 54, left: "82%", top: "8%", dur: "14s", delay: "2s", sdur: "9s", sdelay: "1s" },
-  { size: 120, left: "70%", top: "42%", dur: "9s", delay: "0.5s", sdur: "6s", sdelay: "3s" },
-  { size: 40, left: "3%", top: "55%", dur: "13s", delay: "3s", sdur: "8s", sdelay: "1.5s" },
-  { size: 70, left: "14%", top: "76%", dur: "10s", delay: "1.5s", sdur: "11s", sdelay: "0.5s" },
-  { size: 48, left: "72%", top: "70%", dur: "16s", delay: "4s", sdur: "7s", sdelay: "2s" },
-  { size: 30, left: "55%", top: "5%", dur: "12s", delay: "1s", sdur: "9s", sdelay: "4s" },
-  { size: 80, left: "40%", top: "82%", dur: "8s", delay: "2.5s", sdur: "6s", sdelay: "0s" },
-  { size: 35, left: "86%", top: "22%", dur: "15s", delay: "0s", sdur: "10s", sdelay: "2.5s" },
-  { size: 60, left: "25%", top: "18%", dur: "11s", delay: "3.5s", sdur: "8s", sdelay: "1s" },
-];
-
-function GlassBubbles() {
-  return (
-    <>
-      {BUBBLES.map((b, i) => (
-        <div key={i} className="bubble pointer-events-none absolute" style={{
-          left: b.left, top: b.top, width: b.size, height: b.size, borderRadius: "50%",
-          background: [
-            "radial-gradient(circle at 35% 30%, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.08) 55%, transparent 100%)",
-            "radial-gradient(circle at 70% 75%, rgba(180,220,255,0.30) 0%, transparent 60%)",
-            "linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(160,200,255,0.15) 50%, rgba(120,180,255,0.08) 100%)",
-          ].join(", "),
-          border: "1px solid rgba(255,255,255,0.68)",
-          boxShadow: [
-            "inset 0 1px 2px rgba(255,255,255,0.9)",
-            "inset -2px -2px 6px rgba(120,180,255,0.18)",
-            "0 8px 32px rgba(100,160,255,0.10)",
-            "0 2px 8px rgba(255,255,255,0.40)",
-          ].join(", "),
-          backdropFilter: "blur(6px)",
-          zIndex: 1,
-          "--dur": b.dur,
-          "--delay": b.delay,
-          "--sdur": b.sdur,
-          "--sdelay": b.sdelay,
-        } as React.CSSProperties}>
-          <div style={{ position: "absolute", top: "14%", left: "18%", width: "30%", height: "14%", borderRadius: "50%", background: "rgba(255,255,255,0.85)", filter: "blur(2px)", transform: "rotate(-30deg)" }} />
-          <div style={{ position: "absolute", bottom: "18%", right: "14%", width: "22%", height: "10%", borderRadius: "50%", background: "rgba(180,220,255,0.55)", filter: "blur(3px)", transform: "rotate(20deg)" }} />
-        </div>
-      ))}
-    </>
-  );
-}
 
 export function SignupPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -169,7 +110,8 @@ export function SignupPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("ovulite_theme");
-    setIsDark(saved ? saved === "dark" : false);
+    // Dark is the default. Only an explicit stored "light" opts out of it.
+    setIsDark(saved ? saved !== "light" : true);
   }, []);
 
   useEffect(() => {
@@ -231,15 +173,15 @@ export function SignupPage() {
   };
 
   const inputBase = "w-full rounded-full py-4 pl-12 pr-4 text-sm shadow-sm outline-none transition-all";
-  const inputStyle = { background: "#ffffff", border: "1px solid rgba(31, 77, 68, 0.3)", color: "#1e293b" };
+  const inputStyle = { background: "#ffffff", border: "1px solid rgba(35,83,71,0.28)", color: "#051F20" };
 
   const onFocusInput = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.boxShadow = "0 0 0 4px rgba(255, 213, 128, 0.3)";
-    e.currentTarget.style.borderColor = "rgba(255, 213, 128, 0.5)";
+    e.currentTarget.style.boxShadow = "0 0 0 4px rgba(147,177,166,0.35)";
+    e.currentTarget.style.borderColor = "rgba(41,77,64,0.55)";
   };
   const onBlurInput = (e: React.FocusEvent<HTMLInputElement>) => {
     e.currentTarget.style.boxShadow = "none";
-    e.currentTarget.style.borderColor = "rgba(31, 77, 68, 0.3)";
+    e.currentTarget.style.borderColor = "rgba(41,77,64,0.28)";
   };
 
   return (
@@ -254,7 +196,7 @@ export function SignupPage() {
           border: isDark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.75)",
         }}
       >
-        {isDark ? <Sun className="h-4 w-4 text-orange-400" /> : <Moon className="h-4 w-4 text-blue-500" />}
+        {isDark ? <Sun className="h-4 w-4 text-[#8EB69B]" /> : <Moon className="h-4 w-4 text-[#235347]" />}
       </button>
 
       {/* Split Layout */}
@@ -262,18 +204,15 @@ export function SignupPage() {
         {/* LEFT SIDE - Decorative Panel */}
         <div
           className="relative hidden md:flex md:w-1/2 overflow-hidden flex-col justify-end"
-          style={{ background: "linear-gradient(135deg, #1F4D44 0%, #2a6b60 40%, #1a3a33 70%, #0f2420 100%)" }}
+          style={{ background: "linear-gradient(135deg, #235347 0%, #2F6D5C 40%, #163832 70%, #051F20 100%)" }}
         >
           {!isDark && (
             <>
-              <div className="absolute inset-0 z-0">
-                <GlassBubbles />
-              </div>
-              <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(255, 240, 200, 0.08) 0%, transparent 40%)", zIndex: 1 }} />
-              <div className="pointer-events-none absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[120px]" style={{ background: "rgba(255, 220, 150, 0.12)", zIndex: 1 }} />
-              <div className="pointer-events-none absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full blur-[100px]" style={{ background: "rgba(255, 200, 100, 0.08)", zIndex: 1 }} />
-              <div className="pointer-events-none absolute -left-20 -top-20 h-[28rem] w-[28rem] rounded-full blur-[110px]" style={{ background: "rgba(255, 200, 120, 0.15)", zIndex: 1 }} />
-              <div className="pointer-events-none absolute bottom-8 right-8 h-[22rem] w-[22rem] rounded-full blur-[90px]" style={{ background: "rgba(255, 180, 80, 0.1)", zIndex: 1 }} />
+              <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 30% 20%, rgba(215,240,231,0.08) 0%, transparent 40%)", zIndex: 1 }} />
+              <div className="pointer-events-none absolute top-0 left-1/4 w-96 h-96 rounded-full blur-[120px]" style={{ background: "rgba(179,226,195,0.12)", zIndex: 1 }} />
+              <div className="pointer-events-none absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full blur-[100px]" style={{ background: "rgba(143,212,166,0.08)", zIndex: 1 }} />
+              <div className="pointer-events-none absolute -left-20 -top-20 h-[28rem] w-[28rem] rounded-full blur-[110px]" style={{ background: "rgba(157,218,177,0.15)", zIndex: 1 }} />
+              <div className="pointer-events-none absolute bottom-8 right-8 h-[22rem] w-[22rem] rounded-full blur-[90px]" style={{ background: "rgba(128,207,154,0.1)", zIndex: 1 }} />
             </>
           )}
           {isDark && <NightAtmosphere />}
@@ -289,7 +228,7 @@ export function SignupPage() {
                   bottom: '0px',
                   width: `${40 + (i * 5) % 60}px`,
                   height: `${40 + (i * 5) % 60}px`,
-                  background: `radial-gradient(circle at 35% 35%, rgba(255, 220, 160, 0.6) 0%, rgba(255, 180, 80, 0.2) 50%, transparent 100%)`,
+                  background: `radial-gradient(circle at 35% 35%, rgba(186,229,200,0.6) 0%, rgba(128,207,154,0.2) 50%, transparent 100%)`,
                   filter: 'blur(20px)',
                   '--drift': `${-30 + (i % 3) * 30}px`,
                   animationDelay: `${i * 0.4}s`,
@@ -302,37 +241,37 @@ export function SignupPage() {
 
         {/* RIGHT SIDE - Signup Form */}
         <div className="flex w-full md:w-1/2 items-center justify-center px-6 py-8" style={{
-          background: isDark ? "#060608" : "linear-gradient(to bottom, #F7F3ED 0%, #D9CDBF 60%, #F7F3ED 100%)",
+          background: isDark ? "#051F20" : "linear-gradient(to bottom, #f2f7f3 0%, #dfeee4 60%, #f2f7f3 100%)",
           transition: "background 0.5s ease",
         }}>
           <div className="w-full max-w-[680px] rounded-[2rem] p-8 md:p-12 backdrop-blur-3xl transition-all duration-500" style={{
-            background: isDark ? "rgba(14,12,18,0.82)" : "rgba(255,255,255,0.72)",
+            background: isDark ? "rgba(13,17,16,0.82)" : "rgba(255,255,255,0.72)",
             border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(255,255,255,0.88)",
-            boxShadow: isDark ? "0 8px 64px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)" : "0 8px 48px rgba(255, 213, 128, 0.2)",
+            boxShadow: isDark ? "0 8px 64px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)" : "0 8px 48px rgba(163,220,182,0.2)",
           }}>
             {/* Header */}
             <div className="mb-10 flex flex-col items-center gap-4 text-center">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 shadow-xl" style={{
                 borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.9)",
                 background: isDark ? "rgba(0,0,0,0.5)" : "#ffffff",
-                boxShadow: isDark ? "0 0 24px rgba(255,140,0,0.2)" : undefined,
+                boxShadow: isDark ? "0 0 24px rgba(70,185,108,0.2)" : undefined,
               }}>
                 <img src={ovuliteLogo} alt="Ovulite logo" className="h-full w-full object-cover" />
               </div>
 
               <div className="rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.16em]" style={{
-                background: isDark ? "rgba(255,107,0,0.12)" : "rgba(255,255,255,0.8)",
-                border: isDark ? "1px solid rgba(255,107,0,0.3)" : "1px solid rgba(255,255,255,0.8)",
-                color: isDark ? "#fb923c" : "#475569",
+                background: isDark ? "rgba(70,185,108,0.12)" : "rgba(255,255,255,0.8)",
+                border: isDark ? "1px solid rgba(70,185,108,0.3)" : "1px solid rgba(255,255,255,0.8)",
+                color: isDark ? "#8EB69B" : "#5c7268",
               }}>
                 Create Account
               </div>
 
               <div>
-                <h1 className="mb-2 text-[38px] md:text-[39px] font-bold tracking-tight" style={{ color: isDark ? "#f4f4f5" : "#0f172a", fontFamily: '"Plus Jakarta Sans", "Poppins", sans-serif' }}>
+                <h1 className="mb-2 text-[38px] md:text-[39px] font-bold tracking-tight" style={{ color: isDark ? "#DAF1DE" : "#051F20", fontFamily: '"Plus Jakarta Sans", "Poppins", sans-serif' }}>
                   Join Ovulite
                 </h1>
-                <p className="text-sm font-medium" style={{ color: isDark ? "#71717a" : "#64748b", fontSize: "14px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }}>
+                <p className="text-sm font-medium" style={{ color: isDark ? "#7d9a89" : "#5c7268", fontSize: "14px", fontFamily: '"Inter", sans-serif', fontWeight: 400 }}>
                   Create your account to access the reproductive intelligence platform.
                 </p>
               </div>
@@ -340,18 +279,18 @@ export function SignupPage() {
 
             {success && (
               <div className="mb-6 flex items-center gap-3 rounded-2xl p-4" style={{
-                background: isDark ? "rgba(34,197,94,0.15)" : "#f0fdf4",
-                border: isDark ? "1px solid rgba(74,222,128,0.4)" : "1px solid #86efac",
+                background: isDark ? "rgba(147,177,166,0.16)" : "#eef5f0",
+                border: isDark ? "1px solid rgba(147,177,166,0.4)" : "1px solid #8EB69B",
               }}>
-                <CheckCircle className="h-5 w-5" style={{ color: isDark ? "#86efac" : "#22c55e" }} />
-                <span style={{ color: isDark ? "#86efac" : "#16a34a" }}>Account created successfully! Redirecting to login...</span>
+                <CheckCircle className="h-5 w-5" style={{ color: isDark ? "#8EB69B" : "#235347" }} />
+                <span style={{ color: isDark ? "#8EB69B" : "#235347" }}>Account created successfully! Redirecting to login...</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Full Name */}
               <label className="block">
-                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Full Name</span>
+                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#c6dccd" : "#051F20" }}>Full Name</span>
                 <div className="relative">
                   <User className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type="text" required placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={inputStyle} />
@@ -360,7 +299,7 @@ export function SignupPage() {
 
               {/* Email */}
               <label className="block">
-                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Email Address</span>
+                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#c6dccd" : "#051F20" }}>Email Address</span>
                 <div className="relative">
                   <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type="email" required placeholder="name@company.com" value={email} onChange={(e) => setEmail(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={inputBase} style={inputStyle} />
@@ -369,7 +308,7 @@ export function SignupPage() {
 
               {/* Password */}
               <label className="block">
-                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Password</span>
+                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#c6dccd" : "#051F20" }}>Password</span>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type={showPassword ? "text" : "password"} required placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={inputStyle} />
@@ -381,7 +320,7 @@ export function SignupPage() {
 
               {/* Confirm Password */}
               <label className="block">
-                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#d4d4d8" : "#1e293b" }}>Confirm Password</span>
+                <span className="mb-2 ml-1 block text-xs font-bold uppercase tracking-wider" style={{ color: isDark ? "#c6dccd" : "#051F20" }}>Confirm Password</span>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: isDark ? "#7d9a89" : "#5c7268" }} />
                   <input type={showConfirmPassword ? "text" : "password"} required placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onFocus={onFocusInput} onBlur={onBlurInput} className={`${inputBase} pr-12`} style={inputStyle} />
@@ -393,9 +332,9 @@ export function SignupPage() {
 
               {/* Terms */}
               <label className="flex cursor-pointer items-center gap-2">
-                <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="h-4 w-4 rounded" style={{ accentColor: isDark ? "#f97316" : "#3b82f6" }} />
-                <span className="text-sm" style={{ color: isDark ? "#71717a" : "#64748b" }}>
-                  I agree to the <button type="button" className="underline" style={{ color: isDark ? "#e4e4e7" : "#0f172a", fontWeight: 600 }}>Terms and Conditions</button>
+                <input type="checkbox" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="h-4 w-4 rounded" style={{ accentColor: isDark ? "#8EB69B" : "#235347" }} />
+                <span className="text-sm" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>
+                  I agree to the <button type="button" className="underline" style={{ color: isDark ? "#DAF1DE" : "#051F20", fontWeight: 600 }}>Terms and Conditions</button>
                 </span>
               </label>
 
@@ -410,9 +349,9 @@ export function SignupPage() {
               )}
 
               <button type="submit" disabled={isLoading || success} className="flex w-full items-center justify-center gap-2 rounded-full py-4 text-lg font-bold transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70" style={{
-                background: isDark ? "linear-gradient(to right, #FF6B00, #FFAA00)" : "#000000",
-                color: isDark ? "#0a0a0a" : "#ffffff",
-                boxShadow: isDark ? "0 0 36px rgba(255,107,0,0.5), 0 2px 12px rgba(0,0,0,0.4)" : "0 4px 24px rgba(0,0,0,0.25)",
+                background: isDark ? "linear-gradient(to right, #8EB69B, #B6D9C0)" : "#235347",
+                color: isDark ? "#051F20" : "#DAF1DE",
+                boxShadow: isDark ? "0 0 36px rgba(147,177,166,0.45), 0 2px 12px rgba(0,0,0,0.4)" : "0 10px 30px rgba(10,27,21,0.28)",
               }}>
                 {isLoading ? "Creating Account..." : "Create Account"}
                 {!isLoading && <ArrowRight className="h-5 w-5" />}
@@ -420,9 +359,9 @@ export function SignupPage() {
             </form>
 
             <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
+              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(41,77,64,0.16)" }} />
               <span className="text-xs uppercase tracking-wider" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>or</span>
-              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(31,77,68,0.15)" }} />
+              <div className="h-px flex-1" style={{ background: isDark ? "rgba(255,255,255,0.1)" : "rgba(41,77,64,0.16)" }} />
             </div>
 
             <GoogleAuthButton
@@ -431,9 +370,9 @@ export function SignupPage() {
               onError={setError}
             />
 
-            <p className="mt-8 text-center text-sm" style={{ color: isDark ? "#7d9a89" : "#64748b" }}>
+            <p className="mt-8 text-center text-sm" style={{ color: isDark ? "#7d9a89" : "#5c7268" }}>
               Already have an account?{" "}
-              <button type="button" onClick={() => navigate("/login")} className="font-bold underline underline-offset-4" style={{ color: isDark ? "#e4e4e7" : "#0f172a" }}>
+              <button type="button" onClick={() => navigate("/login")} className="font-bold underline underline-offset-4" style={{ color: isDark ? "#DAF1DE" : "#051F20" }}>
                 Sign In
               </button>
             </p>

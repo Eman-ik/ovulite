@@ -41,6 +41,8 @@ from app.api.protocols import router as protocols_router
 from app.api.qc import router as qc_router
 from app.api.recipients import router as recipients_router
 from app.api.sires import router as sires_router
+from app.api.admin import router as admin_router
+from app.api.laboratories import router as laboratories_router
 from app.api.technicians import router as technicians_router
 from app.api.transfers import router as transfers_router
 from app.middleware import (
@@ -177,6 +179,8 @@ app.include_router(opu_sessions_router, prefix="/opu-sessions", tags=["opu_sessi
 app.include_router(ivf_batches_router, prefix="/ivf-batches", tags=["ivf_batches"])
 app.include_router(transfers_router, prefix="/transfers", tags=["transfers"])
 app.include_router(technicians_router, prefix="/technicians", tags=["technicians"])
+app.include_router(laboratories_router, prefix="/laboratories", tags=["laboratories"])
+app.include_router(admin_router, prefix="/admin", tags=["admin"])
 app.include_router(protocols_router, prefix="/protocols", tags=["protocols"])
 app.include_router(protocol_logs_router, prefix="/protocol-logs", tags=["protocol_logs"])
 app.include_router(import_router, prefix="/import", tags=["import"])

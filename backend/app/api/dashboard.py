@@ -622,6 +622,30 @@ def _count_sparkline(rows, date_field: str, start: date, end: date, granularity:
     return [{"bucket": b, "value": float(counts[b])} for b in buckets]
 
 
+def _count_live_births(
+    db: Session, org_id: int, f: DashboardFilterValues, start: date, end: date
+) -> int:
+    """Live births among transfers made inside the window.
+
+    Counted against the transfer's own date, not the calving date, so the stage
+    stays on the same cohort as the transfer and pregnancy stages above it.
+    """
+    from app.models.calving_record import CalvingRecord
+
+    transfer_ids = [t.transfer_id for t in _fetch_transfers(db, org_id, f, start, end)]
+    if not transfer_ids:
+        return 0
+    return (
+        db.query(CalvingRecord)
+        .filter(
+            CalvingRecord.organization_id == org_id,
+            CalvingRecord.transfer_id.in_(transfer_ids),
+            CalvingRecord.outcome == "Live Birth",
+        )
+        .count()
+    )
+
+
 @router.get("/funnel", response_model=FunnelResponse)
 def get_funnel(
     filters: DashboardFilterValues = Depends(get_dashboard_filters),
@@ -650,34 +674,45 @@ def get_funnel(
         and _clean_pregnancy_result(t.pc2_result) == "Pregnant"
     )
 
-    raw_stages = [
-        ("Oocytes Recovered", oocytes_recovered),
-        ("Mature Oocytes", mature),
-        ("Cleaved Embryos", cleaved),
-        ("Blastocysts", blastocysts),
-        ("Transferable Embryos", transferable),
-        ("Transfers", transfers),
-        ("Pregnancies", pregnancies),
-        ("Ongoing Pregnancies", ongoing),
+    live_births = _count_live_births(db, org_id, filters, start, end)
+
+    # The first five stages follow one cohort of oocytes through the lab. The
+    # transfer stages follow a different set of animals: an embryo banked in
+    # this window is usually transferred in a later one, and a transfer in this
+    # window usually used an embryo banked earlier. Carrying a percentage across
+    # that boundary produced the 243% "conversion" this funnel used to show.
+    COHORT_NOTE = (
+        "Different cohort: embryos banked in this window are not the embryos "
+        "transferred in it, so lab output and transfer counts are not a conversion."
+    )
+    raw_stages: list[tuple[str, int, bool]] = [
+        ("Oocytes Recovered", oocytes_recovered, False),
+        ("Mature Oocytes", mature, False),
+        ("Cleaved Embryos", cleaved, False),
+        ("Blastocysts", blastocysts, False),
+        ("Transferable Embryos", transferable, False),
+        ("Transfers", transfers, True),
+        ("Pregnancies", pregnancies, False),
+        ("Ongoing Pregnancies", ongoing, False),
+        ("Live Births", live_births, False),
     ]
     first_value = raw_stages[0][1] or None
     prev_value: Optional[int] = None
+    cohort_first: Optional[int] = first_value
     stages: list[FunnelStage] = []
-    for name, value in raw_stages:
+    for name, value, is_break in raw_stages:
+        if is_break:
+            cohort_first = value or None
         stages.append(FunnelStage(
             name=name, value=value,
-            conversion_pct_from_previous=_rate(value, prev_value),
-            conversion_pct_from_first=_rate(value, first_value),
+            conversion_pct_from_previous=None if is_break else _rate(value, prev_value),
+            conversion_pct_from_first=_rate(value, cohort_first),
+            cohort_break=is_break,
+            cohort_note=COHORT_NOTE if is_break else None,
         ))
         prev_value = value
 
-    return FunnelResponse(
-        stages=stages,
-        omitted_stages=[OmittedFunnelStage(
-            name="Live Birth / Calving",
-            reason="Not tracked in the current data model — no calving or parturition field exists yet.",
-        )],
-    )
+    return FunnelResponse(stages=stages, omitted_stages=[])
 
 
 @router.get("/trends", response_model=TrendResponse)

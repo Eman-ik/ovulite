@@ -100,3 +100,52 @@ def stratified_split(
         return pd.concat(parts).sample(frac=1, random_state=seed).reset_index(drop=True)
 
     return _concat(train_parts), _concat(val_parts), _concat(test_parts)
+
+
+# ── Morphometric features ───────────────────────────────────────────────────
+# Rocha et al. published 36 quantitative variables per image alongside the
+# grades: GLCM texture statistics over the refractive ring (RR) and
+# trophectoderm (TE), grey-level distributions, and inner-cell-mass geometry.
+# They sat unused while the classifier trained on pixels alone. They are cheap,
+# already computed, and describe exactly the structures an embryologist looks at,
+# which makes them the natural second branch of a fusion model.
+LABEL_COLUMNS = [
+    "MFA Classification",
+    "TGA Classification",
+    "BLC Classification",
+    "Modal value",
+]
+ID_COLUMNS = ["figure_name", "embryo_image", "Unnamed: 2"]
+
+
+def morphometric_columns(labels_csv: Path = LABELS_CSV) -> list[str]:
+    """The 36 feature column names, in file order."""
+    header = pd.read_csv(labels_csv, nrows=0)
+    return [c for c in header.columns if c not in ID_COLUMNS + LABEL_COLUMNS]
+
+
+def load_morphometrics(labels_csv: Path = LABELS_CSV) -> pd.DataFrame:
+    """Per-image morphometric features keyed by ``figure_name``.
+
+    Returned unscaled. Standardisation must be fitted on the training split
+    only — fitting it over the whole file would leak test-set distribution into
+    training, which on 482 images is more than enough to flatter the result.
+    """
+    df = pd.read_csv(labels_csv)
+    cols = [c for c in df.columns if c not in ID_COLUMNS + LABEL_COLUMNS]
+    out = df[["figure_name"] + cols].copy()
+    if out[cols].isna().any().any():
+        raise ValueError("Morphometric features contain NaNs; expected none.")
+    return out
+
+
+def load_rater_labels(labels_csv: Path = LABELS_CSV) -> pd.DataFrame:
+    """The three independent gradings behind the modal label.
+
+    Kept available because rater disagreement is the honest uncertainty signal
+    for this dataset: the three experts agree unanimously on only 58.7% of
+    images, so a model's confidence should not exceed theirs.
+    """
+    df = pd.read_csv(labels_csv)
+    keep = ["figure_name"] + [c for c in LABEL_COLUMNS if c in df.columns]
+    return df[keep].copy()
