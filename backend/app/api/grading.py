@@ -33,7 +33,12 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import (
+    LAB_WRITE_ROLES,
+    PREDICTION_RUN_ROLES,
+    get_current_user,
+    require_role,
+)
 from app.database import get_db
 from app.models.user import User
 from app.schemas.grading import (
@@ -45,6 +50,8 @@ from app.schemas.grading import (
     SimilarCaseMetadata,
     SimilarCasesResponse,
 )
+
+from ml.grading.morphometrics import BlastocystNotFound
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -98,6 +105,18 @@ def _get_similarity_index():
     return get_similarity_index()
 
 
+def _get_tabular_classifier():
+    """Lazy-load the morphometric grader now served by POST /grade/embryo.
+
+    It beats the CNN on the same held-out split (0.597 vs 0.542 accuracy, 0.385
+    vs 0.192 Grade-2 recall) and is ~30x faster on CPU. The CNN is still used by
+    /grade/embryo-with-heatmap, which needs Grad-CAM.
+    """
+    from ml.grading.tabular_predict import get_tabular_classifier
+
+    return get_tabular_classifier()
+
+
 def _get_grade_classifier():
     """Lazy-load the singleton grade classifier. Raises on failure (no fake fallback)."""
     from ml.grading.grade_classifier import get_grade_classifier
@@ -108,7 +127,7 @@ def _get_grade_classifier():
 @router.post("/embryo", response_model=GradePredictionResponse)
 async def grade_embryo(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
-    _current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
 ):
     """Predict embryo grade (1/2/3) for an uploaded image.
 
@@ -117,11 +136,21 @@ async def grade_embryo(
     GradePredictionResponse.caveats for scope and limitations.
     """
     raw_image_bytes = await image.read()
-    image_bytes, _, _ = _validate_and_normalize_image(raw_image_bytes)
+    # Validate (size, decodability) but measure the original pixels. The
+    # sanitised re-encode is for storage; putting it before the measurement
+    # flipped the grade on 3 of 39 test images.
+    _validate_and_normalize_image(raw_image_bytes)
 
     try:
-        classifier = _get_grade_classifier()
-        result = classifier.predict(image_bytes)
+        classifier = _get_tabular_classifier()
+        result = classifier.predict(raw_image_bytes)
+    except BlastocystNotFound as e:
+        # A specific, actionable failure: the framing is wrong, not the model.
+        raise HTTPException(
+            422,
+            f"No blastocyst could be located in this image ({e}). It should show a "
+            "single, roughly centred embryo filling a good part of the frame.",
+        )
     except FileNotFoundError as e:
         raise HTTPException(503, f"Embryo grade classifier not available: {e}")
     except ImportError as e:
@@ -135,15 +164,18 @@ async def grade_embryo(
         predicted_label=result["predicted_label"],
         confidence=result["confidence"],
         probabilities=result["probabilities"],
+        model_type="morphometric_tabular_grade_classifier",
         model_version=classifier.version,
-        heatmap_available=True,
+        # Grad-CAM belongs to the CNN. This model explains itself through named
+        # morphometrics instead, so promising a heatmap here would be a lie.
+        heatmap_available=False,
     )
 
 
 @router.post("/embryo-with-heatmap", response_model=GradePredictionWithHeatmapResponse)
 async def grade_embryo_with_heatmap(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
-    _current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
 ):
     """Predict embryo grade and return a Grad-CAM overlay explaining the prediction."""
     import base64
@@ -177,7 +209,7 @@ async def grade_embryo_with_heatmap(
 async def grade_similar_cases(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
     k: int = Form(5, ge=1, le=20, description="Number of similar cases to return"),
-    _current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
 ):
     """Find the k most visually similar known embryo cases for an uploaded image.
 
@@ -247,7 +279,7 @@ async def upload_embryo_image(
     embryo_id: int | None = Form(None, description="Optional embryo ID to link to"),
     notes: str | None = Form(None),
     db: Session = Depends(get_db),
-    _current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Upload and store an embryo image for later review.
 

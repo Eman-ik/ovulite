@@ -69,26 +69,44 @@ entry to `.claude/launch.json` and use the preview tooling.
 - Fonts: `Plus Jakarta Sans` (display), `Inter` (body), `Instrument Serif` (accent italic).
 - No bubble/`GlassBubbles` animation on the auth pages — it was removed deliberately.
 
-## Embryo grading — this one actually works
+## Embryo grading — the one model that works
 
-`ml/artifacts/grader_checkpoint_v1.pth` (1.4 KB) is a **superseded placeholder**; its own config says so.
-The live artifact is `ml/artifacts/grading/real_labels_v1/grade_classifier.pt` (17 MB), EfficientNet-B0 with
-SimCLR-pretrained init, trained on real labels.
+`POST /grade/embryo` serves a **morphometric tabular model**, not the CNN.
+`ml/artifacts/grading/tabular_extracted_v1/` — random forest over 36 features that
+`ml/grading/morphometrics.py` computes from the raw image (Hough-located disc,
+watershed ICM, masked GLCM texture, grey-level statistics).
 
-Labels come from the Rocha et al. (2017) bovine blastocyst set, already in the repo:
-`docs/dataset/external/rocha2017_bovine_blastocyst/labels_clean.csv` + `docs/dataset/Blastocystimages.zip`.
-482 images, all matched to labels, 3 independent embryologist IETS gradings plus a modal grade, and 36
-precomputed morphometric features.
+Measured on the same held-out 72 images, identical split and seed:
 
-- Modal grade distribution: **112 / 173 / 194** across grades 1/2/3 — real variance, unlike `embryos.grade`
-  in the app database, which is still 489/489 Grade 1 and remains unusable as a label.
-- Test accuracy **54.2%**, macro-F1 0.475, n=72. Majority-class baseline is 40.3%, so it has learned
-  something real.
-- **The ceiling is human disagreement.** Pairwise rater kappa is 0.411-0.727 (raw agreement 61.2-82.0%),
-  and all three graders agree on only 58.7% of images. A model cannot reliably beat the consensus that
-  defines its own label — quote that ceiling whenever quoting the accuracy.
-- Known weakness: Grade 2 recall is 0.192. The middle class collapses into Grade 3, which is the usual
-  failure mode when an ordinal target is trained with plain cross-entropy.
+| model | accuracy | macro F1 | Grade 2 recall |
+|---|---|---|---|
+| tabular, our extractor (**served**) | 0.597 | 0.564 | 0.385 |
+| tabular, Rocha's published features | 0.625 | 0.611 | 0.423 |
+| EfficientNet-B0 + CORAL + fusion | 0.556 | 0.501 | 0.269 |
+| EfficientNet-B0 (previously served) | 0.542 | 0.475 | 0.192 |
+| majority class | 0.403 | — | — |
+
+**Quote 0.587 ± 0.041**, the cross-validated figure. The 72-image test number carries
+a ±0.11 interval either way.
+
+- **The ceiling is human disagreement.** Three graders agree unanimously on only 58.7%
+  of these images (pairwise kappa 0.411-0.727). Anything near 0.75 is the label's noise
+  floor, not headroom. Quote the kappa whenever quoting accuracy.
+- Labels: Rocha et al. (2017), already in the repo. Modal grade 112/173/194 across
+  grades 1/2/3 — real variance, unlike `embryos.grade` in the app database, which is
+  still 489/489 Grade 1 and remains unusable as a label.
+- **Never put the sanitiser before the measurement.** `_validate_and_normalize_image`
+  re-encodes to JPEG q95 to strip EXIF; measuring that copy instead of the original
+  flipped the grade on 3 of 39 images and shifted confidence by up to 0.47. Validate for
+  storage, measure the original pixels.
+- `heatmap_available` is **false** on this endpoint. Grad-CAM belongs to the CNN, which
+  still backs `/grade/embryo-with-heatmap`.
+- Ordinal loss (CORAL) was tried and did not help: arms at
+  `ml/artifacts/grading/ablation_*`, summary in `ablation_summary.json`. All CNN arms
+  fall within noise of each other.
+- **Untested outside Rocha's framing.** All 479 images are centred, uniformly lit and
+  1280x1024. A real lab photo has never been through this. Total failure returns 422;
+  silent degradation on awkward framing is unmeasured.
 
 ## Demo data
 
