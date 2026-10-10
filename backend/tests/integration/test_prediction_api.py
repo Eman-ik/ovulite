@@ -23,7 +23,7 @@ def test_predict_pregnancy_contract(client, auth_headers, sample_prediction_inpu
     assert 0.0 <= data["confidence_lower"] <= 1.0
     assert 0.0 <= data["confidence_upper"] <= 1.0
     assert data["confidence_lower"] <= data["confidence_upper"]
-    assert data["risk_band"] in ["Low", "Medium", "High"]
+    assert data["risk_band"] in ["Low", "Moderate", "High"]
     assert "model_name" in data and data["model_name"]
     assert "model_version" in data and data["model_version"]
     assert "shap_explanation" in data

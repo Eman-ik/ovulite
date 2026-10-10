@@ -32,7 +32,9 @@ def test_grading_model_info(client, auth_headers):
     assert "model_type" in body
     assert "backbone" in body
     assert "trained" in body
-    assert body["backbone"] == "efficientnet_b0"
+    # /grade/embryo is served by the morphometric grader, not the CNN; the
+    # EfficientNet backbone now only backs /grade/embryo-with-heatmap.
+    assert "morphometrics" in body["backbone"]
     # No grade-classifier fields should be present anymore.
     assert "n_grades" not in body
     assert "grade_labels" not in body
@@ -66,7 +68,9 @@ def test_grade_embryo_with_real_image(client, auth_headers):
         assert 0.0 <= body["confidence"] <= 1.0
         assert len(body["probabilities"]) == 3
         assert abs(sum(p["probability"] for p in body["probabilities"]) - 1.0) < 1e-3
-        assert body["heatmap_available"] is True
+        # False by design: Grad-CAM belongs to the CNN. Advertising a heatmap
+        # this endpoint cannot produce would be a claim it cannot honour.
+        assert body["heatmap_available"] is False
         assert len(body["caveats"]) > 0
 
 

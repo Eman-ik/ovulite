@@ -9,6 +9,7 @@ from app.database import Base
 from app.models.mixins import OrganizationScopedMixin
 
 if TYPE_CHECKING:
+    from app.models.embryo_ai_assessment import EmbryoAIAssessment
     from app.models.donor import Donor
     from app.models.embryo_image import EmbryoImage
     from app.models.embryo_observation import EmbryoObservation
@@ -56,6 +57,12 @@ class Embryo(OrganizationScopedMixin, Base):
     sire: Mapped[Optional["Sire"]] = relationship(back_populates="embryos")
     opu_session: Mapped[Optional["OPUSession"]] = relationship(back_populates="embryos")
     ivf_batch: Mapped[Optional["IVFBatch"]] = relationship(back_populates="embryos")
+    # AI output, deliberately separate from `grade` above, which is the
+    # embryologist's. Nothing here writes that column.
+    ai_assessments: Mapped[list["EmbryoAIAssessment"]] = relationship(
+        back_populates="embryo", order_by="EmbryoAIAssessment.assessed_at.desc()"
+    )
+
     images: Mapped[list["EmbryoImage"]] = relationship(back_populates="embryo")
     observations: Mapped[list["EmbryoObservation"]] = relationship(
         back_populates="embryo",

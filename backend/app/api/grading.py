@@ -40,8 +40,12 @@ from app.auth.dependencies import (
     require_role,
 )
 from app.database import get_db
+from app.models.embryo import Embryo
+from app.models.embryo_ai_assessment import EmbryoAIAssessment
 from app.models.user import User
 from app.schemas.grading import (
+    EmbryoAIAssessmentResponse,
+    EmbryoGradeComparison,
     GradePredictionResponse,
     GradePredictionWithHeatmapResponse,
     GradingModelInfo,
@@ -249,27 +253,39 @@ async def grade_similar_cases(
 
 @router.get("/model-info", response_model=GradingModelInfo)
 async def grading_model_info(_current_user: User = Depends(get_current_user)):
-    """Return information about the current embryo-similarity model."""
+    """Describe the model that POST /grade/embryo actually serves.
+
+    This reported the SimCLR similarity index, which backs /grade/similar-cases
+    rather than grading. Naming the wrong model here is how one model's metrics
+    end up attributed to another.
+    """
     try:
-        index = _get_similarity_index()
-    except (FileNotFoundError, ImportError):
+        classifier = _get_tabular_classifier()
+    except (FileNotFoundError, ImportError) as exc:
         return GradingModelInfo(
-            model_type="SimCLR similarity index (unavailable)",
-            backbone="efficientnet_b0",
+            model_type=f"morphometric tabular grader (unavailable: {exc})",
+            backbone="none",
             trained=False,
             n_index_cases=None,
             timestamp=None,
         )
     except Exception as e:
-        logger.exception("Failed to get model info")
+        logger.exception("Failed to get grading model info")
         raise HTTPException(500, str(e))
 
+    summary = classifier.accuracy_summary()
+    cv = summary.get("cv_accuracy")
     return GradingModelInfo(
-        model_type="SimCLR self-supervised similarity index",
-        backbone="efficientnet_b0",
+        model_type=(
+            f"morphometric tabular grader ({classifier.selected_model}); "
+            f"cross-validated accuracy {cv:.3f} against a human-agreement "
+            "ceiling of 0.587" if cv is not None
+            else f"morphometric tabular grader ({classifier.selected_model})"
+        ),
+        backbone="ml/grading/morphometrics.py — Hough + watershed + GLCM, 36 features",
         trained=True,
-        n_index_cases=len(index.filenames),
-        timestamp=index.index_meta.get("timestamp"),
+        n_index_cases=summary.get("n_test"),
+        timestamp=classifier.version,
     )
 
 
@@ -334,3 +350,108 @@ async def upload_embryo_image(
             width_px=width,
             height_px=height,
         )
+
+
+@router.post("/embryo/{embryo_id}", response_model=EmbryoAIAssessmentResponse)
+async def grade_and_record(
+    embryo_id: int,
+    image: UploadFile = File(..., description="Embryo image"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
+):
+    """Grade an image and record the result against an embryo.
+
+    Writes a row in ``embryo_ai_assessments`` and never touches
+    ``embryos.grade``, which is the embryologist's own assessment. The SRS
+    requires the two to stay independent: a model that edited the human record
+    would make every later comparison between them meaningless.
+
+    Assessments accumulate rather than replace, so re-grading after a model
+    change leaves both results readable.
+    """
+    embryo = (
+        db.query(Embryo)
+        .filter(
+            Embryo.embryo_id == embryo_id,
+            Embryo.organization_id == current_user.organization_id,
+        )
+        .first()
+    )
+    if embryo is None:
+        raise HTTPException(404, "Embryo not found")
+
+    raw_image_bytes = await image.read()
+    _validate_and_normalize_image(raw_image_bytes)
+
+    try:
+        classifier = _get_tabular_classifier()
+        result = classifier.predict(raw_image_bytes)
+    except BlastocystNotFound as e:
+        raise HTTPException(
+            422,
+            f"No blastocyst could be located in this image ({e}). It should show a "
+            "single, roughly centred embryo filling a good part of the frame.",
+        )
+    except (FileNotFoundError, ImportError) as e:
+        raise HTTPException(503, f"Embryo grade classifier not available: {e}")
+    except Exception as e:
+        logger.exception("Grade prediction failed")
+        raise HTTPException(500, f"Grade prediction failed: {e}")
+
+    assessment = EmbryoAIAssessment(
+        organization_id=current_user.organization_id,
+        embryo_id=embryo_id,
+        model_name="morphometric_tabular_grade_classifier",
+        model_version=classifier.version,
+        predicted_grade=result["predicted_grade"],
+        confidence=result["confidence"],
+        probabilities=result["probabilities"],
+        features=result["features"],
+        image_sha256=hashlib.sha256(raw_image_bytes).hexdigest(),
+        assessed_by_user_id=current_user.user_id,
+    )
+    db.add(assessment)
+    db.commit()
+    db.refresh(assessment)
+    return assessment
+
+
+@router.get("/embryo/{embryo_id}/assessments", response_model=EmbryoGradeComparison)
+async def embryo_grade_comparison(
+    embryo_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """The embryologist's grade and every AI assessment, side by side.
+
+    Deliberately not reconciled into one number. ``agrees`` is reported so a
+    reviewer can find disagreements, not so the system can resolve them.
+    """
+    embryo = (
+        db.query(Embryo)
+        .filter(
+            Embryo.embryo_id == embryo_id,
+            Embryo.organization_id == current_user.organization_id,
+        )
+        .first()
+    )
+    if embryo is None:
+        raise HTTPException(404, "Embryo not found")
+
+    assessments = (
+        db.query(EmbryoAIAssessment)
+        .filter(
+            EmbryoAIAssessment.embryo_id == embryo_id,
+            EmbryoAIAssessment.organization_id == current_user.organization_id,
+        )
+        .order_by(EmbryoAIAssessment.assessed_at.desc())
+        .all()
+    )
+    latest = assessments[0].predicted_grade if assessments else None
+    return EmbryoGradeComparison(
+        embryo_id=embryo_id,
+        manual_grade=embryo.grade,
+        ai_assessments=assessments,
+        latest_ai_grade=latest,
+        agrees=None if (latest is None or embryo.grade is None) else latest == embryo.grade,
+    )

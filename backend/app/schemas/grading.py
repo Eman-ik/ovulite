@@ -13,7 +13,9 @@ are the restored classifier endpoints, now backed by a real trained model
 as a complementary nearest-neighbor lookup.
 """
 
-from pydantic import BaseModel, Field
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class GradeProbability(BaseModel):
@@ -42,9 +44,14 @@ class GradePredictionResponse(BaseModel):
     )
     caveats: list[str] = Field(
         default_factory=lambda: [
-            "Trained on an external published dataset (Rocha et al. 2017), not on "
-            "Ovulite's own farm images — treat as decision support, not ground truth.",
-            "482 total training images is a small sample; metrics are indicative.",
+            "Experimental decision support, not a diagnosis. Trained on a small "
+            "published dataset (Rocha et al. 2017, 479 images), not on Ovulite's "
+            "own farm images.",
+            "Cross-validated accuracy 0.587. The three embryologists who produced "
+            "the labels agree unanimously on only 58.7% of these images "
+            "(pairwise kappa 0.411-0.727), so that is the ceiling, not a shortfall.",
+            "Does not replace the embryologist's grade. Both are recorded; a "
+            "disagreement between them is information, not an error.",
         ]
     )
 
@@ -129,3 +136,35 @@ class GradingModelInfo(BaseModel):
     trained: bool
     n_index_cases: int | None = None
     timestamp: str | None = None
+
+
+class EmbryoAIAssessmentResponse(BaseModel):
+    """A persisted AI assessment, reported beside the manual grade."""
+
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
+    assessment_id: int
+    embryo_id: int | None = None
+    model_name: str
+    model_version: str
+    predicted_grade: int
+    confidence: float
+    probabilities: list[GradeProbability] | None = None
+    image_sha256: str | None = None
+    assessed_at: datetime | None = None
+
+
+class EmbryoGradeComparison(BaseModel):
+    """Manual and AI assessments side by side.
+
+    They are never reconciled into one number. `agrees` is reported so a
+    reviewer can find the disagreements, not so the system can resolve them.
+    """
+
+    embryo_id: int
+    manual_grade: int | None = Field(None, description="embryos.grade — the embryologist's")
+    ai_assessments: list[EmbryoAIAssessmentResponse]
+    latest_ai_grade: int | None = None
+    agrees: bool | None = Field(
+        None, description="null when either grade is missing"
+    )

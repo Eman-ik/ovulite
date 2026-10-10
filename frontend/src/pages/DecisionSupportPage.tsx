@@ -133,13 +133,13 @@ export default function DecisionSupportPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-sm text-gray-600">Pregnancy Probability</p>
+              <p className="text-sm text-gray-600">Predicted Pregnancy Probability</p>
               <p className={`text-2xl font-bold ${getProbabilityColor(support.prediction_probability)}`}>
                 {(support.prediction_probability * 100).toFixed(1)}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Confidence Interval (95%)</p>
+              <p className="text-sm text-gray-600">Confidence Interval</p>
               <p className="text-sm font-mono">
                 [{(support.confidence_lower * 100).toFixed(1)}% - {(support.confidence_upper * 100).toFixed(1)}%]
               </p>

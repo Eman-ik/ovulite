@@ -454,8 +454,8 @@ export default function PredictionPage() {
   }, [token]);
 
   const dataQuality = useMemo(() => getDataQuality(form), [form]);
-  const completenessLabel = useMemo(() => getCompletenessLabel(dataQuality.confidence), [dataQuality.confidence]);
-  const probabilityTone = prediction ? getProbabilityTone(prediction.probability * 100) : null;
+  const completenessLabel = useMemo(() => getCompletenessLabel(dataQuality.completeness), [dataQuality.completeness]);
+  const bandTone = getBandTone(prediction?.risk_band);
 
   const generatePrediction = async () => {
     setError("");
@@ -771,7 +771,7 @@ export default function PredictionPage() {
                   prediction={prediction}
                   completenessLabel={completenessLabel}
                   modelQuality={modelQuality}
-                  probabilityTone={probabilityTone}
+                  bandTone={bandTone}
                   dataQuality={dataQuality}
                   onOpenAssistant={() => setAssistantOpen(true)}
                   onDecisionSupport={() => {
@@ -827,7 +827,7 @@ function ResultPanel({
   prediction,
   completenessLabel,
   modelQuality,
-  probabilityTone,
+  bandTone,
   dataQuality,
   onOpenAssistant,
   onDecisionSupport,
@@ -836,7 +836,7 @@ function ResultPanel({
   prediction: PredictionResult | null;
   completenessLabel: string;
   modelQuality: ModelQuality | null;
-  probabilityTone: { label: string; tone: "success" | "sage" | "warning" | "destructive" } | null;
+  bandTone: { label: string; tone: "success" | "sage" | "warning" | "destructive" } | null;
   dataQuality: DataQuality;
   onOpenAssistant: () => void;
   onDecisionSupport: () => void;
@@ -868,7 +868,7 @@ function ResultPanel({
               </div>
               <p className="mt-5 text-sm font-medium text-[var(--pp-foreground)]">No prediction generated yet</p>
               <p className="mt-2 max-w-xs text-xs text-[var(--pp-muted)]">
-                Complete the embryo transfer form to view pregnancy probability, confidence interval, and key influencing factors.
+                Complete the embryo transfer form to view the predicted pregnancy probability, its confidence interval, and the factors behind it.
               </p>
             </motion.div>
           ) : (
@@ -899,19 +899,26 @@ function ResultPanel({
                 </div>
               )}
               <div>
-                <div className="text-xs uppercase tracking-widest text-[var(--pp-muted)]">Pregnancy Success Probability</div>
+                <div className="text-xs uppercase tracking-widest text-[var(--pp-muted)]">Predicted Pregnancy Probability</div>
                 <div className="mt-2 flex items-end gap-3">
                   <motion.div initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-6xl leading-none text-[var(--pp-foreground)]">
                     {probabilityPct}%
                   </motion.div>
-                  {probabilityTone && <span className={`pp-badge pp-badge-${probabilityTone.tone}`}>{probabilityTone.label}</span>}
+                  {bandTone && <span className={`pp-badge pp-badge-${bandTone.tone}`}>{bandTone.label}</span>}
                 </div>
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-[var(--pp-muted-bg)]">
                   <motion.div initial={{ width: 0 }} animate={{ width: `${probabilityPct}%` }} transition={{ duration: 0.9 }} className="h-full pp-gradient-primary" />
                 </div>
-                <p className="mt-3 text-sm text-[var(--pp-muted)]">
-                  95% confidence interval: {(prediction.confidence_lower * 100).toFixed(0)}% - {(prediction.confidence_upper * 100).toFixed(0)}%.
-                </p>
+                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <dt className="text-[var(--pp-muted)]">Confidence Interval</dt>
+                  <dd className="text-right font-medium text-[var(--pp-foreground)]">
+                    {(prediction.confidence_lower * 100).toFixed(0)}% – {(prediction.confidence_upper * 100).toFixed(0)}% (95%)
+                  </dd>
+                  <dt className="text-[var(--pp-muted)]">Prediction Band</dt>
+                  <dd className="text-right font-medium text-[var(--pp-foreground)]">{prediction.risk_band ?? "—"}</dd>
+                  <dt className="text-[var(--pp-muted)]">Model Uncertainty</dt>
+                  <dd className="text-right font-medium text-[var(--pp-foreground)]">{prediction.uncertainty_level ?? "—"}</dd>
+                </dl>
               </div>
 
               {/* This tile used to be headed "Prediction Confidence" with a
@@ -924,12 +931,12 @@ function ResultPanel({
                   <div className="text-sm font-medium text-[var(--pp-foreground)]">Input completeness</div>
                   <span className="rounded-full bg-[var(--pp-ocean)]/15 px-2.5 py-1 text-xs text-[var(--pp-ocean)]">{completenessLabel}</span>
                 </div>
-                <div className="mt-2 font-display text-3xl text-[var(--pp-ocean)]">{dataQuality.confidence}%</div>
+                <div className="mt-2 font-display text-3xl text-[var(--pp-ocean)]">{dataQuality.completeness}%</div>
                 <p className="mt-1 text-xs text-[var(--pp-muted)]">
                   How much of the form is filled in — not the model's certainty in this estimate.
                 </p>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--pp-muted-bg)]">
-                  <motion.div initial={{ width: 0 }} animate={{ width: `${dataQuality.confidence}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full bg-[var(--pp-ocean)]" />
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${dataQuality.completeness}%` }} transition={{ duration: 0.8, delay: 0.2 }} className="h-full bg-[var(--pp-ocean)]" />
                 </div>
               </div>
 
@@ -1087,7 +1094,7 @@ function RecentPredictions({
             <table className="w-full min-w-[760px] text-sm">
               <thead>
                 <tr className="bg-[var(--pp-foam)]/40 text-left">
-                  {["ET #", "Model", "Date", "Probability", "Risk Band", "Outcome", "Actions"].map((heading) => (
+                  {["ET #", "Model", "Date", "Probability", "Prediction Band", "Outcome", "Actions"].map((heading) => (
                     <th key={heading} className="px-4 py-3 font-semibold text-[var(--pp-foreground)]">{heading}</th>
                   ))}
                 </tr>
@@ -1196,7 +1203,7 @@ type ModelQuality = {
 
 type DataQuality = {
   label: string;
-  confidence: number;
+  completeness: number;
   items: Array<{ name: string; complete: boolean }>;
 };
 
@@ -1226,7 +1233,7 @@ function getDataQuality(form: FormState): DataQuality {
 
   return {
     label,
-    confidence: Math.round(40 + (completeCount / items.length) * 55),
+    completeness: Math.round(40 + (completeCount / items.length) * 55),
     items,
   };
 }
@@ -1237,11 +1244,17 @@ function getCompletenessLabel(completeness: number) {
   return "Sparse input";
 }
 
-function getProbabilityTone(probability: number) {
-  if (probability >= 75) return { label: "High Probability", tone: "success" as const };
-  if (probability >= 50) return { label: "Moderate Probability", tone: "sage" as const };
-  if (probability >= 30) return { label: "Low to Moderate Probability", tone: "warning" as const };
-  return { label: "Low Probability", tone: "destructive" as const };
+/** The chip shows the band the API assigned, never a second one computed here.
+ *  This previously banded at 30/50/75 with its own labels while the API banded
+ *  at 35/65, so the screen could show "Moderate Probability" beside a Low
+ *  prediction band. One source of truth: prediction.risk_band. */
+function getBandTone(band: string | null | undefined) {
+  switch (band) {
+    case "High": return { label: "High band", tone: "success" as const };
+    case "Moderate": return { label: "Moderate band", tone: "sage" as const };
+    case "Low": return { label: "Low band", tone: "warning" as const };
+    default: return null;
+  }
 }
 
 function recommendationFor(probability: number) {

@@ -74,3 +74,13 @@ backups/
 # docs/dataset/Blastocystimages.zip is the tracked source; extracting it here
 # would duplicate 29 MB of binaries into history.
 docs/Blastocystimages/
+
+# Working documents and datasets dropped in the repo root. The CSV is a
+# byte-identical copy of the clinical dataset in docs/dataset/ — committing it
+# would reintroduce the exposure removed from frontend/public/.
+/*.csv
+/*.xlsx
+/*.pptx
+/*.docx
+/*.pdf
+/ovulite_model_pipeline.py

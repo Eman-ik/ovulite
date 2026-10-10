@@ -66,6 +66,27 @@ interface SimilarCasesResult {
 
 /* ─── Page Component ────────────────────────────────────── */
 
+interface AIAssessment {
+  assessment_id: number;
+  embryo_id: number | null;
+  model_name: string;
+  model_version: string;
+  predicted_grade: number;
+  confidence: number;
+  image_sha256: string | null;
+  assessed_at: string | null;
+}
+
+interface GradeComparison {
+  embryo_id: number;
+  /** embryos.grade — the embryologist's own assessment. Never written by AI. */
+  manual_grade: number | null;
+  ai_assessments: AIAssessment[];
+  latest_ai_grade: number | null;
+  /** null when either grade is missing. Surfaced, not resolved. */
+  agrees: boolean | null;
+}
+
 export default function GradingPage() {
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -99,6 +120,12 @@ export default function GradingPage() {
 
   const [activeTab, setActiveTab] = useState<"grade" | "similar">("grade");
 
+  /* Recording against an embryo. Optional: grading a loose image stays
+     possible, it just is not kept. */
+  const [embryoId, setEmbryoId] = useState("");
+  const [comparison, setComparison] = useState<GradeComparison | null>(null);
+  const [savedNotice, setSavedNotice] = useState<string | null>(null);
+
   /* ─── File handling ───────────────────────────────── */
 
   const handleFile = useCallback((file: File) => {
@@ -110,6 +137,8 @@ export default function GradingPage() {
     setGradeError(null);
     setGradeUnavailable(false);
     setHeatmapBase64(null);
+    setComparison(null);
+    setSavedNotice(null);
 
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
@@ -192,6 +221,20 @@ export default function GradingPage() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
       setGradeResult(data);
+
+      // With an embryo named, record the assessment and show it beside the
+      // embryologist's grade. The manual grade is never written.
+      const id = embryoId.trim();
+      if (id) {
+        const record = new FormData();
+        record.append("image", imageFile);
+        const saved = await api.post<AIAssessment>(`/grade/embryo/${id}`, record, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        const { data: cmp } = await api.get<GradeComparison>(`/grade/embryo/${id}/assessments`);
+        setComparison(cmp);
+        setSavedNotice(`Recorded as assessment #${saved.data.assessment_id} on embryo ${id}.`);
+      }
     } catch (err: any) {
       if (err.response?.status === 503) {
         setGradeUnavailable(true);
@@ -233,6 +276,8 @@ export default function GradingPage() {
     setImageFile(null);
     setImagePreview(null);
     setResult(null);
+    setComparison(null);
+    setSavedNotice(null);
     setError(null);
     setUnavailable(false);
     setGradeResult(null);
@@ -258,7 +303,7 @@ export default function GradingPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">Embryo Grading & Similarity Assist</h1>
-          <p className="text-muted-foreground">
+          <p className="dash-muted-strong">
             Upload a blastocyst image for an AI grade prediction, or find visually similar known cases
           </p>
         </div>
@@ -348,6 +393,20 @@ export default function GradingPage() {
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="embryo-id">Embryo ID</Label>
+                  <Input
+                    id="embryo-id"
+                    inputMode="numeric"
+                    placeholder="Optional"
+                    value={embryoId}
+                    onChange={(e) => setEmbryoId(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Give an ID to keep the AI assessment on the record. Without one the
+                    grade is shown but not saved.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="grade">Manual Grade</Label>
@@ -555,6 +614,65 @@ export default function GradingPage() {
                               </>
                             )}
                           </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {savedNotice && (
+                      <p className="rounded-lg bg-[rgba(142,182,155,0.16)] px-3 py-2 text-xs text-[#235347]">
+                        {savedNotice}
+                      </p>
+                    )}
+
+                    {comparison && (
+                      <div className="rounded-lg border border-[var(--border)] p-4 space-y-3">
+                        <p className="text-sm font-semibold">
+                          Embryo E-{comparison.embryo_id}
+                        </p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              Manual Grade
+                            </p>
+                            <p className="text-xl font-bold">
+                              {comparison.manual_grade ?? "Not graded"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Embryologist</p>
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                              AI Assessment
+                            </p>
+                            <p className="text-xl font-bold">
+                              {comparison.latest_ai_grade ?? "—"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {comparison.ai_assessments[0]?.model_name ?? ""}
+                            </p>
+                          </div>
+                        </div>
+
+                        {comparison.agrees === false && (
+                          <p className="text-xs text-[#7a5a12]">
+                            The two assessments differ. Both are kept; neither replaces the
+                            other.
+                          </p>
+                        )}
+
+                        {comparison.ai_assessments.length > 1 && (
+                          <details className="text-xs">
+                            <summary className="cursor-pointer text-muted-foreground">
+                              {comparison.ai_assessments.length} assessments on record
+                            </summary>
+                            <ul className="mt-2 space-y-1">
+                              {comparison.ai_assessments.map((a) => (
+                                <li key={a.assessment_id} className="text-muted-foreground">
+                                  Grade {a.predicted_grade} · {(a.confidence * 100).toFixed(0)}% ·{" "}
+                                  {a.model_version.slice(0, 19)}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
                         )}
                       </div>
                     )}

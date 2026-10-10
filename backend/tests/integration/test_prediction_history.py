@@ -25,7 +25,7 @@ class TestPredictionHistory:
         assert data["predictions"] == []
 
     def test_prediction_history_includes_recent_predictions(
-        self, client: TestClient, auth_headers, db_session
+        self, client: TestClient, auth_headers, db_session, admin_org_id
     ):
         """Verify history returns predictions after they are created."""
         from app.models.prediction import Prediction
@@ -38,7 +38,8 @@ class TestPredictionHistory:
             probability=Decimal("0.75"),
             confidence_lower=Decimal("0.65"),
             confidence_upper=Decimal("0.85"),
-            risk_band="Medium",
+            risk_band="Moderate",
+            organization_id=admin_org_id,
             shap_json={"base_value": 0.5, "contributions": []},
         )
         pred2 = Prediction(
@@ -48,6 +49,7 @@ class TestPredictionHistory:
             confidence_lower=Decimal("0.15"),
             confidence_upper=Decimal("0.35"),
             risk_band="Low",
+            organization_id=admin_org_id,
             shap_json={"base_value": 0.3, "contributions": []},
         )
         db_session.add(pred1)
@@ -71,7 +73,7 @@ class TestPredictionHistory:
         assert "shap_json" in first_pred
 
     def test_prediction_history_filters_by_transfer_id(
-        self, client: TestClient, auth_headers, db_session
+        self, client: TestClient, auth_headers, db_session, admin_org_id
     ):
         """Verify history can be filtered by transfer_id."""
         from app.models.prediction import Prediction
@@ -80,8 +82,8 @@ class TestPredictionHistory:
         from datetime import date
         
         # Create ET transfers first (foreign key requirement)
-        transfer1 = ETTransfer(transfer_id=100, et_date=date(2024, 1, 1))
-        transfer2 = ETTransfer(transfer_id=200, et_date=date(2024, 1, 2))
+        transfer1 = ETTransfer(transfer_id=100, et_date=date(2024, 1, 1), organization_id=admin_org_id)
+        transfer2 = ETTransfer(transfer_id=200, et_date=date(2024, 1, 2), organization_id=admin_org_id)
         db_session.add(transfer1)
         db_session.add(transfer2)
         db_session.commit()
@@ -92,7 +94,8 @@ class TestPredictionHistory:
             model_name="test_model",
             model_version="v1.0",
             probability=Decimal("0.75"),
-            risk_band="Medium",
+            risk_band="Moderate",
+            organization_id=admin_org_id,
             shap_json={},
         )
         pred2 = Prediction(
@@ -101,6 +104,7 @@ class TestPredictionHistory:
             model_version="v1.0",
             probability=Decimal("0.25"),
             risk_band="Low",
+            organization_id=admin_org_id,
             shap_json={},
         )
         db_session.add(pred1)
@@ -121,7 +125,7 @@ class TestPredictionHistory:
                 assert pred["transfer_id"] == 100
 
     def test_prediction_history_respects_limit_parameter(
-        self, client: TestClient, auth_headers, db_session
+        self, client: TestClient, auth_headers, db_session, admin_org_id
     ):
         """Verify history respects limit parameter."""
         from app.models.prediction import Prediction
@@ -133,7 +137,8 @@ class TestPredictionHistory:
                 model_name="test_model",
                 model_version="v1.0",
                 probability=Decimal(f"0.{i+10}"),
-                risk_band="Medium",
+                risk_band="Moderate",
+                organization_id=admin_org_id,
                 shap_json={},
             )
             db_session.add(pred)
@@ -152,7 +157,7 @@ class TestPredictionHistory:
         assert data["total"] >= 15
 
     def test_prediction_history_ordered_by_most_recent(
-        self, client: TestClient, auth_headers, db_session
+        self, client: TestClient, auth_headers, db_session, admin_org_id
     ):
         """Verify history returns predictions in descending order by predicted_at."""
         from app.models.prediction import Prediction
@@ -167,7 +172,8 @@ class TestPredictionHistory:
                 model_name="test_model",
                 model_version="v1.0",
                 probability=Decimal("0.50"),
-                risk_band="Medium",
+                risk_band="Moderate",
+                organization_id=admin_org_id,
                 shap_json={},
                 predicted_at=base_time - timedelta(hours=i),
             )

@@ -208,3 +208,16 @@ def sample_prediction_input():
         "fresh_or_frozen": "Fresh"
     }
 
+
+
+@pytest.fixture(scope="function")
+def admin_org_id(client, auth_headers) -> int:
+    """Organization of the seeded admin.
+
+    Prediction rows are org-scoped and organization_id is NOT NULL, so any test
+    building one directly needs this. Read from /auth/me rather than hardcoded,
+    so the tests survive a change to how seeding assigns organizations.
+    """
+    response = client.get("/auth/me", headers=auth_headers)
+    assert response.status_code == 200, response.text
+    return response.json()["organization_id"]

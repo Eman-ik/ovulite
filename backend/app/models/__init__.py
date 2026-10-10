@@ -4,6 +4,7 @@ from app.models.anomaly import Anomaly
 from app.models.audit_event import AuditEvent
 from app.models.donor import Donor
 from app.models.embryo import Embryo
+from app.models.embryo_ai_assessment import EmbryoAIAssessment
 from app.models.embryo_image import EmbryoImage
 from app.models.et_transfer import ETTransfer
 from app.models.ivf_batch import IVFBatch
@@ -36,6 +37,7 @@ __all__ = [
     "AuditEvent",
     "Donor",
     "Embryo",
+    "EmbryoAIAssessment",
     "EmbryoImage",
     "ETTransfer",
     "IVFBatch",
