@@ -1,0 +1,39 @@
+{
+  "elapsed_seconds": 76.52,
+  "question": "In the CSF2 and DKK1 bovine embryo study, how was pregnancy diagnosed?",
+  "mode": "generative_rag",
+  "evidence_type": "literature",
+  "corpus_size": 60,
+  "citations": [
+    {
+      "document_id": 59,
+      "passage": 24,
+      "title": "Actions of CSF2 and DKK1 on bovine embryo development and pregnancy outcomes are affected by composition of embryo culture medium.",
+      "authors": "Amaral TF, de Grazia JGV, Martinhao LAG, De Col F, Siqueira LGB, Viana JHM, Hansen PJ.",
+      "year": 2022,
+      "source_url": "https://europepmc.org/articles/PMC9079070",
+      "source_kind": "peer_reviewed",
+      "excerpt": "Addition of either CSF2 or DKK1 lowered pregnancy rate for cows receiving embryos cultured in no serum but there was no additional reduction in pregnancy rate due to CSF2 or DKK1 for cows receiving embryos cultured in SR or FBS. In fact, CSF2 increased pregnancy rate for embryos cultured in serum (96/196; 49.0% for CSF2 vs 54/138; 39.1% for vehicle). Table 1 Effect of culture medium and embryokine treatment of embryos on pregnancy outcome at day 30 of gestation.",
+      "score": 3.20905,
+      "similarity": 0.34964659800146863
+    },
+    {
+      "document_id": 55,
+      "passage": 7,
+      "title": "Effects of Regulating Hippo and Wnt on the Development and Fate Differentiation of Bovine Embryo.",
+      "authors": "Zhang P, Zhang H, Li C, Yang B, Feng X, Cao J, Du W, Shahzad M, Khan A, Sun SC, Zhao X.",
+      "year": 2024,
+      "source_url": "https://europepmc.org/articles/PMC11011455",
+      "source_kind": "peer_reviewed",
+      "excerpt": "Effect of LPA and DKK1 on the Development of Bovine Embryos To examine how the Hippo and Wnt pathways are involved in embryo development, bovine oocytes were fertilized in vitro and then cultured to the blastocyst stage in the presence of LPA and DKK1. The cleavage rate and the blastocyst development rate of the LPA + DKK1 group (89.67 ± 4.53%, 47.11 ± 4.23%) were significantly higher than those of the LPA group (83.57 ± 3.60%, 40.04 ± 2.54%), the DKK1 group (81.97 ± 3.38%, 38.91 ± 3.10%) and the control group (74.18 ± 3.44%, 30.02 ± 3.30%; p < 0.05), as presented in Table 1 . 2.2. Effect of LPA and DKK1 on the YAP Fluorescence Intensity of Bovine Embryos As shown in Figure 1 , the YAP fluorescence intensity of the LPA group (63.41 ± 5.61) and the LPA + DKK1 group (72.81 ± 6.84) were significantly higher compared to the control group (47.21 ± 4.53) and the DKK1 group (51.66 ± 3.65, p < 0.05). 2.3.",
+      "score": 1.99608,
+      "similarity": 0.24734256684584538
+    }
+  ],
+  "claims": [],
+  "model": "qwen2.5:1.5b",
+  "embedding_model": "hash-512-v1",
+  "fallback_reason": null,
+  "limitations": "Literature evidence only; no local case observations or prediction outputs. Citations identify retrieved sources but do not independently verify model interpretation. Review the source and study context.",
+  "answer": "The retrieved evidence is insufficient to answer this question."
+}

@@ -1,0 +1,87 @@
+{
+  "elapsed_seconds": 236.87,
+  "question": "What does the literature report about corpus luteum cavities and pregnancy outcomes in bovine embryo-transfer recipients?",
+  "mode": "generative_rag",
+  "evidence_type": "literature",
+  "corpus_size": 60,
+  "citations": [
+    {
+      "document_id": 26,
+      "passage": 21,
+      "title": "Evaluation of the functional role of corpus luteum cavity in recipient selection for bovine embryo transfer.",
+      "authors": "Park J, Qamar AY, Lee W, Song K, Park M, Hong L, Bang S, Ro Y, Lee S, Kim M, Yi J, Cho J.",
+      "year": 2026,
+      "source_url": "https://europepmc.org/articles/PMC12963757",
+      "source_kind": "peer_reviewed",
+      "excerpt": "An optimal balance of luteal blood flow may be required to sustain a favorable uterine environment for embryo implantation. Table 3 Corpus luteum (CL) cavity diameter, hormone profiles and conception rate according to presence of corpus luteum blood perfusion (CLBP) CLBP (%) CL cavity (mm) 1) E 2 concentration (pg/mL) 1) P 4 concentration (ng/mL) 1) E 2 /P 4 ratio 1) Conception rate (%) <25 9.3±1.1 82.9±13.5 36.4±4.4 3.6±0.9 15/21 (71.4) 25–39 6.2±1.5 86.3±10.4 32.2±3.4 3.7±0.8 15/29 (51.7) ≥40 10.8±4.3 75.7±13.8 39.9±4.3 2.2±0.4 10/16 (62.5) 1) Data presented as mean±standard error of the means. E 2 , estradiol; P 4 , progesterone. Interaction between corpus luteum cavities, hormonal profiles, and pregnancy success Given the importance of hormonal balance in pregnancy establishment, further analysis was conducted to evaluate the relationship between CL cav , E 2 /P 4 ratio, and pregnancy outcomes. The E 2 /P 4 ratio tended to be higher in cows with CL com (3.4±2.0) compared to those with CL cav (2.0±0.4), although this difference was not statistically significant (p>0.05) ( Table 1 ).",
+      "score": 3.31818,
+      "similarity": 0.30886354595583826
+    },
+    {
+      "document_id": 59,
+      "passage": 16,
+      "title": "Actions of CSF2 and DKK1 on bovine embryo development and pregnancy outcomes are affected by composition of embryo culture medium.",
+      "authors": "Amaral TF, de Grazia JGV, Martinhao LAG, De Col F, Siqueira LGB, Viana JHM, Hansen PJ.",
+      "year": 2022,
+      "source_url": "https://europepmc.org/articles/PMC9079070",
+      "source_kind": "peer_reviewed",
+      "excerpt": "On day-8, females were administered an intravaginal progesterone device (1.9 g, CIDR ® , Zoetis, São Paulo, SP, Brazil) and 2 mg estradiol benzoate, i.m. (Gonadiol ® , Zoetis, Brazil). On Day-2, the CIDR inserts were removed and cows were administered, i.m., 12.5 mg PGF 2α (Lutalyse ® , Zoetis), equine chorionic gonadotropin (eCG; Novormon®, Zoetis; 300 IU) and 0.6 mg estradiol cypionate (ECP ® ; Zoetis) to induce ovulation (day 0). On day 7 after expected ovulation, the ovaries of all cows were examined by transrectal ultrasonography using an 5–8 MHz linear-array probe (SonoScape E5, Shenzhen, China) to determine the presence or absence of a corpus luteum. Only cows with a visible corpus luteum were selected as recipients. On day 7, a single embryo was transferred to the uterine horn ipsilateral to the ovary bearing a corpus luteum (n = 1565). Pregnancy diagnosis by ultrasound was performed at 30 (n = 1436 recipients) days of gestation. All but 74 transfers and all pregnancy diagnoses were performed by a single veterinarian.",
+      "score": 2.71671,
+      "similarity": 0.28519973054932296
+    },
+    {
+      "document_id": 20,
+      "passage": 21,
+      "title": "Handmade Biopsy for Genotyping of In Vitro-Produced Bovine Embryos.",
+      "authors": "Camargo LSA, Quintão CCR, de Martins JMCL, Silva MVGB, Dos Camargo AJR, Freitas C, de Reis DRL, Machado MA, Oliveira CS.",
+      "year": 2026,
+      "source_url": "https://europepmc.org/articles/PMC13165688",
+      "source_kind": "peer_reviewed",
+      "excerpt": "2002 ), as described (Oliveira, Silva, et al. 2023 ). The accuracy (ACC) of the GEBV was estimated for each embryo biopsy/animal and for each scenario as follows: ACC i = 1 − SD i 2 σ u 2 in which ACC i is the accuracy of breeding value for animal I and SD is the estimates standard deviation from GBLUP equations. 2.9. Estrous Synchronization and Embryo Transfer Estrous of crossbred recipients was synchronized by a progesterone/oestrogen‐based protocol. Hormones were purchased from Ourofino (Cravinhos, Brazil). Recipients received a vaginal device containing 1 g progesterone and 2 mg estradiol benzoate. Seven days later, recipients received one cloprostenol injection (0.5 mg), and the progesterone device was removed. On the following day, recipients were treated with 1 mg estradiol benzoate. Blastocysts were randomly transferred to recipients with corpus luteum on the 9th day after progesterone device removal. Pregnancy was assessed by ultrasound evaluation at the 30th and 90th day after embryo transfer. Birthweight was recorded at calf's delivery. 2.10.",
+      "score": 2.55898,
+      "similarity": 0.3280787345721047
+    },
+    {
+      "document_id": 38,
+      "passage": 18,
+      "title": "Targeting Inhibin Enhances Wagyu Oocyte Competence and Embryo Quality: A Comparative Study of In Vivo Immunization and In Vitro Antibody Supplementation.",
+      "authors": "Ren J, Liu F, Liu G, Wang B, Zhu J, Liu Y, Dai Y.",
+      "year": 2026,
+      "source_url": "https://europepmc.org/articles/PMC13114022",
+      "source_kind": "peer_reviewed",
+      "excerpt": "Embryo Vitrification and Transfer Blastocysts from the four groups were vitrified using the Cryotop method (Kitazato, Tokyo, Japan). For the field trial, strict recipient controls were applied to minimize variability. Recipients were restricted to healthy, nulliparous heifers (14–16 months old) with synchronized estrus and a high-quality corpus luteum (>15 mm) on Day 7 of the estrous cycle. Qualified recipients were randomly allocated and strictly balanced across the three independent IVP replicates. All vitrified-warmed blastocysts were transferred non-surgically into the uterine horn ipsilateral to the corpus luteum by the same experienced technician at a single farm. Pregnancy was diagnosed by rectal palpation and ultrasonography 60 days post-transfer. 2.13. Statistical Analysis All experiments were replicated at least three times. Data analysis was performed using SPSS 25.0 (IBM Corp., Armonk, NY, USA). Prior to parametric analysis, all datasets were confirmed to meet the assumptions of normality using the Shapiro–Wilk test and variance homogeneity using Levene’s test.",
+      "score": 2.51425,
+      "similarity": 0.22102723353156506
+    },
+    {
+      "document_id": 15,
+      "passage": 14,
+      "title": "Gene profiles of peripheral white blood cells as potential predictors of pregnancy in embryo-recipient heifers.",
+      "authors": "Raliou M, Meyerholz-Wohllebe MM, Dembélé D, Mense K, Heppelmann M, Richard C, Chavatte-Palmer P, Dieuzy-Labaye I, Smith D, Zieger P, Schuberth HJ, Schmicke M, Sheldon IM, Sandra O.",
+      "year": 2025,
+      "source_url": "https://europepmc.org/articles/PMC12435678",
+      "source_kind": "peer_reviewed",
+      "excerpt": "Specifically, on Day 7 post-estrus, synchronized recipient heifers for embryo transfer were administered 3–4 mL of epidural lidocaine (20 mg/mL concentration, Xylovet®, CEVA, France). An embryo transfer gun was used to deposit the embryo into the uterine horn on the side of the corpus luteum. All transferred embryos were male, produced, graded 2+ or 2-, and sexed by Masterrind GmbH (Verden, Germany). Embryos were frozen in glycerol and stored in liquid nitrogen, then thawed under sterile conditions using the Emcare Embryo Thawing System (ICPbio Reproduction, USA). One embryo was transferred trans-cervically using an embryo transfer instrument (Transfer Stylet 19240/1000, Transfit Lateral 19240/1005, Sanitary Sheaths 19271/0080; Minitüb, Germany) and deposited into the uterine horn on the side of the corpus luteum. Pregnancy detection Pregnancy success was determined on Day 18 post-estrus through circulating progesterone (P4) measurement, uterine flushing and conceptus collection, as described previously [ 38 ]. In detail, donor heifers received a 3–4 mL epidural injection of lidocaine (20 mg/mL, Xylovet®, CEVA, France) to reduce discomfort.",
+      "score": 2.39371,
+      "similarity": 0.305444171907032
+    }
+  ],
+  "claims": [
+    {
+      "text": "The literature report suggests that the presence of corpus luteum blood perfusion (CLBP) is positively correlated with the E 2 /P 4 ratio, which is indicative of a favorable uterine environment for embryo implantation.",
+      "citations": [
+        1
+      ]
+    }
+  ],
+  "model": "qwen2.5:1.5b",
+  "embedding_model": "hash-512-v1",
+  "fallback_reason": null,
+  "limitations": "Literature evidence only; no local case observations or prediction outputs. Citations identify retrieved sources but do not independently verify model interpretation. Review the source and study context.",
+  "answer": "The literature report suggests that the presence of corpus luteum blood perfusion (CLBP) is positively correlated with the E 2 /P 4 ratio, which is indicative of a favorable uterine environment for embryo implantation. [1]",
+  "review": {
+    "status": "unsupported_interpretation",
+    "finding": "The cited excerpt does not establish the claimed positive correlation between CLBP and E2/P4 or its favorable implication. Do not use this answer as scientific evidence.",
+    "action": "Prompt tightened to summarize explicit prose and not infer associations from flattened tables; human review remains required."
+  }
+}
