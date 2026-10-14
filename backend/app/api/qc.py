@@ -169,6 +169,9 @@ async def get_charts(
             ewma=ewma_points,
             cusum=cusum_points,
             alerts=alert_items,
+            status=data.get("status", "ok"),
+            periods_available=data.get("periods_available"),
+            periods_required=data.get("periods_required"),
         ))
 
     return QCChartsResponse(charts=chart_list, metrics=all_metrics)

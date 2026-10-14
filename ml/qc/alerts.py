@@ -71,41 +71,67 @@ def generate_iforest_alerts(
     anomalies = results_df[results_df["is_anomaly"]].copy()
     alerts = []
 
+    # The cohort these batches were z-scored against. This is the baseline an
+    # alert has to quote: "26% against a cohort 35%" is actionable, a bare
+    # anomaly score is not.
+    cohort = {
+        col: float(results_df[col].mean())
+        for col in ("pregnancy_rate", "avg_cl_measure", "avg_embryo_grade")
+        if col in results_df.columns and results_df[col].notna().any()
+    }
+
     for _, row in anomalies.iterrows():
         tech = row.get("technician_name", "Unknown")
         period = row.get("period", "Unknown")
         severity = row.get("anomaly_severity", "warning")
         score = row.get("anomaly_score", 0)
 
-        # Determine what's anomalous
+        # Determine what's anomalous, and which metric moved furthest — that is
+        # the one the alert names, so it can be quoted against its baseline.
         descriptions = []
-        if "pregnancy_rate" in row and pd.notna(row["pregnancy_rate"]):
-            preg_rate = row["pregnancy_rate"]
-            z = row.get("z_pregnancy_rate", 0)
-            if abs(z) > 1.5:
-                direction = "low" if z < 0 else "high"
-                descriptions.append(f"pregnancy rate {preg_rate:.0%} ({direction})")
+        driver = None  # (abs_z, column, value)
 
-        if "avg_cl_measure" in row and pd.notna(row["avg_cl_measure"]):
-            z = row.get("z_avg_cl_measure", 0)
-            if abs(z) > 1.5:
-                direction = "low" if z < 0 else "high"
-                descriptions.append(f"CL measure {row['avg_cl_measure']:.1f}mm ({direction})")
+        for col, label, fmt in (
+            ("pregnancy_rate", "pregnancy rate", lambda v: f"{v:.0%}"),
+            ("avg_cl_measure", "CL measure", lambda v: f"{v:.1f}mm"),
+            ("avg_embryo_grade", "embryo grade avg", lambda v: f"{v:.1f}"),
+        ):
+            if col not in row or pd.isna(row[col]):
+                continue
+            z = row.get(f"z_{col}", 0)
+            if pd.isna(z) or abs(z) <= 1.5:
+                continue
+            direction = "low" if z < 0 else "high"
+            descriptions.append(f"{label} {fmt(row[col])} ({direction})")
+            if driver is None or abs(z) > driver[0]:
+                driver = (abs(z), col, float(row[col]))
 
-        if "avg_embryo_grade" in row and pd.notna(row["avg_embryo_grade"]):
-            z = row.get("z_avg_embryo_grade", 0)
-            if abs(z) > 1.5:
-                descriptions.append(f"embryo grade avg {row['avg_embryo_grade']:.1f}")
-
-        desc = f"Anomalous batch: {', '.join(descriptions)}" if descriptions else f"Statistical anomaly detected (score: {score:.3f})"
+        if driver is not None:
+            metric, metric_value = driver[1], driver[2]
+            baseline = cohort.get(metric)
+            desc = f"Anomalous batch: {', '.join(descriptions)}"
+        else:
+            # Flagged on the multivariate combination, with no single metric
+            # past threshold. Naming one would invent a cause that isn't there.
+            metric, metric_value = "composite_anomaly_score", float(score)
+            baseline = (
+                float(results_df["anomaly_score"].median())
+                if "anomaly_score" in results_df.columns
+                else None
+            )
+            desc = (
+                f"Statistical anomaly detected (score: {score:.3f}); no single "
+                "metric past threshold, flagged on the combination"
+            )
 
         alert = Alert(
             alert_type="isolation_forest",
             entity_type="technician_batch",
             entity_id=f"{tech}/{period}",
             severity=severity,
-            metric="composite_anomaly_score",
-            metric_value=float(score),
+            metric=metric,
+            metric_value=metric_value,
+            baseline_value=baseline,
             description=desc,
             period=period,
         )
@@ -136,6 +162,7 @@ def generate_chart_alerts(charts: dict) -> list[dict]:
                 severity=chart_alert.get("severity", "warning"),
                 metric=metric,
                 metric_value=chart_alert.get("value", 0),
+                baseline_value=chart_alert.get("baseline"),
                 description=_format_chart_alert(chart_alert),
                 period=chart_alert.get("period"),
             )

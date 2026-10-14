@@ -210,22 +210,48 @@ def verify_detection(
     -------
     dict with detection_rate, true_positives, false_negatives
     """
-    synthetic = detected_anomalies[detected_anomalies.get("is_synthetic", False) == True]
+    # Matched on (technician, period), because that is the only identity the
+    # injected rows and the detected batches share. The previous version asked
+    # for an ``is_synthetic`` column on the batch frame; row-level aggregation
+    # never produced one, so ``DataFrame.get`` returned the scalar False and
+    # ``df[False]`` raised KeyError — this whole verification path had never run.
+    if "is_anomaly" not in detected_anomalies.columns:
+        raise ValueError("detected_anomalies has no is_anomaly column")
 
-    if len(synthetic) == 0:
-        return {
-            "detection_rate": 0.0,
-            "true_positives": 0,
-            "false_negatives": len(ground_truth),
-            "total_injected": len(ground_truth),
-        }
+    flagged = {
+        (str(row.get("technician_name")), str(row.get("period")))
+        for _, row in detected_anomalies[detected_anomalies["is_anomaly"]].iterrows()
+    }
 
-    tp = synthetic["is_anomaly"].sum() if "is_anomaly" in synthetic.columns else 0
-    fn = len(ground_truth) - tp
+    hits, misses = [], []
+    for truth in ground_truth:
+        key = (str(truth.get("technician")), str(truth.get("period")))
+        (hits if key in flagged else misses).append(
+            {
+                "type": truth.get("type"),
+                "technician": truth.get("technician"),
+                "period": truth.get("period"),
+            }
+        )
+
+    # Detection happens per batch, and several faults can land in one batch
+    # (the CL drift and the grade anomaly both hit Masroor/2025-12). Scoring
+    # per fault therefore caps recall below 1.0 by construction, so the rate is
+    # reported over distinct affected batches and the per-fault counts stay
+    # alongside it.
+    injected_keys = {
+        (str(t.get("technician")), str(t.get("period"))) for t in ground_truth
+    }
+    found_keys = injected_keys & flagged
 
     return {
-        "detection_rate": round(float(tp / max(len(ground_truth), 1)), 4),
-        "true_positives": int(tp),
-        "false_negatives": int(fn),
+        "detection_rate": round(len(found_keys) / max(len(injected_keys), 1), 4),
+        "batches_injected": len(injected_keys),
+        "batches_detected": len(found_keys),
+        "true_positives": len(hits),
+        "false_negatives": len(misses),
         "total_injected": len(ground_truth),
+        "detected": hits,
+        "missed": misses,
+        "flagged_not_injected": len(flagged - injected_keys),
     }

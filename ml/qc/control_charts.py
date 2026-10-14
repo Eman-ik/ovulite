@@ -16,6 +16,7 @@ from .config import (
     CUSUM_THRESHOLD,
     EWMA_LAMBDA,
     EWMA_SIGMA_MULTIPLIER,
+    MIN_CHART_PERIODS,
 )
 
 logger = logging.getLogger(__name__)
@@ -161,9 +162,31 @@ def build_control_charts(monthly_df: pd.DataFrame) -> dict:
         if metric not in monthly_df.columns:
             continue
 
-        series = monthly_df[metric].dropna()
-        if len(series) < 3:
-            logger.warning(f"Skipping {metric}: only {len(series)} data points")
+        # compute_ewma/compute_cusum drop NaNs and return a 0..n-1 index, so the
+        # period labels have to come from the same surviving rows. Reading them
+        # off monthly_df by position mislabels every alert after a NaN month —
+        # it would name the wrong affected period, which is worse than silence.
+        kept = monthly_df[monthly_df[metric].notna()].reset_index(drop=True)
+        series = kept[metric]
+        periods = (
+            kept["period"].tolist() if "period" in kept.columns
+            else [str(i) for i in range(len(series))]
+        )
+
+        if len(series) < MIN_CHART_PERIODS:
+            logger.warning(
+                f"{metric}: {len(series)} periods < {MIN_CHART_PERIODS}, "
+                "insufficient history for a control chart"
+            )
+            charts[metric] = {
+                "ewma": pd.DataFrame(),
+                "cusum": pd.DataFrame(),
+                "alerts": [],
+                "periods": periods,
+                "status": "insufficient_history",
+                "periods_available": len(series),
+                "periods_required": MIN_CHART_PERIODS,
+            }
             continue
 
         ewma_df = compute_ewma(series)
@@ -172,17 +195,22 @@ def build_control_charts(monthly_df: pd.DataFrame) -> dict:
         # Generate alerts from control chart violations
         alerts = []
 
-        # EWMA alerts
-        ewma_violations = ewma_df[ewma_df["out_of_control"]]
+        # EWMA alerts. The first point is skipped: ewma[0] is seeded with
+        # values[0] itself and its limit factor is the narrowest of the series,
+        # so point 0 is tested against a statistic it defines and violates on
+        # noise. On this dataset it reported a 1.3-percentage-point move as an
+        # out-of-control pregnancy rate.
+        ewma_violations = ewma_df.iloc[1:][ewma_df["out_of_control"].iloc[1:]]
         for idx, row in ewma_violations.iterrows():
             direction = "above UCL" if row["ewma"] > row["ucl"] else "below LCL"
             alerts.append({
                 "type": "ewma_violation",
                 "metric": metric,
                 "period_index": int(idx),
-                "period": monthly_df["period"].iloc[idx] if "period" in monthly_df.columns else str(idx),
+                "period": periods[int(idx)],
                 "value": round(float(row["value"]), 4),
                 "ewma": round(float(row["ewma"]), 4),
+                "baseline": round(float(row["target"]), 4),
                 "direction": direction,
                 "severity": "warning",
             })
@@ -194,8 +222,9 @@ def build_control_charts(monthly_df: pd.DataFrame) -> dict:
                 "type": "cusum_shift",
                 "metric": metric,
                 "period_index": int(idx),
-                "period": monthly_df["period"].iloc[idx] if "period" in monthly_df.columns else str(idx),
+                "period": periods[int(idx)],
                 "value": round(float(row["value"]), 4),
+                "baseline": round(float(series.mean()), 4),
                 "shift_direction": row["shift_direction"],
                 "severity": "critical" if row["shift_direction"] == "both" else "warning",
             })
@@ -204,7 +233,10 @@ def build_control_charts(monthly_df: pd.DataFrame) -> dict:
             "ewma": ewma_df,
             "cusum": cusum_df,
             "alerts": alerts,
-            "periods": monthly_df["period"].tolist() if "period" in monthly_df.columns else list(range(len(series))),
+            "periods": periods,
+            "status": "ok",
+            "periods_available": len(series),
+            "periods_required": MIN_CHART_PERIODS,
         }
 
     return charts

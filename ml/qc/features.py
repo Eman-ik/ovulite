@@ -62,31 +62,34 @@ def load_et_data(csv_path: Path | None = None) -> pd.DataFrame:
                 df[internal_col] = df[col]
                 break
 
+    # A missing column must come back as a Series, not as the scalar default.
+    # ``df.get("x", "")`` hands back the string, and the next ``.fillna`` or
+    # ``to_numeric`` then dies on it — so a CSV lacking any one of these columns
+    # took the whole loader down rather than loading what it did have.
+    def column(name: str) -> pd.Series:
+        if name in df.columns:
+            return df[name]
+        return pd.Series([None] * len(df), index=df.index, dtype=object)
+
     # Parse numeric columns
-    df["et_number"] = pd.to_numeric(df.get("# ET"), errors="coerce")
-    df["embryo_stage"] = pd.to_numeric(df.get("embryo_stage"), errors="coerce")
-    df["embryo_grade"] = pd.to_numeric(df.get("embryo_grade"), errors="coerce")
-    df["cl_measure_mm"] = pd.to_numeric(df.get("cl_measure_mm"), errors="coerce")
-    df["bc_score"] = pd.to_numeric(df.get("bc_score"), errors="coerce")
-    df["heat_day"] = pd.to_numeric(df.get("heat_day"), errors="coerce")
+    df["et_number"] = pd.to_numeric(column("# ET"), errors="coerce")
+    for name in ("embryo_stage", "embryo_grade", "cl_measure_mm", "bc_score", "heat_day"):
+        df[name] = pd.to_numeric(column(name), errors="coerce")
 
     # Parse categorical columns
-    df["technician_name"] = df.get("technician_name", "").fillna("Unknown").str.strip()
-    df["protocol_name"] = df.get("protocol_name", "").fillna("Unknown").str.strip()
-    df["donor_breed"] = df.get("donor_breed", "").fillna("Unknown").str.strip()
-    df["fresh_or_frozen"] = df.get("fresh_or_frozen", "").fillna("Unknown").str.strip()
-    df["customer_id"] = df.get("customer_id", "").fillna("Unknown").str.strip()
-    df["semen_type"] = df.get("semen_type", "").fillna("Unknown").str.strip()
-    df["cl_side"] = df.get("cl_side", "").fillna("Unknown").str.strip()
+    for name in (
+        "technician_name", "protocol_name", "donor_breed", "fresh_or_frozen",
+        "customer_id", "semen_type", "cl_side",
+    ):
+        df[name] = column(name).fillna("Unknown").astype(str).str.strip()
 
     # Parse pregnancy outcome
-    pc1_raw = df.get("pc1_result", "").fillna("")
-    df["pregnant"] = pc1_raw.str.strip().map(
+    df["pregnant"] = column("pc1_result").fillna("").astype(str).str.strip().map(
         {"Pregnant": 1, "P": 1, "Open": 0, "O": 0, "Recheck": np.nan, "R": np.nan}
     )
 
     # Parse dates
-    df["et_date"] = pd.to_datetime(df.get("et_date"), errors="coerce", dayfirst=True)
+    df["et_date"] = pd.to_datetime(column("et_date"), errors="coerce", dayfirst=True)
     df["year_month"] = df["et_date"].dt.to_period("M")
 
     return df
@@ -159,6 +162,14 @@ def compute_monthly_metrics(df: pd.DataFrame) -> pd.DataFrame:
         transfer_count, pregnancy_rate, avg_cl_measure, avg_embryo_grade,
         avg_bc_score, std_cl_measure
     """
+    if df.empty or "year_month" not in df.columns:
+        return pd.DataFrame(
+            columns=[
+                "year_month", "transfer_count", "pregnancy_rate", "avg_cl_measure",
+                "std_cl_measure", "avg_embryo_grade", "avg_bc_score", "period",
+            ]
+        )
+
     valid = df.dropna(subset=["year_month"]).copy()
     grouped = valid.groupby("year_month")
 
@@ -194,6 +205,14 @@ def compute_batch_features(df: pd.DataFrame) -> pd.DataFrame:
         technician_name, period, transfer_count, pregnancy_rate,
         avg_cl_measure, avg_embryo_grade, z_pregnancy_rate, z_cl_measure
     """
+    cols = [
+        "technician_name", "year_month", "transfer_count", "pregnancy_rate",
+        "avg_cl_measure", "avg_embryo_grade", "z_pregnancy_rate",
+        "z_avg_cl_measure", "z_avg_embryo_grade", "period",
+    ]
+    if df.empty or "year_month" not in df.columns:
+        return pd.DataFrame(columns=cols)
+
     valid = df.dropna(subset=["year_month"]).copy()
     grouped = valid.groupby(["technician_name", "year_month"])
 

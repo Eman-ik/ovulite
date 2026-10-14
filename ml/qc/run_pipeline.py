@@ -66,6 +66,32 @@ def run_qc_pipeline(
     X, batch_df = build_qc_feature_matrix(df)
     logger.info(f"Feature matrix: {X.shape[0]} batches × {X.shape[1]} features")
 
+    # No batches survived the minimum-size filters. Fitting Isolation Forest on
+    # this raises; an empty result that says so is the honest answer.
+    if len(batch_df) == 0:
+        logger.warning("No batches met the minimum size; nothing to assess")
+        return {
+            "technician_stats": tech_stats,
+            "protocol_stats": protocol_stats,
+            "monthly_metrics": monthly,
+            "anomalies": batch_df,
+            "charts": {},
+            "alerts": [],
+            "summary": {
+                "status": "no_data",
+                "total_records": len(df),
+                "total_batches": 0,
+                "anomalous_batches": 0,
+                "anomaly_rate": 0.0,
+                "chart_alerts": 0,
+                "total_alerts": 0,
+                "technicians_analyzed": len(tech_stats),
+                "protocols_analyzed": len(protocol_stats),
+                "months_analyzed": len(monthly),
+                "global_pregnancy_rate": None,
+            },
+        }
+
     # ── Isolation Forest ──
     logger.info("Training Isolation Forest...")
     model, results_df = train_isolation_forest(X, batch_df, save_dir=save_dir)
@@ -124,6 +150,11 @@ def run_qc_pipeline(
             "cusum": data["cusum"].to_dict(orient="records") if not data["cusum"].empty else [],
             "alerts": data["alerts"],
             "periods": data["periods"],
+            # Without these a chart that could not run is indistinguishable
+            # from one that ran and found nothing.
+            "status": data.get("status", "ok"),
+            "periods_available": data.get("periods_available"),
+            "periods_required": data.get("periods_required"),
         }
 
     with open(save_dir / "qc_charts.json", "w") as f:

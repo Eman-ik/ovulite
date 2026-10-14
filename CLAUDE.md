@@ -136,9 +136,39 @@ The pipeline works end to end. The discrimination does not.
 - **Retraining does not fix this** — `ml/permutation_test.py` and `ml/diagnose_split.py` already
   establish it under pooled CV, within-regime CV and rolling origin. Do not propose a new split
   as a remedy; more labelled outcomes are the only thing that would change the answer.
-- Live predictions span 0.112–0.238 (sd 0.018) against a 38.6% base rate, so every case lands
-  in the "Low" risk band and the Brier score is worse than always predicting the base rate.
+- Live predictions span 0.112–0.238 (sd 0.018) against a **28.6%** base rate (136 pregnant of
+  476 scored rows in `ovulite_cleaned_et_data.csv`; the raw ET CSV agrees at 136/470 = 28.9%).
+  An earlier note here said 38.6% — wrong by ten points, and it never reached the code. Every
+  case still lands in the "Low" band and the Brier score is still worse than always predicting
+  the base rate; the band threshold is 0.35 and the predictions top out at 0.238.
   The prediction page states this above the estimate rather than hiding it.
+
+## Lab QC (M7)
+
+`python -m ml.qc.acceptance_demo` walks the whole chain in one run — no data, normal data,
+injected faults, detection, alert contents — and prints a verdict. Run it before claiming
+anything about QC.
+
+- **The reporting contract holds. The detection does not.** Inject 5 faults across 4
+  technician-month batches and Isolation Forest finds **1**. Sweeping contamination from
+  0.10 to 0.42 (flagging 5 of 12 batches) finds the same one and adds four false positives,
+  so it is not a flag-budget problem — 12 batches over 4 technicians is no cohort to judge
+  against. Do not "fix" this by retuning contamination.
+- **Control charts cannot run on this data.** Only 3–4 months clear `MIN_MONTHLY_RECORDS`,
+  against `MIN_CHART_PERIODS = 8`. Below that an EWMA chart tests points against a baseline
+  estimated from those same points and flags its own noise; it was calling a
+  1.3-percentage-point move an out-of-control pregnancy rate. The chart now reports
+  `status: "insufficient_history"` and the dashboard says so instead of drawing an empty axis.
+- The first EWMA point is never alerted on: `ewma[0]` is seeded with `values[0]`, so point 0
+  is tested against a statistic it defines.
+- `pandas.DataFrame.get(name, default)` returns the **scalar** default when the column is
+  missing, not a Series. This bit twice: it killed `load_et_data` on any CSV missing a column,
+  and `verify_detection` did `df[df.get("is_synthetic", False) == True]` → `df[False]` →
+  KeyError, so the synthetic-verification path had never once executed.
+- QC reads the transfer-level ET CSV. Cleavage and blastocyst rates are **not** in its feature
+  space — they live on `ivf_batches` and every one of those numbers is demo-seeded.
+- Alerts carry `metric`, `metric_value`, `baseline_value`, `period` and `severity`, and state
+  no cause. Protocol, technician and month move together in this dataset; it cannot attribute.
 
 ## House style
 

@@ -94,6 +94,9 @@ interface ControlChart {
   ewma: EWMAPoint[];
   cusum: CUSUMPoint[];
   alerts: QCAlert[];
+  status?: "ok" | "insufficient_history";
+  periods_available?: number | null;
+  periods_required?: number | null;
 }
 
 /* ─── Constants ─────────────────────────────────────────── */
@@ -363,6 +366,26 @@ export default function QCDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* A control chart tests each point against a baseline estimated
+                from the series itself, so a handful of periods makes it flag
+                its own noise. Saying so beats drawing an empty axis that reads
+                as a process in control. */}
+            {currentChart.status === "insufficient_history" && (
+              <div className="mb-6 rounded-lg border border-[#7a5a12]/30 bg-[#7a5a12]/10 p-4">
+                <p className="text-sm font-medium text-[#7a5a12]">
+                  Not enough history to run a control chart
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {currentChart.metric.replace(/_/g, " ")} has{" "}
+                  {currentChart.periods_available ?? 0} month
+                  {currentChart.periods_available === 1 ? "" : "s"} of data;{" "}
+                  {currentChart.periods_required ?? 8} are needed before a
+                  baseline means anything. Below that, the chart flags ordinary
+                  month-to-month variation as an excursion.
+                </p>
+              </div>
+            )}
+
             {/* EWMA Chart (text-based visualization) */}
             <div className="mb-6">
               <h4 className="mb-3 text-sm font-medium">EWMA — {currentChart.metric.replace(/_/g, " ")}</h4>
@@ -418,7 +441,9 @@ export default function QCDashboardPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No EWMA data available</p>
+                currentChart.status !== "insufficient_history" && (
+                  <p className="text-sm text-muted-foreground">No EWMA data available</p>
+                )
               )}
             </div>
 
@@ -463,7 +488,9 @@ export default function QCDashboardPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No CUSUM data available</p>
+                currentChart.status !== "insufficient_history" && (
+                  <p className="text-sm text-muted-foreground">No CUSUM data available</p>
+                )
               )}
             </div>
           </CardContent>

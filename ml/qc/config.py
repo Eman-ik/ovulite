@@ -47,3 +47,10 @@ TEMPORAL_METRICS = [
 # ── Minimum sample sizes ────────────────────────────────
 MIN_TECH_TRANSFERS = 5  # minimum transfers for technician stats
 MIN_MONTHLY_RECORDS = 3  # minimum records in a month to compute metric
+
+# A control chart tests points against a baseline estimated from the same
+# series, so with a handful of periods it flags its own noise: on this dataset
+# (4 monthly points) it called a 1.3-percentage-point move an EWMA violation.
+# SPC convention wants 20-25 Phase I subgroups; 8 is the floor below which the
+# chart reports insufficient history instead of an alert.
+MIN_CHART_PERIODS = 8

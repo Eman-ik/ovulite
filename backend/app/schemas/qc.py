@@ -54,6 +54,13 @@ class ControlChartData(BaseModel):
     ewma: list[EWMAPoint]
     cusum: list[CUSUMPoint]
     alerts: list[QCAlert]
+    # "ok" or "insufficient_history". Without this an empty chart reads as a
+    # process in control, when in fact the chart could not be built: the
+    # baseline a control chart tests against needs a run of periods this
+    # dataset does not have.
+    status: str = "ok"
+    periods_available: int | None = None
+    periods_required: int | None = None
 
 
 class QCChartsResponse(BaseModel):
