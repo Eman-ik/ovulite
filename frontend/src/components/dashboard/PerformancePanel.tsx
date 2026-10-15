@@ -1,4 +1,4 @@
-import { ROLE, roleProps, vsProgramme } from "@/lib/chartPalette";
+import { ROLE, roleProps, verdictFromRate } from "@/lib/chartPalette";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import api from "@/lib/api";
@@ -131,7 +131,7 @@ export default function PerformancePanel({
                         {chartRows.map((r) => (
                           <Cell
                             key={r.id}
-                            {...roleProps(vsProgramme(r.pregnancy_rate, shownAverage))}
+                            {...roleProps(verdictFromRate(r.pregnancy_rate == null ? null : r.pregnancy_rate / 100, r.n_transfers, shownAverage == null ? null : shownAverage / 100))}
                             {...(selectedId === r.id ? { stroke: "#2E3645", strokeWidth: 2 } : {})}
                             cursor={slice ? "pointer" : undefined}
                             onClick={slice ? () => slice(r.id) : undefined}
@@ -143,11 +143,15 @@ export default function PerformancePanel({
                   <p className="mt-1 flex flex-wrap items-center gap-x-4 text-[11px] dash-muted">
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE.positive.fill }} />
-                      At or above the average of these bars
+                      Clearly above the average of these bars
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE.negative.fill, boxShadow: `inset 0 0 0 1px ${ROLE.negative.stroke}` }} />
-                      Below it
+                      Clearly below it
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE.volume.fill, boxShadow: `inset 0 0 0 1px ${ROLE.volume.stroke}` }} />
+                      No clear difference (the intervals overlap)
                     </span>
                   </p>
                 </div>

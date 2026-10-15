@@ -7,8 +7,10 @@ import {
   CartesianGrid,
   Cell,
   ComposedChart,
+  LabelList,
   Legend,
   Line,
+  LineChart,
   PolarAngleAxis,
   PolarGrid,
   PolarRadiusAxis,
@@ -22,113 +24,196 @@ import {
   Scatter,
   ScatterChart,
   Tooltip,
-  Treemap,
   XAxis,
   YAxis,
   ZAxis,
 } from "recharts";
 import api from "@/lib/api";
-import { ROLE, roleProps, textOn, vsProgramme, type Role } from "@/lib/chartPalette";
+import type { DashboardFilterValues } from "@/lib/types";
+import { ROLE, roleProps, verdict, wilson, type Role } from "@/lib/chartPalette";
 import RoleKey from "@/components/dashboard/RoleKey";
 
 /*
- * Programme-wide charts, each a different type, built only from real transfer
- * records. The lab-side funnel (oocytes, embryos, live births) is left out on
- * purpose: those figures come from the demo seeder, not from recorded data.
+ * Programme charts. Data comes from /dashboard/charts under the dashboard filters.
  *
- * These use the whole programme, not the dashboard filters, and say so.
- * A bar, segment, bubble or point from fewer than SMALL_SAMPLE transfers is
- * drawn faded, so a thin sample never looks as solid as a large one.
+ * Colour is a verdict, not a ranking: a group is coloured positive or negative only
+ * when its whole 95% interval sits above or below the programme rate. Otherwise it
+ * is the neutral "no clear difference" colour, however far its point estimate
+ * wanders. Each card states its finding in a takeaway line, computed from the data.
+ *
+ * Clicking a bar, slice, bubble or period sets the dashboard filter, so every panel
+ * on the page follows. Clicking the active item again clears it.
  */
 
 const SMALL_SAMPLE = 20;
 const AXIS = "#8a9a92";
 const GRID = "rgba(46, 54, 69, 0.07)";
 const INK = "#2E3645";
+const FADE = 0.35;
 
-interface Kpis {
+interface Group {
+  n_with_outcome: number;
   pregnant: number;
-  open: number;
-  with_outcome: number;
-  total_transfers: number;
-  fresh_vs_frozen: Record<string, { n: number; pregnant: number; rate: number }>;
+  rate: number | null;
 }
-interface TrendRow {
-  month: string;
-  n_transfers: number;
-  n_pregnant: number;
-  pregnancy_rate: number | null;
-}
-interface ProtocolRow {
-  protocol_name: string;
-  n_transfers: number;
-  n_pregnant: number;
-  pregnancy_rate: number;
-  ci_lower: number;
-  ci_upper: number;
-}
-interface BreedRow {
-  donor_breed: string;
-  n_transfers: number;
-  pregnancy_rate: number;
-}
-interface DonorRow {
-  donor_tag: string;
-  breed: string | null;
-  n_transfers: number;
-  n_pregnant: number;
-  pregnancy_rate: number;
-}
-interface BinRow {
-  range: string;
-  n: number;
-  pregnancy_rate: number | null;
-  ci_lower: number | null;
-  ci_upper: number | null;
-}
-
-interface Data {
-  kpis: Kpis | null;
-  trends: TrendRow[] | null;
-  protocols: ProtocolRow[] | null;
-  breeds: BreedRow[] | null;
-  donors: DonorRow[] | null;
-  bins: BinRow[] | null;
+interface ChartsData {
+  start: string | null;
+  end: string | null;
+  kpis: {
+    pregnant: number;
+    open: number;
+    with_outcome: number;
+    total_transfers: number;
+    fresh_vs_frozen: Record<string, Group>;
+  };
+  trends: { month: string; n_transfers: number; n_with_outcome: number; n_pregnant: number; pregnancy_rate: number | null }[];
+  protocols: {
+    protocol_id: number | null;
+    protocol_name: string;
+    n_transfers: number;
+    n_with_outcome: number;
+    n_pregnant: number;
+    pregnancy_rate: number | null;
+    ci_lower: number | null;
+    ci_upper: number | null;
+  }[];
+  breeds: { donor_breed: string; n_transfers: number; n_with_outcome: number; n_pregnant: number; pregnancy_rate: number | null }[];
+  donors: {
+    donor_id: number | null;
+    donor_tag: string;
+    breed: string | null;
+    n_transfers: number;
+    n_with_outcome: number;
+    n_pregnant: number;
+    pregnancy_rate: number | null;
+  }[];
+  bins: {
+    range: string;
+    n_transfers: number;
+    n_with_outcome: number;
+    n_pregnant: number;
+    pregnancy_rate: number | null;
+    ci_lower: number | null;
+    ci_upper: number | null;
+  }[];
 }
 
-const pct = (v: number | null | undefined) => (v == null ? "—" : `${(v * 100).toFixed(1)}%`);
+type Period = "month" | "quarter";
+type Measure = "rate" | "transfers";
 
-// Legend and tooltip text takes the series colour by default, which fails on
-// pale fills, so it is set in ink here.
 const ink = (text: ReactNode) => <span style={{ color: INK }}>{text}</span>;
+const pctText = (v: number) => `${(v * 100).toFixed(1)}%`;
+const toPct = (v: number | null | undefined) => (v == null ? null : v * 100);
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-function Card({ title, caption, children, wide = false }: { title: string; caption: string; children: ReactNode; wide?: boolean }) {
+/** Monthly rows folded to quarters when the viewer drills up. Rates recompute from counts. */
+function regroup(rows: ChartsData["trends"], period: Period) {
+  const byKey = new Map<string, { transfers: number; out: number; pregnant: number }>();
+  for (const r of rows) {
+    const key =
+      period === "month"
+        ? r.month
+        : `${r.month.slice(0, 4)}-Q${Math.floor((Number(r.month.slice(5, 7)) - 1) / 3) + 1}`;
+    const cur = byKey.get(key) ?? { transfers: 0, out: 0, pregnant: 0 };
+    cur.transfers += r.n_transfers;
+    cur.out += r.n_with_outcome;
+    cur.pregnant += r.n_pregnant;
+    byKey.set(key, cur);
+  }
+  return [...byKey.entries()].map(([label, v]) => ({
+    label,
+    transfers: v.transfers,
+    out: v.out,
+    pregnant: v.pregnant,
+    rate: v.out ? v.pregnant / v.out : null,
+  }));
+}
+
+/** First and last day of a month ("2026-03") or quarter ("2026-Q2"), as ISO dates. */
+function periodRange(label: string): { from: string; to: string } {
+  const year = Number(label.slice(0, 4));
+  let startMonth: number;
+  let endMonth: number;
+  if (label.includes("Q")) {
+    const q = Number(label.slice(-1));
+    startMonth = (q - 1) * 3 + 1;
+    endMonth = startMonth + 2;
+  } else {
+    startMonth = Number(label.slice(5, 7));
+    endMonth = startMonth;
+  }
+  const lastDay = new Date(year, endMonth, 0).getDate();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return {
+    from: `${year}-${pad(startMonth)}-01`,
+    to: `${year}-${pad(endMonth)}-${pad(lastDay)}`,
+  };
+}
+
+/** Two intervals overlap, so neither group is clearly different from the other. */
+function overlap(a: [number, number], b: [number, number]) {
+  return a[0] <= b[1] && b[0] <= a[1];
+}
+
+function Card({
+  title,
+  caption,
+  takeaway,
+  controls,
+  children,
+  wide = false,
+}: {
+  title: string;
+  caption: string;
+  takeaway?: string | null;
+  controls?: ReactNode;
+  children: ReactNode;
+  wide?: boolean;
+}) {
   return (
     <div className={`dash-card ${wide ? "xl:col-span-2" : ""}`}>
       <h3 className="text-base font-semibold dash-heading">{title}</h3>
-      <p className="mb-3 mt-1 text-xs dash-muted">{caption}</p>
+      <p className="mb-2 mt-1 text-xs dash-muted">{caption}</p>
+      {takeaway && (
+        <p className="mb-3 rounded-xl bg-white/65 px-3 py-2 text-[13px] leading-snug dash-heading" role="note">
+          <span className="mr-1.5 font-semibold">What it shows:</span>
+          {takeaway}
+        </p>
+      )}
+      {controls && <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">{controls}</div>}
       {children}
     </div>
   );
 }
 
-function Empty({ children }: { children: ReactNode }) {
-  return <p className="py-10 text-center text-sm dash-muted">{children}</p>;
-}
-
-// Treemap cell: the label colour follows the block, since the blocks run from light to dark.
-function TreemapCell(props: { x: number; y: number; width: number; height: number; name: string; fill: string; outline?: string }) {
-  const { x, y, width, height, name, fill, outline } = props;
-  const showLabel = width > 64 && height > 26;
+function Seg<T extends string | number>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}) {
   return (
-    <g>
-      <rect x={x} y={y} width={width} height={height} fill={fill} stroke={outline ?? "#ffffff"} strokeWidth={2} />
-      {showLabel && (
-        <text x={x + 8} y={y + 18} fill={textOn(fill)} stroke="none" fontSize={11} fontWeight={600}>
-          {name}
-        </text>
-      )}
-    </g>
+    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+      <span className="font-medium dash-muted">{label}</span>
+      {options.map((o) => (
+        <button
+          key={String(o.value)}
+          type="button"
+          onClick={() => onChange(o.value)}
+          aria-pressed={value === o.value}
+          className={`rounded-full px-3 py-1 font-semibold transition ${
+            value === o.value ? "bg-white shadow-sm dash-heading" : "bg-black/[0.045] dash-muted hover:bg-white/70"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -142,161 +227,384 @@ function Frame({ height, children }: { height: number; children: ReactElement })
   );
 }
 
-/** How the monthly chart is drawn: the same data as bars and a line, or either alone. */
-type MonthlyView = "combo" | "bars" | "line";
-const MONTHLY_VIEWS: { value: MonthlyView; label: string }[] = [
-  { value: "combo", label: "Bars and line" },
-  { value: "bars", label: "Transfers only" },
-  { value: "line", label: "Pregnancy rate only" },
+function Empty({ children }: { children: ReactNode }) {
+  return <p className="py-10 text-center text-sm dash-muted">{children}</p>;
+}
+
+const MIN_OPTIONS = [
+  { value: 1, label: "All" },
+  { value: 5, label: "5+" },
+  { value: 10, label: "10+" },
+  { value: 20, label: "20+" },
+];
+const PERIOD_OPTIONS: { value: Period; label: string }[] = [
+  { value: "month", label: "Month" },
+  { value: "quarter", label: "Quarter" },
+];
+const MEASURE_OPTIONS: { value: Measure; label: string }[] = [
+  { value: "rate", label: "Pregnancy rate" },
+  { value: "transfers", label: "Transfers" },
 ];
 
-export default function ChartGallery() {
-  const [data, setData] = useState<Data>({ kpis: null, trends: null, protocols: null, breeds: null, donors: null, bins: null });
+export default function ChartGallery({
+  filters,
+  onFilter,
+}: {
+  filters: DashboardFilterValues;
+  onFilter: (patch: Partial<DashboardFilterValues>) => void;
+}) {
+  const [data, setData] = useState<ChartsData | null>(null);
   const [failed, setFailed] = useState(false);
-  const [monthlyView, setMonthlyView] = useState<MonthlyView>("combo");
+  const filterKey = JSON.stringify(filters);
+
+  // Per-chart controls. The viewer's choice of how to draw; nothing here changes the data.
+  const [outcomeView, setOutcomeView] = useState<"donut" | "bars">("donut");
+  const [radialView, setRadialView] = useState<"radial" | "bars">("radial");
+  const [monthlyView, setMonthlyView] = useState<"combo" | "bars" | "line">("combo");
+  const [monthlyPeriod, setMonthlyPeriod] = useState<Period>("month");
+  const [stackPeriod, setStackPeriod] = useState<Period>("month");
+  const [stackMode, setStackMode] = useState<"counts" | "share">("counts");
+  const [waterfallView, setWaterfallView] = useState<"waterfall" | "bars">("waterfall");
+  const [waterfallMeasure, setWaterfallMeasure] = useState<"count" | "share">("count");
+  const [radarView, setRadarView] = useState<"radar" | "bars">("radar");
+  const [radarMin, setRadarMin] = useState(5);
+  const [donorMin, setDonorMin] = useState(20);
+  const [breedMeasure, setBreedMeasure] = useState<Measure>("rate");
+  const [breedMin, setBreedMin] = useState(5);
+  const [protocolMode, setProtocolMode] = useState<"counts" | "share">("counts");
+  const [protocolMin, setProtocolMin] = useState(5);
+  const [clView, setClView] = useState<"columns" | "line">("columns");
+  const [clMeasure, setClMeasure] = useState<Measure>("rate");
 
   useEffect(() => {
-    Promise.allSettled([
-      api.get<Kpis>("/analytics/kpis"),
-      api.get<TrendRow[]>("/analytics/trends"),
-      api.get<{ protocols: ProtocolRow[] }>("/analytics/protocols"),
-      api.get<{ breeds: BreedRow[] }>("/analytics/breeds"),
-      api.get<{ donors: DonorRow[] }>("/analytics/donors"),
-      api.get<{ cl_measure: { bins: BinRow[] } }>("/analytics/biomarkers"),
-    ]).then(([k, t, p, b, d, bi]) => {
-      setData({
-        kpis: k.status === "fulfilled" ? k.value.data : null,
-        trends: t.status === "fulfilled" ? t.value.data : null,
-        protocols: p.status === "fulfilled" ? p.value.data.protocols : null,
-        breeds: b.status === "fulfilled" ? b.value.data.breeds : null,
-        donors: d.status === "fulfilled" ? d.value.data.donors : null,
-        bins: bi.status === "fulfilled" ? bi.value.data.cl_measure.bins : null,
+    let cancelled = false;
+    setFailed(false);
+    api
+      .get<ChartsData>("/dashboard/charts", { params: filters })
+      .then((res) => {
+        if (!cancelled) setData(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
       });
-      if ([k, t, p, b, d, bi].every((r) => r.status === "rejected")) setFailed(true);
-    });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+    // filterKey is the serialised filters; the object itself changes identity on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey]);
 
-  // The programme's pregnancy rate: the yardstick for every above/below colour.
-  const programmeRate = data.kpis && data.kpis.with_outcome > 0 ? data.kpis.pregnant / data.kpis.with_outcome : null;
+  // The programme's pregnancy rate under the current filters: the yardstick for every verdict.
+  const programmeRate = data && data.kpis.with_outcome > 0 ? data.kpis.pregnant / data.kpis.with_outcome : null;
+  const k = data?.kpis;
 
-  // 1. Donut: outcome split.
+  /** Click handlers. A click on the active item clears that filter. */
+  const toggle = <K extends keyof DashboardFilterValues>(key: K, value: DashboardFilterValues[K]) =>
+    onFilter({ [key]: filters[key] === value ? undefined : value } as Partial<DashboardFilterValues>);
+  const togglePeriod = (label: string) => {
+    const { from, to } = periodRange(label);
+    const active = filters.date_from === from && filters.date_to === to;
+    onFilter(active ? { date_from: undefined, date_to: undefined } : { date_from: from, date_to: to });
+  };
+  const isPeriodActive = (label: string) => {
+    const { from, to } = periodRange(label);
+    return filters.date_from === from && filters.date_to === to;
+  };
+
+  // 1. Outcome split. Counts, so pregnant and open are fixed roles.
   const outcome = useMemo(
-    () => (data.kpis ? [{ name: "Pregnant", value: data.kpis.pregnant }, { name: "Open", value: data.kpis.open }] : null),
-    [data.kpis],
+    () =>
+      k
+        ? [
+            { name: "Pregnant", value: k.pregnant, role: "positive" as Role },
+            { name: "Open", value: k.open, role: "negative" as Role },
+          ]
+        : null,
+    [k],
   );
 
-  // 2. Radial: fresh vs frozen.
+  // 2. Fresh vs frozen: verdict on each group's own interval.
   const freshFrozen = useMemo(() => {
-    const f = data.kpis?.fresh_vs_frozen;
-    if (!f) return null;
-    return Object.entries(f).map(([name, v]) => ({
-      name,
-      rate: v.rate * 100,
-      n: v.n,
-      role: vsProgramme(v.rate, programmeRate),
-    }));
-  }, [data.kpis, programmeRate]);
+    if (!k) return null;
+    return Object.entries(k.fresh_vs_frozen)
+      .filter(([, g]) => g.rate != null)
+      .map(([name, g]) => ({
+        name,
+        rate: (g.rate ?? 0) * 100,
+        n: g.n_with_outcome,
+        k: g.pregnant,
+        role: verdict(g.pregnant, g.n_with_outcome, programmeRate),
+        active: filters.fresh_or_frozen === name,
+      }));
+  }, [k, programmeRate, filters.fresh_or_frozen]);
 
-  // 3. Combo: monthly volume (bars) and pregnancy rate (line).
+  // 3. Monthly volume and rate, per month or per quarter.
   const monthly = useMemo(
-    () => data.trends?.map((r) => ({ month: r.month, transfers: r.n_transfers, rate: r.pregnancy_rate == null ? null : r.pregnancy_rate * 100 })) ?? null,
-    [data.trends],
+    () =>
+      data
+        ? regroup(data.trends, monthlyPeriod).map((r) => ({
+            period: r.label,
+            transfers: r.transfers,
+            rate: toPct(r.rate),
+            k: r.pregnant,
+            n: r.out,
+          }))
+        : null,
+    [data, monthlyPeriod],
   );
 
-  // 4. Stacked area: pregnant vs not, per month.
-  const stackedMonthly = useMemo(
-    () => data.trends?.map((r) => ({ month: r.month, pregnant: r.n_pregnant, notPregnant: r.n_transfers - r.n_pregnant })) ?? null,
-    [data.trends],
+  // 4. Pregnant vs not, per period.
+  const stacked = useMemo(
+    () =>
+      data
+        ? regroup(data.trends, stackPeriod).map((r) => ({
+            period: r.label,
+            pregnant: r.pregnant,
+            notPregnant: r.transfers - r.pregnant,
+          }))
+        : null,
+    [data, stackPeriod],
   );
 
-  // 5. Waterfall: transfers down to pregnancies. Each step is a real count.
+  // 5. From transfers to pregnancies. Counts, or shares of all transfers.
   const waterfall = useMemo(() => {
-    const k = data.kpis;
     if (!k) return null;
     const noOutcome = k.total_transfers - k.with_outcome;
+    const scale = (v: number) => (waterfallMeasure === "share" && k.total_transfers > 0 ? (v / k.total_transfers) * 100 : v);
     return [
-      { name: "Transfers", base: 0, value: k.total_transfers, kind: "volume" },
-      { name: "No outcome yet", base: k.with_outcome, value: noOutcome, kind: "pending" },
-      { name: "With outcome", base: 0, value: k.with_outcome, kind: "volume" },
-      { name: "Open", base: k.pregnant, value: k.open, kind: "negative" },
-      { name: "Pregnant", base: 0, value: k.pregnant, kind: "positive" },
+      { name: "Transfers", base: 0, value: scale(k.total_transfers), kind: "volume" as Role },
+      { name: "No outcome yet", base: scale(k.with_outcome), value: scale(noOutcome), kind: "pending" as Role },
+      { name: "With outcome", base: 0, value: scale(k.with_outcome), kind: "volume" as Role },
+      { name: "Open", base: scale(k.pregnant), value: scale(k.open), kind: "negative" as Role },
+      { name: "Pregnant", base: 0, value: scale(k.pregnant), kind: "positive" as Role },
     ];
-  }, [data.kpis]);
+  }, [k, waterfallMeasure]);
 
-  // 6. Radar: main protocols on rate, lower bound and share of volume.
+  // 6. Protocols with enough transfers. Verdict on each protocol's own interval.
+  const protocolRows = useMemo(
+    () =>
+      (data?.protocols ?? [])
+        .filter((p) => p.n_with_outcome >= radarMin && p.pregnancy_rate != null)
+        .map((p) => ({
+          ...p,
+          role: verdict(p.n_pregnant, p.n_with_outcome, programmeRate),
+          ci: wilson(p.n_pregnant, p.n_with_outcome),
+        })),
+    [data, radarMin, programmeRate],
+  );
   const radar = useMemo(() => {
-    if (!data.protocols) return null;
-    const rows = data.protocols.filter((p) => p.n_transfers >= 5);
-    const total = rows.reduce((s, p) => s + p.n_transfers, 0) || 1;
-    const series = rows.map((p, i) => ({
+    const total = protocolRows.reduce((s, p) => s + p.n_with_outcome, 0) || 1;
+    const series = protocolRows.map((p, i) => ({
       key: `p${i}`,
       label: p.protocol_name.length > 22 ? `${p.protocol_name.slice(0, 21)}…` : p.protocol_name,
-      n: p.n_transfers,
-      color: ROLE[vsProgramme(p.pregnancy_rate, programmeRate)].ink,
+      n: p.n_with_outcome,
+      color: ROLE[p.role].ink,
+      protocolId: p.protocol_id,
     }));
     const axes = [
-      { axis: "Pregnancy rate", ...Object.fromEntries(rows.map((p, i) => [`p${i}`, p.pregnancy_rate * 100])) },
-      { axis: "Lower 95% bound", ...Object.fromEntries(rows.map((p, i) => [`p${i}`, p.ci_lower * 100])) },
-      { axis: "Share of transfers", ...Object.fromEntries(rows.map((p, i) => [`p${i}`, (p.n_transfers / total) * 100])) },
+      { axis: "Pregnancy rate", ...Object.fromEntries(protocolRows.map((p, i) => [`p${i}`, (p.pregnancy_rate ?? 0) * 100])) },
+      { axis: "Lower 95% bound", ...Object.fromEntries(protocolRows.map((p, i) => [`p${i}`, (p.ci?.[0] ?? 0) * 100])) },
+      { axis: "Share of transfers", ...Object.fromEntries(protocolRows.map((p, i) => [`p${i}`, (p.n_with_outcome / total) * 100])) },
     ];
     return { axes, series };
-  }, [data.protocols, programmeRate]);
+  }, [protocolRows]);
+  const protocolRanked = useMemo(
+    () =>
+      [...protocolRows]
+        .sort((a, b) => (b.pregnancy_rate ?? 0) - (a.pregnancy_rate ?? 0))
+        .map((p) => ({
+          id: p.protocol_id,
+          label: p.protocol_name.length > 26 ? `${p.protocol_name.slice(0, 25)}…` : p.protocol_name,
+          rate: toPct(p.pregnancy_rate) ?? 0,
+          n: p.n_with_outcome,
+          role: p.role,
+          active: filters.protocol_id === p.protocol_id,
+          ci: p.ci == null ? "—" : `${(p.ci[0] * 100).toFixed(0)}–${(p.ci[1] * 100).toFixed(0)}%`,
+        })),
+    [protocolRows, filters.protocol_id],
+  );
 
-  // 7. Bubble scatter: donors, transfers against pregnancy rate.
+  // 7. Donor bubbles. Verdict on each donor's interval; only donors with enough transfers.
   const donors = useMemo(
     () =>
-      data.donors
-        ?.filter((d) => d.n_transfers > 0)
+      (data?.donors ?? [])
+        .filter((d) => d.n_with_outcome >= donorMin && d.pregnancy_rate != null)
         .map((d) => ({
           x: d.n_transfers,
-          y: d.pregnancy_rate * 100,
+          y: (d.pregnancy_rate ?? 0) * 100,
           z: d.n_transfers,
+          donorId: d.donor_id,
           tag: d.donor_tag,
           breed: d.breed ?? "Unknown",
-          role: vsProgramme(d.pregnancy_rate, programmeRate),
-        })) ?? null,
-    [data.donors, programmeRate],
+          n: d.n_with_outcome,
+          role: verdict(d.n_pregnant, d.n_with_outcome, programmeRate),
+          active: filters.donor_id === d.donor_id,
+        })),
+    [data, donorMin, programmeRate, filters.donor_id],
   );
 
-  // 8. Treemap: share of transfers by breed.
-  const treemap = useMemo(
-    () =>
-      data.breeds
-        ?.filter((b) => b.n_transfers > 0)
-        .sort((a, b) => b.n_transfers - a.n_transfers)
-        .map((b) => ({ name: b.donor_breed, size: b.n_transfers, rate: b.pregnancy_rate * 100, fill: ROLE[vsProgramme(b.pregnancy_rate, programmeRate)].fill, outline: ROLE[vsProgramme(b.pregnancy_rate, programmeRate)].stroke ?? "#ffffff" })) ?? null,
-    [data.breeds, programmeRate],
-  );
+  // 8. Breeds, ranked as bars. Pregnancy rate gets a verdict; transfers are a volume.
+  const breedRanked = useMemo(() => {
+    const rows = (data?.breeds ?? []).filter((b) => b.n_with_outcome >= breedMin);
+    return rows
+      .map((b) => ({
+        name: b.donor_breed,
+        value: breedMeasure === "rate" ? toPct(b.pregnancy_rate) ?? 0 : b.n_transfers,
+        n: b.n_with_outcome,
+        rate: toPct(b.pregnancy_rate),
+        role: breedMeasure === "rate" ? verdict(b.n_pregnant, b.n_with_outcome, programmeRate) : ("volume" as Role),
+        active: filters.breed === b.donor_breed,
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [data, breedMeasure, breedMin, programmeRate, filters.breed]);
 
-  // 9. Stacked horizontal bar: protocol outcome counts.
+  // 9. Protocol outcomes: counts, or share of each protocol's transfers.
   const protocolStack = useMemo(
     () =>
-      data.protocols
-        ?.filter((p) => p.n_transfers > 0)
+      (data?.protocols ?? [])
+        .filter((p) => p.n_transfers >= protocolMin)
         .map((p) => ({
+          id: p.protocol_id,
           label: p.protocol_name.length > 26 ? `${p.protocol_name.slice(0, 25)}…` : p.protocol_name,
           full: p.protocol_name,
           pregnant: p.n_pregnant,
           notPregnant: p.n_transfers - p.n_pregnant,
           n: p.n_transfers,
         }))
-        .sort((a, b) => b.n - a.n) ?? null,
-    [data.protocols],
+        .sort((a, b) => b.n - a.n),
+    [data, protocolMin],
   );
 
-  // 10. Column: pregnancy rate by corpus luteum size.
+  // 10. Corpus luteum size. Verdict on each band's interval; transfers are a volume.
   const bins = useMemo(
     () =>
-      data.bins
-        ?.filter((b) => b.n > 0)
-        .map((b) => ({
-          range: b.range,
-          rate: b.pregnancy_rate == null ? null : b.pregnancy_rate * 100,
-          n: b.n,
-          ci: b.ci_lower == null || b.ci_upper == null ? "—" : `${(b.ci_lower * 100).toFixed(0)}–${(b.ci_upper * 100).toFixed(0)}%`,
-        })) ?? null,
-    [data.bins],
+      (data?.bins ?? []).map((b) => ({
+        range: b.range,
+        rate: toPct(b.pregnancy_rate),
+        transfers: b.n_transfers,
+        n: b.n_with_outcome,
+        ci: b.ci_lower == null || b.ci_upper == null ? "—" : `${(b.ci_lower * 100).toFixed(0)}–${(b.ci_upper * 100).toFixed(0)}%`,
+        role: verdict(b.n_pregnant, b.n_with_outcome, programmeRate),
+      })),
+    [data, programmeRate],
   );
+
+  // ---- Takeaways. Each is computed from the rows the chart shows. ----
+
+  const outcomeTake =
+    k && k.with_outcome > 0
+      ? `${k.pregnant.toLocaleString()} of ${k.with_outcome.toLocaleString()} transfers with a first-check result were pregnant (${pctText(programmeRate ?? 0)}). ${(k.total_transfers - k.with_outcome).toLocaleString()} transfers have no result yet.`
+      : null;
+
+  const freshTake = (() => {
+    if (!freshFrozen || freshFrozen.length < 2) return null;
+    const [a, b] = freshFrozen;
+    const ca = wilson(a.k, a.n);
+    const cb = wilson(b.k, b.n);
+    if (!ca || !cb) return null;
+    const gap = Math.abs(a.rate - b.rate).toFixed(1);
+    const verdictText = overlap(ca, cb)
+      ? `The intervals overlap, so this gap of ${gap} points is not a clear difference.`
+      : `${a.rate > b.rate ? a.name : b.name} is clearly higher.`;
+    return `${a.name} ${a.rate.toFixed(1)}% (n=${a.n.toLocaleString()}) against ${b.name} ${b.rate.toFixed(1)}% (n=${b.n.toLocaleString()}). ${verdictText}`;
+  })();
+
+  const monthlyTake = (() => {
+    if (!monthly || programmeRate == null) return null;
+    const eligible = monthly.filter((m) => m.n >= SMALL_SAMPLE && m.rate != null);
+    if (eligible.length === 0) return `No ${monthlyPeriod} has ${SMALL_SAMPLE} or more transfers with a result.`;
+    const sorted = [...eligible].sort((a, b) => (a.rate ?? 0) - (b.rate ?? 0));
+    const low = sorted[0];
+    const high = sorted[sorted.length - 1];
+    const lowerClearly = eligible.filter((m) => verdict(m.k, m.n, programmeRate) === "negative");
+    const higherClearly = eligible.filter((m) => verdict(m.k, m.n, programmeRate) === "positive");
+    const clear =
+      lowerClearly.length || higherClearly.length
+        ? ` Clearly below the programme rate: ${lowerClearly.length ? lowerClearly.map((m) => m.period).join(", ") : "none"}. Clearly above: ${higherClearly.length ? higherClearly.map((m) => m.period).join(", ") : "none"}.`
+        : " No period is clearly different from the programme rate.";
+    return `Rates run from ${(low.rate ?? 0).toFixed(1)}% (${low.period}) to ${(high.rate ?? 0).toFixed(1)}% (${high.period}), across ${plural(eligible.length, monthlyPeriod, `${monthlyPeriod}s`)} with ${SMALL_SAMPLE} or more transfers.${clear}`;
+  })();
+
+  const stackTake =
+    k && k.total_transfers > 0
+      ? `${(k.total_transfers - k.with_outcome).toLocaleString()} of ${k.total_transfers.toLocaleString()} transfers (${pctText((k.total_transfers - k.with_outcome) / k.total_transfers)}) have no first-check result, so they count with "not pregnant" here. Read the share view for the mix among transfers with a result.`
+      : null;
+
+  const waterfallTake =
+    k && k.with_outcome > 0
+      ? `${(k.total_transfers - k.with_outcome).toLocaleString()} transfers (${pctText((k.total_transfers - k.with_outcome) / k.total_transfers)}) are still waiting for a result. Of the ${k.with_outcome.toLocaleString()} that have one, ${k.pregnant.toLocaleString()} (${pctText(programmeRate ?? 0)}) are pregnant.`
+      : null;
+
+  const radarTake = (() => {
+    if (protocolRows.length === 0) return null;
+    const clear = protocolRows.filter((p) => p.role !== "volume");
+    const names = clear.map((p) => `${p.protocol_name} (${pctText(p.pregnancy_rate ?? 0)})`);
+    return clear.length
+      ? `Of ${plural(protocolRows.length, "protocol", "protocols")} with ${radarMin} or more transfers, ${names.join("; ")} ${clear.length === 1 ? "is" : "are"} clearly different from the programme rate. The rest overlap it.`
+      : `None of the ${plural(protocolRows.length, "protocol", "protocols")} with ${radarMin} or more transfers is clearly different from the programme rate. Their intervals overlap it.`;
+  })();
+
+  const donorTake = (() => {
+    if (!data) return null;
+    const eligible = data.donors.filter((d) => d.n_with_outcome >= donorMin && d.pregnancy_rate != null);
+    if (eligible.length === 0) return `No donor has ${donorMin} or more transfers with a result.`;
+    const above = eligible.filter((d) => verdict(d.n_pregnant, d.n_with_outcome, programmeRate) === "positive").length;
+    const below = eligible.filter((d) => verdict(d.n_pregnant, d.n_with_outcome, programmeRate) === "negative").length;
+    const chance = Math.round(0.05 * eligible.length);
+    return `${above} donor${above === 1 ? "" : "s"} clearly above and ${below} clearly below the programme rate, out of ${eligible.length} with ${donorMin} or more transfers. Testing that many donors, about ${chance} would look different by chance alone, so treat the few outliers as leads to check, not findings.`;
+  })();
+
+  const breedTake = (() => {
+    if (breedRanked.length === 0) return null;
+    const top = breedRanked[0];
+    const clear = breedRanked.filter((b) => b.role !== "volume" && breedMeasure === "rate");
+    const topText =
+      breedMeasure === "rate"
+        ? `${top.name} is highest at ${top.value.toFixed(1)}% (n=${top.n.toLocaleString()}).`
+        : `${top.name} has the most transfers (${top.value.toLocaleString()}).`;
+    if (breedMeasure === "transfers") return `${topText} Volume only: switch to pregnancy rate to see whether the breeds differ.`;
+    return clear.length
+      ? `${topText} Clearly different from the programme rate: ${clear.map((b) => b.name).join(", ")}.`
+      : `${topText} No breed is clearly different from the programme rate; the intervals overlap it.`;
+  })();
+
+  const protocolStackTake = (() => {
+    if (protocolStack.length === 0) return null;
+    const largest = protocolStack[0];
+    const smallest = protocolStack[protocolStack.length - 1];
+    return `${largest.full} carries the most transfers (${largest.n.toLocaleString()}). ${
+      smallest.n < SMALL_SAMPLE ? `${smallest.full} has only ${smallest.n}, so its rate is uncertain.` : "Every protocol shown has at least 20 transfers."
+    }`;
+  })();
+
+  const clTake = (() => {
+    const eligible = (data?.bins ?? []).filter((b) => b.n_with_outcome >= SMALL_SAMPLE && b.pregnancy_rate != null);
+    if (eligible.length === 0) return null;
+    const above = eligible.filter((b) => verdict(b.n_pregnant, b.n_with_outcome, programmeRate) === "positive");
+    const below = eligible.filter((b) => verdict(b.n_pregnant, b.n_with_outcome, programmeRate) === "negative");
+    const parts = [];
+    if (above.length) parts.push(`${above.map((b) => `${b.range} mm (${pctText(b.pregnancy_rate ?? 0)})`).join(", ")} clearly above`);
+    if (below.length) parts.push(`${below.map((b) => `${b.range} mm (${pctText(b.pregnancy_rate ?? 0)})`).join(", ")} clearly below`);
+    return parts.length
+      ? `${parts.join("; ")} the programme rate. Other size bands overlap it.`
+      : "No corpus luteum size band is clearly different from the programme rate. Their intervals overlap it.";
+  })();
+
+  // ---- Active filters, shown above the charts so a click is never a mystery. ----
+  const chips: { label: string; clear: () => void }[] = [];
+  if (filters.breed) chips.push({ label: `Breed: ${filters.breed}`, clear: () => onFilter({ breed: undefined }) });
+  if (filters.fresh_or_frozen)
+    chips.push({ label: `Embryos: ${filters.fresh_or_frozen}`, clear: () => onFilter({ fresh_or_frozen: undefined }) });
+  if (filters.protocol_id) {
+    const name = data?.protocols.find((p) => p.protocol_id === filters.protocol_id)?.protocol_name ?? `#${filters.protocol_id}`;
+    chips.push({ label: `Protocol: ${name}`, clear: () => onFilter({ protocol_id: undefined }) });
+  }
+  if (filters.donor_id) {
+    const tag = data?.donors.find((d) => d.donor_id === filters.donor_id)?.donor_tag ?? `#${filters.donor_id}`;
+    chips.push({ label: `Donor: ${tag}`, clear: () => onFilter({ donor_id: undefined }) });
+  }
+  if (filters.date_from && filters.date_to)
+    chips.push({ label: `Dates: ${filters.date_from} to ${filters.date_to}`, clear: () => onFilter({ date_from: undefined, date_to: undefined }) });
 
   if (failed) {
     return (
@@ -311,127 +619,236 @@ export default function ChartGallery() {
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       <div className="dash-card flex flex-wrap items-center gap-x-5 gap-y-2 text-xs dash-muted xl:col-span-2">
         <span className="font-semibold dash-heading">Colour key</span>
-        <RoleKey items={[
-          { role: "positive", label: "Pregnant, or at or above the programme rate" },
-          { role: "negative", label: "Open or not pregnant, or below the programme rate" },
-          { role: "volume", label: "Transfers or oocytes counted (a volume, not an outcome)" },
-          { role: "transfer", label: "Transfer event" },
-          { role: "pending", label: "No outcome recorded yet" },
-        ]} />
+        <RoleKey
+          items={[
+            { role: "positive", label: "Clearly above the programme rate (whole 95% interval above it)" },
+            { role: "negative", label: "Clearly below it (whole interval below it)" },
+            { role: "volume", label: "No clear difference (the interval includes the programme rate), or a plain count" },
+            { role: "pending", label: "Still waiting for a result" },
+          ]}
+        />
         {programmeRate != null && (
-          <span className="dash-heading">Programme rate: {(programmeRate * 100).toFixed(1)}% (pregnant ÷ transfers with an outcome)</span>
+          <span className="dash-heading">
+            Programme rate for these filters: {pctText(programmeRate)} ({k?.with_outcome.toLocaleString()} transfers with a result)
+          </span>
+        )}
+        {data?.start && data?.end && (
+          <span className="w-full">
+            Transfers from {data.start} to {data.end}. Click a bar, slice, bubble or period to filter the whole dashboard; click it again to clear.
+          </span>
+        )}
+        {chips.length > 0 && (
+          <span className="flex w-full flex-wrap items-center gap-2">
+            <span className="font-medium dash-heading">Filtered to:</span>
+            {chips.map((c) => (
+              <button
+                key={c.label}
+                type="button"
+                onClick={c.clear}
+                className="rounded-full bg-white px-3 py-1 font-semibold dash-heading shadow-sm hover:bg-white/80"
+              >
+                {c.label} ×
+              </button>
+            ))}
+          </span>
         )}
       </div>
-      {/* 1. Donut */}
+
+      {/* 1. Outcome split */}
       <Card
         title="Outcome split"
-        caption={data.kpis ? `Pregnant vs open, of ${data.kpis.with_outcome} transfers with a recorded outcome (${data.kpis.total_transfers} in total). Periwinkle is pregnant, pink is open.` : "Loading outcomes…"}
+        caption={k ? `Pregnant vs open at the first check, for transfers with a result.` : "Loading outcomes…"}
+        takeaway={outcomeTake}
+        controls={<Seg label="View" value={outcomeView} onChange={setOutcomeView} options={[{ value: "donut", label: "Donut" }, { value: "bars", label: "Bars" }]} />}
       >
         {outcome ? (
-          <div className="relative">
-            <Frame height={260}>
-              <PieChart>
-                <Pie data={outcome} dataKey="value" nameKey="name" innerRadius={62} outerRadius={96} paddingAngle={2} stroke="none">
-                  <Cell {...roleProps("positive")} />
-                  <Cell {...roleProps("negative")} />
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={28} formatter={(v) => ink(v)} />
-              </PieChart>
-            </Frame>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center pb-7">
-              <div className="text-center">
-                <div className="text-2xl font-semibold dash-heading">{pct(data.kpis!.pregnant / data.kpis!.with_outcome)}</div>
-                <div className="text-[11px] dash-muted">pregnant</div>
-              </div>
+          outcomeView === "donut" ? (
+            <div className="relative">
+              <Frame height={260}>
+                <PieChart>
+                  <Pie data={outcome} dataKey="value" nameKey="name" innerRadius={62} outerRadius={96} paddingAngle={2} stroke="none">
+                    {outcome.map((o) => (
+                      <Cell key={o.name} {...roleProps(o.role)} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={28} formatter={(v) => ink(v)} />
+                </PieChart>
+              </Frame>
+              {k && k.with_outcome > 0 && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center pb-7">
+                  <div className="text-center">
+                    <div className="text-2xl font-semibold dash-heading">{pctText(k.pregnant / k.with_outcome)}</div>
+                    <div className="text-[11px] dash-muted">pregnant</div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <>
+              <RoleKey items={[{ role: "positive", label: "Pregnant" }, { role: "negative", label: "Open" }]} />
+              <Frame height={220}>
+                <BarChart data={outcome} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
+                  <XAxis type="number" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" width={70} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                  <Tooltip />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                    {outcome.map((o) => (
+                      <Cell key={o.name} {...roleProps(o.role)} />
+                    ))}
+                    <LabelList dataKey="value" position="right" fill={INK} fontSize={11} />
+                  </Bar>
+                </BarChart>
+              </Frame>
+            </>
+          )
         ) : (
           <Empty>Loading…</Empty>
         )}
       </Card>
 
-      {/* 2. Radial */}
+      {/* 2. Fresh vs frozen */}
       <Card
         title="Transfer type"
-        caption="Pregnancy rate for fresh and frozen embryos. Each ring is one group; the legend gives its number of transfers. Faded rings have fewer than 20."
+        caption="Pregnancy rate for fresh and frozen embryos. Click a group to filter the dashboard to it. Faded groups have fewer than 20 transfers with a result."
+        takeaway={freshTake}
+        controls={<Seg label="View" value={radialView} onChange={setRadialView} options={[{ value: "radial", label: "Radial" }, { value: "bars", label: "Bars" }]} />}
       >
         {freshFrozen ? (
-          <Frame height={260}>
-            <RadialBarChart innerRadius="30%" outerRadius="95%" data={freshFrozen} startAngle={180} endAngle={-180}>
-              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-              <RadialBar dataKey="rate" background={{ fill: "rgba(46, 54, 69, 0.05)" }} cornerRadius={8}>
-                {freshFrozen.map((f) => (
-                  <Cell key={f.name} {...roleProps(f.role)} fillOpacity={f.n < SMALL_SAMPLE ? 0.45 : 1} />
-                ))}
-              </RadialBar>
-              <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% (n=${(item.payload as { n: number }).n})`, (item.payload as { name: string }).name]} />
-              <Legend iconSize={10} verticalAlign="bottom" formatter={(_v, entry) => ink(`${(entry.payload as { name: string; n: number }).name} · n=${(entry.payload as { n: number }).n}`)} />
-            </RadialBarChart>
-          </Frame>
-        ) : (
-          <Empty>Loading…</Empty>
-        )}
-      </Card>
-
-      {/* 3. Combo */}
-      <Card
-        wide
-        title="Monthly volume and pregnancy rate"
-        caption="Light blue bars are the embryos transferred each month; the periwinkle line is that month's pregnancy rate. Months with few transfers carry little weight."
-      >
-        {monthly ? (
           <>
-            <div className="mb-2 flex flex-wrap gap-2 text-xs">
-              {MONTHLY_VIEWS.map((v) => (
-                <button
-                  key={v.value}
-                  type="button"
-                  onClick={() => setMonthlyView(v.value)}
-                  aria-pressed={monthlyView === v.value}
-                  className={`rounded-full px-3 py-1 font-semibold transition ${
-                    monthlyView === v.value ? "bg-white shadow-sm dash-heading" : "bg-black/[0.045] dash-muted hover:bg-white/70"
-                  }`}
-                >
-                  {v.label}
-                </button>
-              ))}
-            </div>
-            <Frame height={280}>
-              <ComposedChart data={monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-                <XAxis dataKey="month" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-                <YAxis yAxisId="left" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
-                <YAxis yAxisId="right" orientation="right" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
-                <Tooltip formatter={(v, name) => (name === "rate" ? `${Number(v).toFixed(1)}%` : v)} />
-                <Legend verticalAlign="top" height={28} formatter={(v) => ink(v === "transfers" ? "Transfers" : "Pregnancy rate")} />
-                {monthlyView !== "line" && (
-                  <Bar yAxisId="left" dataKey="transfers" {...roleProps("volume")} radius={[6, 6, 0, 0]} name="transfers" />
-                )}
-                {monthlyView !== "bars" && (
-                  <Line yAxisId="right" type="monotone" dataKey="rate" stroke={ROLE.positive.fill} strokeWidth={2.2} dot={{ r: 4 }} connectNulls name="rate" />
-                )}
-              </ComposedChart>
-            </Frame>
+            <RoleKey items={[{ role: "positive", label: "Clearly above the programme rate" }, { role: "negative", label: "Clearly below it" }, { role: "volume", label: "No clear difference" }]} />
+            {radialView === "radial" ? (
+              <Frame height={240}>
+                <RadialBarChart innerRadius="30%" outerRadius="95%" data={freshFrozen} startAngle={180} endAngle={-180}>
+                  <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                  <RadialBar dataKey="rate" background={{ fill: "rgba(46, 54, 69, 0.05)" }} cornerRadius={8}>
+                    {freshFrozen.map((f) => (
+                      <Cell
+                        key={f.name}
+                        {...roleProps(f.role)}
+                        fillOpacity={filters.fresh_or_frozen && !f.active ? FADE : f.n < SMALL_SAMPLE ? 0.45 : 1}
+                        cursor="pointer"
+                        onClick={() => toggle("fresh_or_frozen", f.name)}
+                      />
+                    ))}
+                  </RadialBar>
+                  <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% (n=${(item.payload as { n: number }).n})`, (item.payload as { name: string }).name]} />
+                  <Legend iconSize={10} verticalAlign="bottom" formatter={(_v, entry) => ink(`${(entry.payload as { name: string; n: number }).name} · n=${(entry.payload as { n: number }).n}`)} />
+                </RadialBarChart>
+              </Frame>
+            ) : (
+              <Frame height={240}>
+                <BarChart data={freshFrozen} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                  <XAxis dataKey="name" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                  <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
+                  <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% (n=${(item.payload as { n: number }).n})`, "Pregnancy rate"]} />
+                  <Bar dataKey="rate" radius={[6, 6, 0, 0]}>
+                    {freshFrozen.map((f) => (
+                      <Cell
+                        key={f.name}
+                        {...roleProps(f.role)}
+                        fillOpacity={filters.fresh_or_frozen && !f.active ? FADE : f.n < SMALL_SAMPLE ? 0.45 : 1}
+                        cursor="pointer"
+                        onClick={() => toggle("fresh_or_frozen", f.name)}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </Frame>
+            )}
           </>
         ) : (
           <Empty>Loading…</Empty>
         )}
       </Card>
 
-      {/* 4. Stacked area */}
+      {/* 3. Monthly volume and rate */}
       <Card
-        title="Monthly pregnant vs not pregnant"
-        caption="Each month's transfers split into pregnant (periwinkle) and not pregnant or no record (pink). Stacked, so the top edge is the month's total."
+        wide
+        title="Monthly volume and pregnancy rate"
+        caption="Bars are transfers in each period; the line is that period's pregnancy rate. Click a period to filter the dashboard to its dates. Quarters pool their months."
+        takeaway={monthlyTake}
+        controls={
+          <>
+            <Seg label="Period" value={monthlyPeriod} onChange={setMonthlyPeriod} options={PERIOD_OPTIONS} />
+            <Seg
+              label="Show"
+              value={monthlyView}
+              onChange={setMonthlyView}
+              options={[
+                { value: "combo", label: "Bars and line" },
+                { value: "bars", label: "Transfers only" },
+                { value: "line", label: "Pregnancy rate only" },
+              ]}
+            />
+          </>
+        }
       >
-        {stackedMonthly ? (
-          <Frame height={250}>
-            <AreaChart data={stackedMonthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+        {monthly ? (
+          <Frame height={280}>
+            <ComposedChart data={monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-              <XAxis dataKey="month" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-              <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+              <XAxis dataKey="period" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+              <YAxis yAxisId="left" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+              <YAxis yAxisId="right" orientation="right" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
+              <Tooltip formatter={(v, name) => (name === "rate" ? `${Number(v).toFixed(1)}%` : v)} />
+              <Legend verticalAlign="top" height={28} formatter={(v) => ink(v === "transfers" ? "Transfers" : "Pregnancy rate")} />
+              {monthlyView !== "line" && (
+                <Bar yAxisId="left" dataKey="transfers" {...roleProps("volume")} radius={[6, 6, 0, 0]} name="transfers" cursor="pointer" onClick={(d: unknown) => togglePeriod((d as { payload: { period: string } }).payload.period)} />
+              )}
+              {monthlyView !== "bars" && (
+                <Line yAxisId="right" type="monotone" dataKey="rate" stroke={ROLE.positive.fill} strokeWidth={2.2} dot={{ r: 4 }} connectNulls name="rate" />
+              )}
+            </ComposedChart>
+          </Frame>
+        ) : (
+          <Empty>Loading…</Empty>
+        )}
+        {monthly && (
+          <p className="mt-2 text-[11px] dash-muted">
+            Selected periods are pinned by the date filter.{" "}
+            {monthly.some((m) => isPeriodActive(m.period)) ? "Current selection: " + monthly.filter((m) => isPeriodActive(m.period)).map((m) => m.period).join(", ") : ""}
+          </p>
+        )}
+      </Card>
+
+      {/* 4. Pregnant vs not */}
+      <Card
+        title="Pregnant vs not pregnant"
+        caption="Each period's transfers split into pregnant and not pregnant or no result yet. Counts stack to the period total; share mode stacks each period to 100%."
+        takeaway={stackTake}
+        controls={
+          <>
+            <Seg label="Period" value={stackPeriod} onChange={setStackPeriod} options={PERIOD_OPTIONS} />
+            <Seg
+              label="Measure"
+              value={stackMode}
+              onChange={setStackMode}
+              options={[
+                { value: "counts", label: "Counts" },
+                { value: "share", label: "Share" },
+              ]}
+            />
+          </>
+        }
+      >
+        {stacked ? (
+          <Frame height={250}>
+            <AreaChart data={stacked} stackOffset={stackMode === "share" ? "expand" : "none"} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+              <XAxis dataKey="period" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+              <YAxis
+                stroke={AXIS}
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+                allowDecimals={false}
+                tickFormatter={(v) => (stackMode === "share" ? `${Math.round(Number(v) * 100)}%` : String(v))}
+              />
               <Tooltip />
-              <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no record")} />
+              <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no result yet")} />
               <Area type="monotone" dataKey="notPregnant" stackId="m" stroke={ROLE.negative.stroke} fill={ROLE.negative.fill} fillOpacity={1} name="notPregnant" />
               <Area type="monotone" dataKey="pregnant" stackId="m" stroke={ROLE.positive.fill} fill={ROLE.positive.fill} fillOpacity={0.85} name="pregnant" />
             </AreaChart>
@@ -441,28 +858,45 @@ export default function ChartGallery() {
         )}
       </Card>
 
-      {/* 5. Waterfall */}
+      {/* 5. From transfers to pregnancies */}
       <Card
         title="From transfers to pregnancies"
-        caption="Light blue steps are totals. The dashed step is transfers with no outcome yet, and pink steps are open transfers. What remains, in periwinkle, is the pregnant count."
+        caption="Totals, then the steps that leave them. Counts, or each step as a share of all transfers."
+        takeaway={waterfallTake}
+        controls={
+          <>
+            <Seg label="View" value={waterfallView} onChange={setWaterfallView} options={[{ value: "waterfall", label: "Waterfall" }, { value: "bars", label: "Bars" }]} />
+            <Seg
+              label="Measure"
+              value={waterfallMeasure}
+              onChange={setWaterfallMeasure}
+              options={[
+                { value: "count", label: "Count" },
+                { value: "share", label: "% of transfers" },
+              ]}
+            />
+          </>
+        }
       >
-        <RoleKey items={[
-          { role: "volume", label: "Totals" },
-          { role: "pending", label: "No outcome yet" },
-          { role: "negative", label: "Open" },
-          { role: "positive", label: "Pregnant" },
-        ]} />
+        <RoleKey
+          items={[
+            { role: "volume", label: "Totals" },
+            { role: "pending", label: "No result yet" },
+            { role: "negative", label: "Open" },
+            { role: "positive", label: "Pregnant" },
+          ]}
+        />
         {waterfall ? (
           <Frame height={250}>
             <BarChart data={waterfall} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
               <XAxis dataKey="name" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} interval={0} />
-              <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
-              <Tooltip formatter={(v) => [v, "Count"]} />
-              <Bar dataKey="base" stackId="w" fill="transparent" isAnimationActive={false} />
-              <Bar dataKey="value" stackId="w" radius={[6, 6, 0, 0]} name="value">
+              <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} unit={waterfallMeasure === "share" ? "%" : undefined} />
+              <Tooltip formatter={(v) => [waterfallMeasure === "share" ? `${Number(v).toFixed(1)}%` : v, waterfallMeasure === "share" ? "Share" : "Count"]} />
+              {waterfallView === "waterfall" && <Bar dataKey="base" stackId="w" fill="transparent" isAnimationActive={false} />}
+              <Bar dataKey="value" stackId={waterfallView === "waterfall" ? "w" : undefined} radius={[6, 6, 0, 0]} name="value">
                 {waterfall.map((w) => (
-                  <Cell key={w.name} {...roleProps(w.kind as Role)} />
+                  <Cell key={w.name} {...roleProps(w.kind)} />
                 ))}
               </Bar>
             </BarChart>
@@ -472,142 +906,302 @@ export default function ChartGallery() {
         )}
       </Card>
 
-      {/* 6. Radar */}
+      {/* 6. Protocol profile */}
       <Card
         wide
         title="Protocol profile"
-        caption="Each protocol with at least 5 transfers, on pregnancy rate, the lower bound of its 95% interval, and its share of all transfers. Further out is better on the first two; on the third, further out means more used. The scale runs 0–60%. A violet outline is at or above the programme rate, rose is below it."
+        caption="Protocols with enough transfers, against the programme rate. Radar shows rate, lower bound and share of transfers; bars rank them by rate. Click a protocol to filter the dashboard to it."
+        takeaway={radarTake}
+        controls={
+          <>
+            <Seg label="View" value={radarView} onChange={setRadarView} options={[{ value: "radar", label: "Radar" }, { value: "bars", label: "Ranked bars" }]} />
+            <Seg label="Min transfers" value={radarMin} onChange={setRadarMin} options={MIN_OPTIONS} />
+          </>
+        }
       >
-        {radar && radar.series.length > 0 ? (
-          <Frame height={320}>
-            <RadarChart data={radar.axes} outerRadius="72%">
-              <PolarGrid stroke={GRID} />
-              <PolarAngleAxis dataKey="axis" tick={{ fill: INK, fontSize: 11 }} />
-              <PolarRadiusAxis angle={90} domain={[0, 60]} tick={false} axisLine={false} />
-              {radar.series.map((s) => (
-                <Radar key={s.key} name={`${s.label} (n=${s.n})`} dataKey={s.key} stroke={s.color} fill={s.color} fillOpacity={0.18} strokeWidth={2} />
-              ))}
-              <Tooltip />
-              <Legend layout="vertical" verticalAlign="middle" align="right" formatter={(v) => ink(v)} wrapperStyle={{ fontSize: 11, paddingLeft: 8 }} />
-            </RadarChart>
-          </Frame>
+        {radarView === "radar" ? (
+          radar.series.length > 0 ? (
+            <>
+              <Frame height={320}>
+                <RadarChart data={radar.axes} outerRadius="72%">
+                  <PolarGrid stroke={GRID} />
+                  <PolarAngleAxis dataKey="axis" tick={{ fill: INK, fontSize: 11 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 60]} tick={false} axisLine={false} />
+                  {radar.series.map((s) => (
+                    <Radar key={s.key} name={`${s.label} (n=${s.n})`} dataKey={s.key} stroke={s.color} fill={s.color} fillOpacity={0.18} strokeWidth={2} />
+                  ))}
+                  <Tooltip />
+                  <Legend layout="vertical" verticalAlign="middle" align="right" formatter={(v) => ink(v)} wrapperStyle={{ fontSize: 11, paddingLeft: 8 }} />
+                </RadarChart>
+              </Frame>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {radar.series.map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => toggle("protocol_id", s.protocolId ?? undefined)}
+                    className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold dash-heading hover:bg-white"
+                  >
+                    Filter to {s.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <Empty>No protocol has {radarMin} or more transfers with a result.</Empty>
+          )
+        ) : protocolRanked.length > 0 ? (
+          <>
+            <RoleKey items={[{ role: "positive", label: "Clearly above the programme rate" }, { role: "negative", label: "Clearly below it" }, { role: "volume", label: "No clear difference" }]} />
+            <Frame height={Math.max(180, protocolRanked.length * 44)}>
+              <BarChart data={protocolRanked} layout="vertical" margin={{ top: 4, right: 56, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
+                <XAxis type="number" domain={[0, 100]} unit="%" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis type="category" dataKey="label" width={170} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% · n=${(item.payload as { n: number }).n} · CI ${(item.payload as { ci: string }).ci}`, "Pregnancy rate"]} />
+                <Bar dataKey="rate" radius={[0, 6, 6, 0]}>
+                  {protocolRanked.map((p) => (
+                    <Cell
+                      key={p.label}
+                      {...roleProps(p.role)}
+                      fillOpacity={filters.protocol_id && !p.active ? FADE : 1}
+                      cursor="pointer"
+                      onClick={() => toggle("protocol_id", p.id ?? undefined)}
+                    />
+                  ))}
+                  <LabelList dataKey="rate" position="right" formatter={(v: unknown) => `${Number(v).toFixed(1)}%`} fill={INK} fontSize={11} />
+                </Bar>
+              </BarChart>
+            </Frame>
+          </>
         ) : (
-          <Empty>Loading…</Empty>
+          <Empty>No protocol has {radarMin} or more transfers with a result.</Empty>
         )}
       </Card>
 
-      {/* 7. Bubble scatter */}
+      {/* 7. Donor performance */}
       <Card
         title="Donor performance"
-        caption="One bubble per donor: how many transfers it has had (across) against its pregnancy rate (up). Bigger bubbles have more transfers. Periwinkle bubbles are at or above the programme rate, pink below it. Donors with fewer than 20 transfers are faded."
+        caption="One bubble per donor: transfers (across) against pregnancy rate (up). Bigger bubbles have more transfers. Click a bubble to filter the dashboard to that donor."
+        takeaway={donorTake}
+        controls={<Seg label="Min transfers with a result" value={donorMin} onChange={setDonorMin} options={[{ value: 5, label: "5+" }, { value: 10, label: "10+" }, { value: 20, label: "20+" }]} />}
       >
-        <RoleKey items={[
-          { role: "positive", label: "At or above the programme rate" },
-          { role: "negative", label: "Below the programme rate" },
-        ]} />
-        {donors ? (
-          <Frame height={280}>
-            <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
-              <XAxis type="number" dataKey="x" name="transfers" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
-              <YAxis type="number" dataKey="y" name="pregnancy rate" unit="%" domain={[0, 100]} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-              <ZAxis type="number" dataKey="z" range={[60, 360]} />
-              <Tooltip
-                cursor={{ strokeDasharray: "3 3" }}
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  const d = payload[0].payload as { tag: string; breed: string; x: number; y: number };
-                  return (
-                    <div className="rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-xs shadow" style={{ color: INK }}>
-                      <div className="font-semibold">Donor {d.tag}</div>
-                      <div>{d.breed}</div>
-                      <div>
-                        {d.x} transfers · {d.y.toFixed(1)}% pregnant
+        <RoleKey items={[{ role: "positive", label: "Clearly above the programme rate" }, { role: "negative", label: "Clearly below it" }, { role: "volume", label: "No clear difference" }]} />
+        {data ? (
+          donors.length > 0 ? (
+            <Frame height={280}>
+              <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} />
+                <XAxis type="number" dataKey="x" name="transfers" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+                <YAxis type="number" dataKey="y" name="pregnancy rate" unit="%" domain={[0, 100]} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <ZAxis type="number" dataKey="z" range={[60, 360]} />
+                <Tooltip
+                  cursor={{ strokeDasharray: "3 3" }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload as { tag: string; breed: string; x: number; y: number; n: number };
+                    return (
+                      <div className="rounded-xl border border-white/80 bg-white/95 px-3 py-2 text-xs shadow" style={{ color: INK }}>
+                        <div className="font-semibold">Donor {d.tag}</div>
+                        <div>{d.breed}</div>
+                        <div>
+                          {d.x} transfers · {d.n} with a result · {d.y.toFixed(1)}% pregnant
+                        </div>
                       </div>
-                    </div>
-                  );
-                }}
-              />
-              <Scatter data={donors} name="donors">
-                {donors.map((d) => (
-                  <Cell key={d.tag} {...roleProps(d.role)} fillOpacity={d.x < SMALL_SAMPLE ? 0.45 : 0.85} />
-                ))}
-              </Scatter>
-            </ScatterChart>
-          </Frame>
+                    );
+                  }}
+                />
+                <Scatter data={donors} name="donors">
+                  {donors.map((d) => (
+                    <Cell
+                      key={d.tag}
+                      {...roleProps(d.role)}
+                      fillOpacity={filters.donor_id && !d.active ? FADE : d.n < SMALL_SAMPLE ? 0.45 : 0.85}
+                      cursor="pointer"
+                      onClick={() => toggle("donor_id", d.donorId ?? undefined)}
+                    />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </Frame>
+          ) : (
+            <Empty>No donor matches these filters.</Empty>
+          )
         ) : (
           <Empty>Loading…</Empty>
         )}
       </Card>
 
-      {/* 8. Treemap */}
+      {/* 8. Breeds, ranked */}
       <Card
         title="Transfers by donor breed"
-        caption="Each block is a breed, sized by its number of transfers. Periwinkle blocks are at or above the programme rate, pink below it. The tooltip gives its pregnancy rate. Small blocks have fewer than 20 transfers."
+        caption="Breeds ranked by the measure you choose. Click a breed to filter the dashboard to it. Faded bars have fewer than 20 transfers with a result."
+        takeaway={breedTake}
+        controls={
+          <>
+            <Seg label="Measure" value={breedMeasure} onChange={setBreedMeasure} options={MEASURE_OPTIONS} />
+            <Seg label="Min transfers" value={breedMin} onChange={setBreedMin} options={MIN_OPTIONS} />
+          </>
+        }
       >
-        <RoleKey items={[
-          { role: "positive", label: "At or above the programme rate" },
-          { role: "negative", label: "Below the programme rate" },
-        ]} />
-        {treemap ? (
-          <Frame height={280}>
-            <Treemap data={treemap} dataKey="size" aspectRatio={4 / 3} stroke="#ffffff" isAnimationActive={false} content={<TreemapCell x={0} y={0} width={0} height={0} name="" fill="" />}>
-              <Tooltip formatter={(v, _n, item) => [`${v} transfers · ${Number((item.payload as { rate: number }).rate).toFixed(1)}% pregnant`, (item.payload as { name: string }).name]} />
-            </Treemap>
-          </Frame>
+        {breedMeasure === "rate" ? (
+          <RoleKey items={[{ role: "positive", label: "Clearly above the programme rate" }, { role: "negative", label: "Clearly below it" }, { role: "volume", label: "No clear difference" }]} />
+        ) : (
+          <RoleKey items={[{ role: "volume", label: "Transfers" }]} />
+        )}
+        {data ? (
+          breedRanked.length > 0 ? (
+            <Frame height={Math.max(180, breedRanked.length * 40)}>
+              <BarChart data={breedRanked} layout="vertical" margin={{ top: 4, right: 56, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
+                <XAxis
+                  type="number"
+                  stroke={AXIS}
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={11}
+                  allowDecimals={false}
+                  domain={breedMeasure === "rate" ? [0, 100] : [0, "auto"]}
+                  unit={breedMeasure === "rate" ? "%" : undefined}
+                />
+                <YAxis type="category" dataKey="name" width={150} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <Tooltip
+                  formatter={(v, _n, item) => {
+                    const p = item.payload as { n: number; rate: number | null };
+                    return [breedMeasure === "rate" ? `${Number(v).toFixed(1)}% · n=${p.n}` : `${v} transfers · ${p.rate == null ? "—" : `${p.rate.toFixed(1)}%`} pregnant`, breedMeasure === "rate" ? "Pregnancy rate" : "Transfers"];
+                  }}
+                />
+                <Bar dataKey="value" radius={[0, 6, 6, 0]}>
+                  {breedRanked.map((b) => (
+                    <Cell
+                      key={b.name}
+                      {...roleProps(b.role)}
+                      fillOpacity={filters.breed && !b.active ? FADE : b.n < SMALL_SAMPLE ? 0.45 : 1}
+                      cursor="pointer"
+                      onClick={() => toggle("breed", b.name)}
+                    />
+                  ))}
+                  <LabelList
+                    dataKey="value"
+                    position="right"
+                    formatter={(v: unknown) => (breedMeasure === "rate" ? `${Number(v).toFixed(1)}%` : String(v))}
+                    fill={INK}
+                    fontSize={11}
+                  />
+                </Bar>
+              </BarChart>
+            </Frame>
+          ) : (
+            <Empty>No breed has {breedMin} or more transfers with a result.</Empty>
+          )
         ) : (
           <Empty>Loading…</Empty>
         )}
       </Card>
 
-      {/* 9. Stacked horizontal bar */}
+      {/* 9. Protocol outcomes */}
       <Card
         title="Outcomes by protocol"
-        caption="Pregnant (periwinkle) and not-pregnant (pink) transfer counts for each protocol, so the sample behind every rate is visible."
+        caption="Pregnant and not-pregnant transfer counts for each protocol, so the sample behind every rate is visible. Share mode stacks each protocol to 100%."
+        takeaway={protocolStackTake}
+        controls={
+          <>
+            <Seg
+              label="Measure"
+              value={protocolMode}
+              onChange={setProtocolMode}
+              options={[
+                { value: "counts", label: "Counts" },
+                { value: "share", label: "Share" },
+              ]}
+            />
+            <Seg label="Min transfers" value={protocolMin} onChange={setProtocolMin} options={MIN_OPTIONS} />
+          </>
+        }
       >
-        {protocolStack ? (
-          <Frame height={250}>
-            <BarChart data={protocolStack} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
-              <XAxis type="number" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
-              <YAxis type="category" dataKey="label" width={170} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-              <Tooltip
-                formatter={(v, name) => [v, name === "pregnant" ? "Pregnant" : "Not pregnant / no record"]}
-                labelFormatter={(_l, payload) => (payload?.[0]?.payload as { full?: string } | undefined)?.full ?? ""}
-              />
-              <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no record")} />
-              <Bar dataKey="pregnant" stackId="p" {...roleProps("positive")} name="pregnant" />
-              <Bar dataKey="notPregnant" stackId="p" {...roleProps("negative")} radius={[0, 6, 6, 0]} name="notPregnant" />
-            </BarChart>
-          </Frame>
+        {data ? (
+          protocolStack.length > 0 ? (
+            <Frame height={Math.max(200, protocolStack.length * 44)}>
+              <BarChart data={protocolStack} layout="vertical" stackOffset={protocolMode === "share" ? "expand" : "none"} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} horizontal={false} />
+                <XAxis
+                  type="number"
+                  stroke={AXIS}
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={11}
+                  allowDecimals={false}
+                  tickFormatter={(v) => (protocolMode === "share" ? `${Math.round(Number(v) * 100)}%` : String(v))}
+                />
+                <YAxis type="category" dataKey="label" width={170} stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <Tooltip
+                  formatter={(v, name) => [v, name === "pregnant" ? "Pregnant" : "Not pregnant / no result yet"]}
+                  labelFormatter={(_l, payload) => (payload?.[0]?.payload as { full?: string } | undefined)?.full ?? ""}
+                />
+                <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no result yet")} />
+                <Bar dataKey="pregnant" stackId="p" {...roleProps("positive")} name="pregnant" cursor="pointer" onClick={(d: unknown) => toggle("protocol_id", (d as { payload: { id: number | null } }).payload.id ?? undefined)} />
+                <Bar dataKey="notPregnant" stackId="p" {...roleProps("negative")} radius={[0, 6, 6, 0]} name="notPregnant" cursor="pointer" onClick={(d: unknown) => toggle("protocol_id", (d as { payload: { id: number | null } }).payload.id ?? undefined)} />
+              </BarChart>
+            </Frame>
+          ) : (
+            <Empty>No protocol has {protocolMin} or more transfers.</Empty>
+          )
         ) : (
           <Empty>Loading…</Empty>
         )}
       </Card>
 
-      {/* 10. Column */}
+      {/* 10. Corpus luteum size */}
       <Card
         title="Pregnancy rate by corpus luteum size"
-        caption="Ultrasound CL size at transfer, in millimetres. Periwinkle columns are at or above the programme rate, pink below it. The tooltip gives the 95% interval and the number of transfers. Faded columns have fewer than 20."
+        caption="Ultrasound CL size at transfer, in millimetres. Columns show pregnancy rate with a verdict against the programme rate; transfers are a plain count. The tooltip gives each band's 95% interval."
+        takeaway={clTake}
+        controls={
+          <>
+            <Seg label="View" value={clView} onChange={setClView} options={[{ value: "columns", label: "Columns" }, { value: "line", label: "Line" }]} />
+            <Seg label="Measure" value={clMeasure} onChange={setClMeasure} options={MEASURE_OPTIONS} />
+          </>
+        }
       >
-        <RoleKey items={[
-          { role: "positive", label: "At or above the programme rate" },
-          { role: "negative", label: "Below the programme rate" },
-        ]} />
-        {bins ? (
-          <Frame height={250}>
-            <BarChart data={bins} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-              <XAxis dataKey="range" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-              <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
-              <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% · n=${(item.payload as { n: number }).n} · CI ${(item.payload as { ci: string }).ci}`, "Pregnancy rate"]} />
-              <Bar dataKey="rate" radius={[6, 6, 0, 0]} name="rate">
-                {bins.map((b) => (
-                  <Cell key={b.range} {...roleProps(vsProgramme(b.rate == null ? null : b.rate / 100, programmeRate))} fillOpacity={b.n < SMALL_SAMPLE ? 0.45 : 1} />
-                ))}
-              </Bar>
-            </BarChart>
-          </Frame>
+        {clMeasure === "rate" ? (
+          <RoleKey items={[{ role: "positive", label: "Clearly above the programme rate" }, { role: "negative", label: "Clearly below it" }, { role: "volume", label: "No clear difference" }]} />
+        ) : (
+          <RoleKey items={[{ role: "volume", label: "Transfers" }]} />
+        )}
+        {data ? (
+          clView === "columns" ? (
+            <Frame height={250}>
+              <BarChart data={bins} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                <XAxis dataKey="range" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} unit={clMeasure === "rate" ? "%" : undefined} domain={clMeasure === "rate" ? [0, 100] : [0, "auto"]} />
+                <Tooltip
+                  formatter={(v, _n, item) => {
+                    const p = item.payload as { n: number; ci: string; transfers: number };
+                    return clMeasure === "rate"
+                      ? [`${Number(v).toFixed(1)}% · n=${p.n} · CI ${p.ci}`, "Pregnancy rate"]
+                      : [`${p.transfers} transfers`, "Transfers"];
+                  }}
+                />
+                <Bar dataKey={clMeasure === "rate" ? "rate" : "transfers"} radius={[6, 6, 0, 0]} name={clMeasure === "rate" ? "rate" : "transfers"}>
+                  {bins.map((b) => (
+                    <Cell key={b.range} {...roleProps(clMeasure === "rate" ? b.role : "volume")} fillOpacity={b.n < SMALL_SAMPLE ? 0.45 : 1} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </Frame>
+          ) : (
+            <Frame height={250}>
+              <LineChart data={bins} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                <XAxis dataKey="range" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} unit={clMeasure === "rate" ? "%" : undefined} domain={clMeasure === "rate" ? [0, 100] : [0, "auto"]} />
+                <Tooltip />
+                <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "rate" ? "Pregnancy rate" : "Transfers")} />
+                <Line type="monotone" dataKey={clMeasure === "rate" ? "rate" : "transfers"} name={clMeasure === "rate" ? "rate" : "transfers"} stroke={clMeasure === "rate" ? ROLE.positive.fill : ROLE.volume.stroke} strokeWidth={2.2} dot={{ r: 4 }} connectNulls />
+              </LineChart>
+            </Frame>
+          )
         ) : (
           <Empty>Loading…</Empty>
         )}

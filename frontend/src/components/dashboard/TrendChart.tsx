@@ -9,7 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import type { DashboardTrendResponse } from "@/lib/types";
-import { ROLE } from "@/lib/chartPalette";
+import { ROLE, verdict } from "@/lib/chartPalette";
 
 export default function TrendChart({
   data,
@@ -25,10 +25,29 @@ export default function TrendChart({
   const points = data.points.map((p) => ({ label: p.bucket_label, value: p.value, n: p.n }));
   const gradientId = `trend-fill-${title.replace(/\s+/g, "-")}`;
 
+  // What the line shows: the overall rate over buckets with 20+ transfers, the range, and
+  // which buckets are clearly off that overall rate (whole 95% interval on one side of it).
+  const eligible = data.points.filter((p) => p.value != null && p.n >= 20);
+  const counted = eligible.map((p) => ({ label: p.bucket_label, rate: (p.value ?? 0) / 100, n: p.n, k: Math.round(((p.value ?? 0) / 100) * p.n) }));
+  const totalN = counted.reduce((s, c) => s + c.n, 0);
+  const overall = totalN ? counted.reduce((s, c) => s + c.k, 0) / totalN : null;
+  const sorted = [...counted].sort((a, b) => a.rate - b.rate);
+  const off = overall == null ? [] : counted.filter((c) => verdict(c.k, c.n, overall) !== "volume");
+  const takeaway =
+    overall == null || sorted.length === 0
+      ? `No ${data.granularity} has 20 or more transfers with a result in this range.`
+      : `Across ${sorted.length} ${data.granularity}${sorted.length === 1 ? "" : "s"} with 20 or more transfers, the rate averages ${(overall * 100).toFixed(1)}%, ranging from ${(sorted[0].rate * 100).toFixed(1)}% (${sorted[0].label}) to ${(sorted[sorted.length - 1].rate * 100).toFixed(1)}% (${sorted[sorted.length - 1].label}). ${
+          off.length === 0 ? "No single period is clearly different from that average." : `${off.length} ${off.length === 1 ? "period is" : "periods are"} clearly different from it: ${off.map((c) => c.label).join(", ")}.`
+        }`;
+
   return (
     <div>
-      <p className="mb-3 text-xs dash-muted">
+      <p className="mb-2 text-xs dash-muted">
         Granularity: {data.granularity} · points with few underlying records read as noisier
+      </p>
+      <p className="mb-3 rounded-xl bg-white/65 px-3 py-2 text-[13px] leading-snug dash-heading" role="note">
+        <span className="mr-1.5 font-semibold">What it shows:</span>
+        {takeaway}
       </p>
       <div className="h-60">
         <ResponsiveContainer width="100%" height="100%">

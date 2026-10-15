@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getPermissions, getRoleDisplayName, normalizeRole, type CanonicalRole } from "@/lib/roleRoutes";
 import type {
   DashboardAlertsResponse,
-  DashboardDataQualityResponse,
   DashboardFilterOptions,
   DashboardFilterValues,
   DashboardFunnelResponse,
@@ -28,7 +27,6 @@ import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import IntelligencePanel from "@/components/dashboard/IntelligencePanel";
 import InsightCards from "@/components/dashboard/InsightCards";
 import PerformancePanel from "@/components/dashboard/PerformancePanel";
-import DataQualityPanel from "@/components/dashboard/DataQualityPanel";
 
 /** Trend bucket size. "auto" follows the date range; the others drill down or roll up. */
 type Grain = "auto" | "day" | "week" | "month";
@@ -53,12 +51,11 @@ type RoleConfig = {
   trendMetrics: { metric: string; title: string; color: string }[];
   performanceDimensions: ("donor" | "sire" | "protocol" | "technician")[];
   showIntelligence: boolean;
-  showDataQuality: boolean;
   filterFields?: Array<keyof DashboardFilterValues>;
   alertFilter?: (metricKey: string) => boolean;
 };
 
-function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canViewAllData: boolean): RoleConfig {
+function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean): RoleConfig {
   if (role === "embryologist") {
     return {
       kpiKeys: ["oocytes_recovered", "maturation_rate", "cleavage_rate", "blastocyst_rate"],
@@ -68,7 +65,6 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: MEANING.process }],
       performanceDimensions: ["donor", "sire"],
       showIntelligence: canViewAnalytics,
-      showDataQuality: canViewAllData,
       filterFields: ["date_from", "date_to", "farm_location", "breed", "donor_id", "sire_id", "embryologist_id", "fresh_or_frozen"],
       alertFilter: (key) => ["blastocyst_rate", "predictions_pending_outcome"].includes(key),
     };
@@ -82,7 +78,6 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: MEANING.positive }],
       performanceDimensions: ["protocol", "technician"],
       showIntelligence: canViewAnalytics,
-      showDataQuality: canViewAllData,
       filterFields: ["date_from", "date_to", "farm_location", "technician_id", "protocol_id", "fresh_or_frozen"],
       alertFilter: (key) => ["pregnancy_rate", "pregnancy_checks_due"].includes(key),
     };
@@ -107,7 +102,6 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       ],
       performanceDimensions: ["donor", "sire", "protocol", "technician"],
       showIntelligence: true,
-      showDataQuality: true,
     };
   }
   // admin and viewer see everything
@@ -118,7 +112,6 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
     ],
     performanceDimensions: ["donor", "sire", "protocol", "technician"],
     showIntelligence: canViewAnalytics,
-    showDataQuality: canViewAllData,
   };
 }
 
@@ -127,8 +120,8 @@ export default function HomepageDashboard() {
   const role = normalizeRole(user?.role);
   const permissions = getPermissions(user?.role);
   const roleConfig = useMemo(
-    () => buildRoleConfig(role, permissions.canViewAnalytics, permissions.canViewAllData),
-    [role, permissions.canViewAnalytics, permissions.canViewAllData]
+    () => buildRoleConfig(role, permissions.canViewAnalytics),
+    [role, permissions.canViewAnalytics]
   );
   // An empty tile/stage list means the role has no operational view at all
   // (researcher); undefined means "show everything" (admin, viewer).
@@ -142,7 +135,6 @@ export default function HomepageDashboard() {
   const [operations, setOperations] = useState<DashboardOperationsResponse | null>(null);
   const [pipeline, setPipeline] = useState<DashboardPipelineRow[]>([]);
   const [alerts, setAlerts] = useState<DashboardAlertsResponse | null>(null);
-  const [dataQuality, setDataQuality] = useState<DashboardDataQualityResponse | null>(null);
   const [trends, setTrends] = useState<Record<string, DashboardTrendResponse>>({});
   const [grain, setGrain] = useState<Grain>("auto");
   const [qcSummary, setQcSummary] = useState<QCSummary | null>(null);
@@ -181,17 +173,11 @@ export default function HomepageDashboard() {
 
   useEffect(() => {
     api.get<DashboardAlertsResponse>("/dashboard/alerts").then((res) => setAlerts(res.data)).catch(() => setAlerts(null));
-    if (roleConfig.showDataQuality) {
-      api
-        .get<DashboardDataQualityResponse>("/dashboard/data-quality")
-        .then((res) => setDataQuality(res.data))
-        .catch(() => setDataQuality(null));
-    }
     api
       .get<QCSummary>("/qc/summary")
       .then((res) => setQcSummary(res.data))
       .catch(() => setQcSummary(null));
-  }, [roleConfig.showDataQuality]);
+  }, []);
 
   useEffect(() => {
     // A failed level (e.g. daily points over a long range) leaves that chart without data
@@ -358,7 +344,7 @@ export default function HomepageDashboard() {
         />
       </div>
 
-      {permissions.canViewAnalytics && <ChartGallery />}
+      {permissions.canViewAnalytics && <ChartGallery filters={filters} onFilter={(patch) => setFilters((f) => ({ ...f, ...patch }))} />}
 
       {showPipeline && (
         <div className="dash-card">
@@ -367,18 +353,11 @@ export default function HomepageDashboard() {
         </div>
       )}
 
-      <div className={`grid grid-cols-1 gap-5 ${roleConfig.showIntelligence && roleConfig.showDataQuality ? "xl:grid-cols-2" : ""}`}>
+      <div className="grid grid-cols-1 gap-5">
         {roleConfig.showIntelligence && (
           <div className="dash-card">
             <h3 className="mb-4 text-base font-semibold dash-heading">Attention Required</h3>
             <AlertsPanel alerts={filteredAlerts} extra={qcExtra} />
-          </div>
-        )}
-
-        {roleConfig.showDataQuality && (
-          <div className="dash-card">
-            <h3 className="mb-4 text-base font-semibold dash-heading">Data Quality</h3>
-            <DataQualityPanel data={dataQuality} />
           </div>
         )}
       </div>

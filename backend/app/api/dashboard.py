@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.transfers import _clean_pregnancy_result
@@ -38,6 +39,14 @@ from app.models.technician import Technician
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
 from app.schemas.dashboard import (
+    ChartsResponse,
+    GalleryBinRow,
+    GalleryBreedRow,
+    GalleryDonorRow,
+    GalleryGroup,
+    GalleryKpis,
+    GalleryProtocolRow,
+    GalleryTrendRow,
     AISummaryResponse,
     AlertItem,
     AlertsResponse,
@@ -781,6 +790,162 @@ def get_trends(
         ]
 
     return TrendResponse(metric=metric, granularity=granularity, points=points)
+
+
+@router.get("/charts", response_model=ChartsResponse)
+def get_charts(
+    filters: DashboardFilterValues = Depends(get_dashboard_filters),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Programme charts, computed from transfer records under the dashboard filters.
+
+    With no date range, the whole programme is used, not the homepage's 90-day window.
+    Rates use transfers with a recorded pc1 outcome as the denominator.
+    """
+    org_id = current_user.organization_id
+    first, last = db.query(func.min(ETTransfer.et_date), func.max(ETTransfer.et_date)).filter(
+        ETTransfer.organization_id == org_id
+    ).one()
+    if first is None:
+        empty_kpis = GalleryKpis(pregnant=0, open=0, with_outcome=0, total_transfers=0, fresh_vs_frozen={})
+        return ChartsResponse(kpis=empty_kpis, trends=[], protocols=[], breeds=[], donors=[], bins=[])
+    start = filters.date_from or first
+    end = filters.date_to or last
+    transfers = _fetch_transfers(db, org_id, filters, start, end)
+
+    def tally(items):
+        """Counts for a group of transfers, given (transfer, outcome) pairs."""
+        total = len(items)
+        with_outcome = sum(1 for _, o in items if o in ("Pregnant", "Open"))
+        pregnant = sum(1 for _, o in items if o == "Pregnant")
+        return total, with_outcome, pregnant
+
+    outcomes = [(t, _clean_pregnancy_result(t.pc1_result)) for t in transfers]
+    total, with_outcome, pregnant = tally(outcomes)
+
+    fresh_vs_frozen: dict[str, GalleryGroup] = {}
+    by_kind: dict[str, list] = defaultdict(list)
+    for t, o in outcomes:
+        kind = t.embryo.fresh_or_frozen if t.embryo else None
+        if kind:
+            by_kind[kind].append((t, o))
+    for kind, items in sorted(by_kind.items()):
+        _, n_out, n_preg = tally(items)
+        fresh_vs_frozen[kind] = GalleryGroup(
+            n_with_outcome=n_out, pregnant=n_preg, rate=_fraction(n_preg, n_out),
+        )
+
+    def group_row(items):
+        n_total, n_out, n_preg = tally(items)
+        return n_total, n_out, n_preg, _fraction(n_preg, n_out)
+
+    by_month: dict[str, list] = defaultdict(list)
+    by_protocol: dict[tuple[Optional[int], str], list] = defaultdict(list)
+    by_breed: dict[str, list] = defaultdict(list)
+    by_donor: dict[int, list] = defaultdict(list)
+    by_bin: dict[str, list] = defaultdict(list)
+    donor_info: dict[int, tuple[str, Optional[str]]] = {}
+    for t, o in outcomes:
+        by_month[t.et_date.strftime("%Y-%m")].append((t, o))
+        protocol_name = t.protocol.name if t.protocol else "Unknown"
+        by_protocol[(t.protocol_id, protocol_name)].append((t, o))
+        donor = t.embryo.donor if t.embryo else None
+        breed = donor.breed if donor and donor.breed else "Unknown"
+        by_breed[breed].append((t, o))
+        if donor:
+            by_donor[donor.donor_id].append((t, o))
+            donor_info[donor.donor_id] = (donor.tag_id, donor.breed)
+        if t.cl_measure_mm is not None:
+            by_bin[_cl_bin(float(t.cl_measure_mm))].append((t, o))
+
+    trends = []
+    for month in sorted(by_month):
+        n_total, n_out, n_preg, rate = group_row(by_month[month])
+        trends.append(GalleryTrendRow(
+            month=month, n_transfers=n_total, n_with_outcome=n_out, n_pregnant=n_preg, pregnancy_rate=rate,
+        ))
+
+    protocols = []
+    for (protocol_id, name), items in sorted(by_protocol.items(), key=lambda kv: -len(kv[1])):
+        n_total, n_out, n_preg, rate = group_row(items)
+        lo, hi = _wilson(n_preg, n_out)
+        protocols.append(GalleryProtocolRow(
+            protocol_id=protocol_id, protocol_name=name, n_transfers=n_total, n_with_outcome=n_out, n_pregnant=n_preg,
+            pregnancy_rate=rate, ci_lower=lo, ci_upper=hi,
+        ))
+
+    breeds = []
+    for breed, items in sorted(by_breed.items(), key=lambda kv: -len(kv[1])):
+        n_total, n_out, n_preg, rate = group_row(items)
+        breeds.append(GalleryBreedRow(
+            donor_breed=breed, n_transfers=n_total, n_with_outcome=n_out, n_pregnant=n_preg, pregnancy_rate=rate,
+        ))
+
+    donors = []
+    for donor_id, items in by_donor.items():
+        tag, breed = donor_info[donor_id]
+        n_total, n_out, n_preg, rate = group_row(items)
+        donors.append(GalleryDonorRow(
+            donor_id=donor_id, donor_tag=tag, breed=breed, n_transfers=n_total, n_with_outcome=n_out, n_pregnant=n_preg,
+            pregnancy_rate=rate,
+        ))
+    donors.sort(key=lambda d: -d.n_transfers)
+
+    bins = []
+    for label in CL_BIN_LABELS:
+        if label not in by_bin:
+            continue
+        items = by_bin[label]
+        n_total, n_out, n_preg, rate = group_row(items)
+        lo, hi = _wilson(n_preg, n_out)
+        bins.append(GalleryBinRow(
+            range=label, n_transfers=n_total, n_with_outcome=n_out, n_pregnant=n_preg,
+            pregnancy_rate=rate, ci_lower=lo, ci_upper=hi,
+        ))
+
+    return ChartsResponse(
+        start=start,
+        end=end,
+        kpis=GalleryKpis(
+            pregnant=pregnant,
+            open=with_outcome - pregnant,
+            with_outcome=with_outcome,
+            total_transfers=total,
+            fresh_vs_frozen=fresh_vs_frozen,
+        ),
+        trends=trends,
+        protocols=protocols,
+        breeds=breeds,
+        donors=donors,
+        bins=bins,
+    )
+
+
+CL_BIN_LABELS = ["<10", "10–15", "15–18", "18–20", "20–22", "22–25", "25+"]
+
+
+def _cl_bin(mm: float) -> str:
+    edges = [(10, "<10"), (15, "10–15"), (18, "15–18"), (20, "18–20"), (22, "20–22"), (25, "22–25")]
+    for upper, label in edges:
+        if mm < upper:
+            return label
+    return "25+"
+
+
+def _fraction(k: int, n: int) -> Optional[float]:
+    return round(k / n, 4) if n else None
+
+
+def _wilson(k: int, n: int, z: float = 1.96) -> tuple[Optional[float], Optional[float]]:
+    """95% Wilson score interval for a proportion, as fractions."""
+    if n == 0:
+        return None, None
+    p = k / n
+    denom = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / denom
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
+    return round(max(0.0, centre - half), 4), round(min(1.0, centre + half), 4)
 
 
 @router.get("/operations", response_model=OperationsResponse)

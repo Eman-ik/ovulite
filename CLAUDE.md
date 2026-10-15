@@ -69,33 +69,35 @@ Adopted 2026-10-15 for the whole website, replacing Minimal Green. Reference swa
   text. Never Cartilage `#757F99` as text. Never light text on Lymphatic or Neutrophils.
 - **Status colours keep their meaning** and are not part of the palette: danger `#9d3730`, warning
   `#7a5a12`, info `#35748a`. Do not recolour them to match the theme.
-- **Dashboard chart gallery:** `components/dashboard/ChartGallery.tsx` has ten programme-wide charts of
-  nine types: donut, radial, combo bar-and-line, stacked area, waterfall, radar, bubble scatter, treemap,
-  stacked bars, and columns. They use real transfer records only. The lab-side funnel (oocytes, embryos,
-  live births) comes from the demo seeder, so the gallery leaves it out. The dashboard's own Reproductive
-  Funnel still shows those seeded figures. The gallery shows only for roles with `canViewAnalytics`. It
-  ignores the dashboard filters, and its captions say so. Bars, segments, bubbles and columns from fewer
-  than 20 transfers are drawn faded. Legend, tooltip and treemap text is set in ink.
-- **Dashboard interaction:** three ways to explore, all on the homepage dashboard. *Drill level* (Auto / Day / Week / Month
-  above the trend charts) passes `granularity` to `/dashboard/trends`; Day is refused over a year (422). *Slicing*: clicking a
-  row or bar in the Performance panel sets the matching filter (donor, sire, protocol or technician), and clicking it again
-  clears it; rows are clickable only when the role can see that filter. *Chart switching*: the monthly volume chart toggles
-  between bars and line, bars only, and line only. Pivoting and zoom/pan are not built.
+- **Dashboard chart gallery:** `components/dashboard/ChartGallery.tsx` shows ten programme charts. Each has its
+  own controls (View, Measure, Period, Min transfers) and a "What it shows" takeaway computed from the rows it
+  draws. Data comes from `GET /dashboard/charts` (`backend/app/api/dashboard.py`), computed from transfer records
+  under the dashboard filters; with no date range it covers the whole programme. The `/analytics/*` endpoints read
+  static artifact files, not the database, so the gallery must not use them. Clicking a bar, slice, bubble or
+  period sets the matching dashboard filter (breed, fresh/frozen, protocol, donor, or the period's dates); the active
+  filters show as chips above the charts. Faded bars, segments, bubbles and columns have fewer than 20 transfers with
+  a result. Live births are not in the funnel's steepest-drop claim: no calving outcome is recorded for this
+  programme, so a zero there is missing data. The lab-side funnel still shows seeded figures. The homepage has no
+  Data Quality panel; `/dashboard/data-quality` remains in the API.
+- **Takeaways:** the gallery, the two trend charts and the funnel each state a finding. The text is computed, and it
+  must say when a difference is not clear. The donor takeaway also reports how many "clear" donors chance alone would
+  give (about 5% of the donors tested).
+- **Dashboard interaction:** the filter bar drives every panel and chart on the homepage. *Drill level* (Auto / Day /
+  Week / Month above the trends) passes `granularity` to `/dashboard/trends`; Day is refused over a year (422).
+  *Slicing*: clicking a row or bar in the Performance panel sets the matching filter, and clicking it again clears it.
+  Pivoting and zoom/pan are not built.
 - **KPI card colours:** `KPI_COLORS` in `components/dashboard/KpiCard.tsx` uses the Sea / Heaven / Shine /
   Blush / Wave reference palette. Each card has a soft tint, the icon tile takes the solid colour, and the
   sparkline uses a darker shade derived from the palette so it stays visible on white.
-- **Colour carries meaning:** on the dashboard a colour may only encode something. The roles live in
-  `ROLE` in `frontend/src/lib/chartPalette.ts`, built from the "Палитра для ваших проектов" sheet (Sea
-  `#ffd9ff`, Heaven `#c7f3f6`, Shine `#fdfcf8`, Blush `#a4c6e8`, Wave `#7e89ca`). Five swatches cannot carry
-  seven roles, so some roles use a darker or lighter step of a sheet hue; each step is noted in the file.
-  `positive` Wave (pregnant, or at or above the programme rate); `negative` Sea with a mauve outline (open, or
-  below it); `volume` Blush with a blue outline (a count, no verdict); `transfer` Heaven with a teal outline
-  (the transfer event); `process` deep Blush (lab rates); `caution` light Wave (model not reliable); `pending`
-  Shine, hollow and dashed (no outcome yet). Use `roleProps(role)` for fill and outline, `textOn(fill)` for
-  labels, and `vsProgramme(rate, programme)` for above or below the programme rate. The programme rate is
-  pregnant ÷ transfers with an outcome (28.9% at last count). Never colour a series by its position in a
-  list. **Every dashboard chart has a legend**: a Recharts `Legend`, or the shared `RoleKey` component when
-  the swatches are cells or shapes. Any new chart needs one.
+- **Colour is a verdict, not a ranking.** A group is coloured `positive` or `negative` only when its whole
+  95% Wilson interval sits above or below the programme rate (`verdict(k, n, programme)` in
+  `frontend/src/lib/chartPalette.ts`). Otherwise it takes `volume`, the "no clear difference" colour, however far
+  its point estimate sits from the programme rate. Colouring a point estimate that is 1-2 points off, with
+  overlapping intervals, was the old behaviour and it read noise as findings. `roleProps(role)` gives fill and
+  outline, `textOn(fill)` the label colour. Counts that are not rates keep fixed roles (pregnant, open, pending,
+  transfers). Never colour a series by its position in a list. **Every dashboard chart has a legend**: a Recharts
+  `Legend`, or the shared `RoleKey` component when the swatches are cells or shapes. Any new chart needs one.
+  The programme rate is pregnant ÷ transfers with an outcome under the current filters (53.2% at last count).
 - **Chart palette:** all chart series colours come from `frontend/src/lib/chartPalette.ts`
   (`CHART_SERIES`, from the pastel reference palettes). Teal and lime were removed from the series on
   2026-10-15 to make the dashboard less green; the set is now wave, watermelon, mango, grape, blush,

@@ -23,8 +23,25 @@ export default function ReproductiveFunnel({
   const omitted = stageNames ? data.omitted_stages.filter((s) => stageNames.includes(s.name)) : data.omitted_stages;
   const maxValue = Math.max(1, ...stages.map((s) => s.value));
 
+  // The steepest drop between consecutive stages, where the stages are comparable. Live births
+  // are left out: no calving outcome is recorded for this programme, so a zero there is missing data.
+  const drops = stages
+    .map((s, i) => ({ s, prev: stages[i - 1] }))
+    .filter(({ s, prev }) => prev && !s.cohort_break && s.name !== "Live Births" && s.conversion_pct_from_previous != null && prev.value > 0);
+  const steepest = drops.reduce<(typeof drops)[number] | null>(
+    (best, d) => (best == null || (d.s.conversion_pct_from_previous ?? 100) < (best.s.conversion_pct_from_previous ?? 100) ? d : best),
+    null,
+  );
+  const funnelTakeaway = steepest
+    ? `The steepest drop is from ${steepest.prev.name} to ${steepest.s.name}: ${steepest.s.conversion_pct_from_previous}% carry on (${steepest.s.value.toLocaleString()} of ${steepest.prev.value.toLocaleString()}).`
+    : "Not enough comparable stages to name a steepest drop.";
+
   return (
     <div className="space-y-2.5">
+      <p className="rounded-xl bg-white/65 px-3 py-2 text-[13px] leading-snug dash-heading" role="note">
+        <span className="mr-1.5 font-semibold">What it shows:</span>
+        {funnelTakeaway}
+      </p>
       <RoleKey
         items={[
           { role: "volume", label: "Counts before transfer" },

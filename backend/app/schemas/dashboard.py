@@ -146,3 +146,81 @@ class DashboardFilterOptions(BaseModel):
     breeds: list[str]
     farm_locations: list[str]
     fresh_or_frozen: list[str]
+
+
+# --- Programme charts (GET /dashboard/charts) -------------------------------
+# Rates are fractions (0-1), not percentages. A rate is None when the group has
+# no transfers with a recorded outcome. Every rate uses n_with_outcome as its
+# denominator; n_transfers counts all transfers in the group.
+
+
+class GalleryGroup(BaseModel):
+    n_with_outcome: int
+    pregnant: int
+    rate: Optional[float] = None
+
+
+class GalleryKpis(BaseModel):
+    pregnant: int
+    open: int
+    with_outcome: int
+    total_transfers: int
+    fresh_vs_frozen: dict[str, GalleryGroup]
+
+
+class GalleryTrendRow(BaseModel):
+    month: str
+    n_transfers: int
+    n_with_outcome: int
+    n_pregnant: int
+    pregnancy_rate: Optional[float] = None
+
+
+class GalleryProtocolRow(BaseModel):
+    protocol_id: Optional[int] = None
+    protocol_name: str
+    n_transfers: int
+    n_with_outcome: int
+    n_pregnant: int
+    pregnancy_rate: Optional[float] = None
+    ci_lower: Optional[float] = None
+    ci_upper: Optional[float] = None
+
+
+class GalleryBreedRow(BaseModel):
+    donor_breed: str
+    n_transfers: int
+    n_with_outcome: int
+    n_pregnant: int
+    pregnancy_rate: Optional[float] = None
+
+
+class GalleryDonorRow(BaseModel):
+    donor_id: Optional[int] = None
+    donor_tag: str
+    breed: Optional[str] = None
+    n_transfers: int
+    n_with_outcome: int
+    n_pregnant: int
+    pregnancy_rate: Optional[float] = None
+
+
+class GalleryBinRow(BaseModel):
+    range: str
+    n_transfers: int
+    n_with_outcome: int
+    n_pregnant: int
+    pregnancy_rate: Optional[float] = None
+    ci_lower: Optional[float] = None
+    ci_upper: Optional[float] = None
+
+
+class ChartsResponse(BaseModel):
+    start: Optional[Date] = None
+    end: Optional[Date] = None
+    kpis: GalleryKpis
+    trends: list[GalleryTrendRow]
+    protocols: list[GalleryProtocolRow]
+    breeds: list[GalleryBreedRow]
+    donors: list[GalleryDonorRow]
+    bins: list[GalleryBinRow]

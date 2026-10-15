@@ -71,10 +71,40 @@ export function roleProps(role: Role) {
   };
 }
 
-/** Positive colour at or above the programme rate, negative below, volume if unknown. */
-export function vsProgramme(rate: number | null | undefined, programme: number | null): Role {
-  if (rate == null || programme == null) return "volume";
-  return rate >= programme ? "positive" : "negative";
+/**
+ * 95% Wilson score interval for k successes in n, as fractions. Null when n is 0.
+ * Used so a colour says something only when the data supports it.
+ */
+export function wilson(k: number, n: number): [number, number] | null {
+  if (n <= 0) return null;
+  const z = 1.96;
+  const p = k / n;
+  const denom = 1 + (z * z) / n;
+  const centre = (p + (z * z) / (2 * n)) / denom;
+  const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / denom;
+  return [Math.max(0, centre - half), Math.min(1, centre + half)];
+}
+
+/**
+ * The verdict a group's colour gives, against the programme rate.
+ *   positive  its whole 95% interval is above the programme rate: clearly higher
+ *   negative  its whole interval is below it: clearly lower
+ *   volume    the interval includes the programme rate: no clear difference
+ * A bar that looks above or below by a point or two, with overlapping intervals,
+ * is not coloured as if it were a finding.
+ */
+export function verdict(k: number, n: number, programme: number | null): Role {
+  const ci = wilson(k, n);
+  if (ci == null || programme == null) return "volume";
+  if (ci[0] > programme) return "positive";
+  if (ci[1] < programme) return "negative";
+  return "volume";
+}
+
+/** Verdict from a rate and the number of transfers it is based on, when the counts are not to hand. */
+export function verdictFromRate(rate: number | null | undefined, n: number, programme: number | null): Role {
+  if (rate == null) return "volume";
+  return verdict(Math.round(rate * n), n, programme);
 }
 
 const LABEL_INK = "#1B2030";
