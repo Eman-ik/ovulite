@@ -22,14 +22,14 @@ const ICONS: Record<string, React.ReactNode> = {
 };
 
 const COLORS: Record<string, KpiColor> = {
-  oocytes_recovered: "blue",
-  maturation_rate: "teal",
-  cleavage_rate: "violet",
-  blastocyst_rate: "amber",
-  transferable_embryos: "green",
-  transfers_completed: "olive",
-  pregnancy_rate: "rose",
-  model_auc: "pink",
+  oocytes_recovered: "volume",
+  maturation_rate: "process",
+  cleavage_rate: "process",
+  blastocyst_rate: "process",
+  transferable_embryos: "volume",
+  transfers_completed: "transfer",
+  pregnancy_rate: "positive",
+  model_auc: "caution",
 };
 
 function formatValue(kpi: DashboardKpiItem): string {

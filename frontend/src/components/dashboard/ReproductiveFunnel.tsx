@@ -1,22 +1,13 @@
 import type { DashboardFunnelResponse } from "@/lib/types";
+import RoleKey from "@/components/dashboard/RoleKey";
+import { ROLE, textOn, type Role } from "@/lib/chartPalette";
 
-/** Pale sage deepening to forest as the funnel narrows, so the visual weight
- *  tracks the drop-off instead of cycling unrelated hues. Bars carry a dark
- *  label on the light end and a cream one once the fill goes dark. */
-const STAGE_GRADIENTS = [
-  "linear-gradient(90deg, #CFE8FF, #C2E4F5)",
-  "linear-gradient(90deg, #C2E4F5, #B0DEE6)",
-  "linear-gradient(90deg, #B0DEE6, #9FD8DA)",
-  "linear-gradient(90deg, #9FD8DA, #8ED3CC)",
-  "linear-gradient(90deg, #8ED3CC, #7FCDC9)",
-  "linear-gradient(90deg, #7FCDC9, #66CAC8)",
-  "linear-gradient(90deg, #66CAC8, #66CAC8)",
-  "linear-gradient(90deg, #66CAC8, #66CAC8)",
-  "linear-gradient(90deg, #66CAC8, #66CAC8)",
-];
-
-/** Index at which the fill is dark enough to need light text. */
-const DARK_FILL_FROM = 99;
+/** Stage order is oocytes, mature, cleaved, blastocysts, transferable, transfers,
+ *  pregnancies, ongoing, live births. Counts before transfer are volume; the
+ *  transfer stage is the transfer role; outcome stages are positive. */
+const STAGE_ROLES: Role[] = ["volume", "volume", "volume", "volume", "volume", "transfer", "positive", "positive", "positive"];
+const STAGE_FILLS = STAGE_ROLES.map((r) => ROLE[r].fill);
+const STAGE_GRADIENTS = STAGE_FILLS.map((c) => `linear-gradient(90deg, ${c}, ${c})`);
 
 export default function ReproductiveFunnel({
   data,
@@ -34,6 +25,13 @@ export default function ReproductiveFunnel({
 
   return (
     <div className="space-y-2.5">
+      <RoleKey
+        items={[
+          { role: "volume", label: "Counts before transfer" },
+          { role: "transfer", label: "Transfers" },
+          { role: "positive", label: "Pregnancy outcomes" },
+        ]}
+      />
       {stages.map((stage, i) => {
         const globalIndex = allStages.findIndex((s) => s.name === stage.name);
         const widthPct = Math.max(5, (stage.value / maxValue) * 100);
@@ -58,7 +56,10 @@ export default function ReproductiveFunnel({
                 style={{
                   width: `${widthPct}%`,
                   background: STAGE_GRADIENTS[globalIndex % STAGE_GRADIENTS.length],
-                  color: globalIndex >= DARK_FILL_FROM ? "#EAF1F1" : "#2E3645",
+                  color: textOn(STAGE_FILLS[globalIndex % STAGE_FILLS.length]),
+                  boxShadow: ROLE[STAGE_ROLES[globalIndex % STAGE_ROLES.length]].stroke
+                    ? `inset 0 0 0 1.25px ${ROLE[STAGE_ROLES[globalIndex % STAGE_ROLES.length]].stroke}`
+                    : undefined,
                 }}
               >
                 {stage.value.toLocaleString()}

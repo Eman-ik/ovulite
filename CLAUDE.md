@@ -27,6 +27,10 @@ entry to `.claude/launch.json` and use the preview tooling.
 
 ## Verification rules
 
+- **Type checking:** the root `frontend/tsconfig.json` only holds `references`, so `npx tsc --noEmit` checks
+  nothing and always exits 0. Use `npx tsc -p tsconfig.app.json --noEmit`. Until this was caught, every earlier
+  "tsc clean" in this repo had checked no files. `vite build` does not type-check either, so run both.
+
 - **`tsc --noEmit` does not validate JSX structure.** It has passed on an unbalanced
   `motion.div` that rendered a blank page. Always finish with `npx vite build`.
 - Before trusting a measurement script you just wrote, check it against a case you already
@@ -72,8 +76,30 @@ Adopted 2026-10-15 for the whole website, replacing Minimal Green. Reference swa
   Funnel still shows those seeded figures. The gallery shows only for roles with `canViewAnalytics`. It
   ignores the dashboard filters, and its captions say so. Bars, segments, bubbles and columns from fewer
   than 20 transfers are drawn faded. Legend, tooltip and treemap text is set in ink.
+- **Dashboard interaction:** three ways to explore, all on the homepage dashboard. *Drill level* (Auto / Day / Week / Month
+  above the trend charts) passes `granularity` to `/dashboard/trends`; Day is refused over a year (422). *Slicing*: clicking a
+  row or bar in the Performance panel sets the matching filter (donor, sire, protocol or technician), and clicking it again
+  clears it; rows are clickable only when the role can see that filter. *Chart switching*: the monthly volume chart toggles
+  between bars and line, bars only, and line only. Pivoting and zoom/pan are not built.
+- **KPI card colours:** `KPI_COLORS` in `components/dashboard/KpiCard.tsx` uses the Sea / Heaven / Shine /
+  Blush / Wave reference palette. Each card has a soft tint, the icon tile takes the solid colour, and the
+  sparkline uses a darker shade derived from the palette so it stays visible on white.
+- **Colour carries meaning:** on the dashboard a colour may only encode something. The roles live in
+  `ROLE` in `frontend/src/lib/chartPalette.ts`, built from the "Палитра для ваших проектов" sheet (Sea
+  `#ffd9ff`, Heaven `#c7f3f6`, Shine `#fdfcf8`, Blush `#a4c6e8`, Wave `#7e89ca`). Five swatches cannot carry
+  seven roles, so some roles use a darker or lighter step of a sheet hue; each step is noted in the file.
+  `positive` Wave (pregnant, or at or above the programme rate); `negative` Sea with a mauve outline (open, or
+  below it); `volume` Blush with a blue outline (a count, no verdict); `transfer` Heaven with a teal outline
+  (the transfer event); `process` deep Blush (lab rates); `caution` light Wave (model not reliable); `pending`
+  Shine, hollow and dashed (no outcome yet). Use `roleProps(role)` for fill and outline, `textOn(fill)` for
+  labels, and `vsProgramme(rate, programme)` for above or below the programme rate. The programme rate is
+  pregnant ÷ transfers with an outcome (28.9% at last count). Never colour a series by its position in a
+  list. **Every dashboard chart has a legend**: a Recharts `Legend`, or the shared `RoleKey` component when
+  the swatches are cells or shapes. Any new chart needs one.
 - **Chart palette:** all chart series colours come from `frontend/src/lib/chartPalette.ts`
-  (`CHART_SERIES`, from the pastel Fruit Salad and swatch references). Don't hard-code chart
+  (`CHART_SERIES`, from the pastel reference palettes). Teal and lime were removed from the series on
+  2026-10-15 to make the dashboard less green; the set is now wave, watermelon, mango, grape, blush,
+  old rose, lemon and hazelnut. Don't hard-code chart
   colours; import from there. Axes, gridlines and status colours are not part of it. The
   landing page's own charts keep the photo-sampled colours it was given. The pastels are
   light, so strokes sit near 1.5:1 on white. Charts rely on hue plus labels.

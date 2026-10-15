@@ -718,13 +718,18 @@ def get_funnel(
 @router.get("/trends", response_model=TrendResponse)
 def get_trends(
     metric: str = Query(..., pattern="^(pregnancy_rate|cleavage_rate|blastocyst_rate|maturation_rate)$"),
+    granularity: str | None = Query(None, pattern="^(day|week|month)$"),
     filters: DashboardFilterValues = Depends(get_dashboard_filters),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     org_id = current_user.organization_id
     start, end = resolve_date_range(filters.date_from, filters.date_to, anchor=_latest_activity_date(db, org_id))
-    granularity = bucket_granularity(start, end)
+    # Drill-down/up: the caller may pick the bucket size; otherwise it follows the range.
+    if granularity is None:
+        granularity = bucket_granularity(start, end)
+    elif granularity == "day" and (end - start).days + 1 > 366:
+        raise HTTPException(status_code=422, detail="Daily points need a range of a year or less.")
     buckets = _ordered_buckets(start, end, granularity)
 
     if metric == "pregnancy_rate":

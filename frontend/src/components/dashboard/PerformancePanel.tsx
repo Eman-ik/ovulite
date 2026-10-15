@@ -1,4 +1,4 @@
-import { CHART_SERIES } from "@/lib/chartPalette";
+import { ROLE, roleProps, vsProgramme } from "@/lib/chartPalette";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import api from "@/lib/api";
@@ -14,15 +14,26 @@ const DIMENSION_LABEL: Record<Dimension, string> = {
   technician: "Technicians",
 };
 
-/** Green shades cycled across bars so rows stay separable. */
-const BAR_COLORS = CHART_SERIES;
+/** The dashboard filter each dimension slices by. Row ids are the entity ids those filters take. */
+const DIMENSION_FILTER: Record<Dimension, keyof DashboardFilterValues> = {
+  donor: "donor_id",
+  sire: "sire_id",
+  protocol: "protocol_id",
+  technician: "technician_id",
+};
 
 export default function PerformancePanel({
   filters,
   dimensions,
+  onSlice,
+  visibleFilters,
 }: {
   filters: DashboardFilterValues;
   dimensions: Dimension[];
+  /** Set or clear the filter for a row. */
+  onSlice?: (filterKey: keyof DashboardFilterValues, id: number | null) => void;
+  /** Filters this role can see; a row is only clickable when its filter is among them. */
+  visibleFilters?: Array<keyof DashboardFilterValues>;
 }) {
   const [active, setActive] = useState<Dimension>(dimensions[0]);
   const [data, setData] = useState<Record<string, DashboardPerformanceResponse | null>>({});
@@ -55,6 +66,16 @@ export default function PerformancePanel({
 
   const current = data[active];
   const chartRows = current?.rows.filter((r) => !r.insufficient_data) ?? [];
+  // Yardstick for the bar colours: the transfer-weighted average of the bars on screen.
+  const rated = chartRows.filter((r) => r.pregnancy_rate != null);
+  const shownTransfers = rated.reduce((s, r) => s + r.n_transfers, 0);
+  const shownAverage =
+    shownTransfers > 0 ? rated.reduce((s, r) => s + (r.pregnancy_rate ?? 0) * r.n_transfers, 0) / shownTransfers : null;
+  // Slicing: clicking a row filters the dashboard to it; clicking the selected row clears it.
+  const sliceKey = DIMENSION_FILTER[active];
+  const selectedId = filters[sliceKey] ?? null;
+  const sliceable = onSlice && (!visibleFilters || visibleFilters.includes(sliceKey));
+  const slice = sliceable ? (id: number) => onSlice(sliceKey, selectedId === id ? null : id) : undefined;
 
   return (
     <Tabs value={active} onValueChange={(v) => setActive(v as Dimension)}>
@@ -107,12 +128,28 @@ export default function PerformancePanel({
                         cursor={{ fill: "rgba(255,255,255,0.04)" }}
                       />
                       <Bar dataKey="pregnancy_rate" radius={[0, 8, 8, 0]}>
-                        {chartRows.map((r, i) => (
-                          <Cell key={r.id} fill={BAR_COLORS[i % BAR_COLORS.length]} />
+                        {chartRows.map((r) => (
+                          <Cell
+                            key={r.id}
+                            {...roleProps(vsProgramme(r.pregnancy_rate, shownAverage))}
+                            {...(selectedId === r.id ? { stroke: "#2E3645", strokeWidth: 2 } : {})}
+                            cursor={slice ? "pointer" : undefined}
+                            onClick={slice ? () => slice(r.id) : undefined}
+                          />
                         ))}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
+                  <p className="mt-1 flex flex-wrap items-center gap-x-4 text-[11px] dash-muted">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE.positive.fill }} />
+                      At or above the average of these bars
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: ROLE.negative.fill, boxShadow: `inset 0 0 0 1px ${ROLE.negative.stroke}` }} />
+                      Below it
+                    </span>
+                  </p>
                 </div>
               )}
 
@@ -126,8 +163,24 @@ export default function PerformancePanel({
                 </thead>
                 <tbody>
                   {current.rows.map((r) => (
-                    <tr key={r.id} className="border-b border-[var(--border)] last:border-0">
-                      <td className="py-2.5 pr-3 font-medium dash-heading">{r.label}</td>
+                    <tr
+                      key={r.id}
+                      className={`border-b border-[var(--border)] last:border-0 ${selectedId === r.id ? "bg-white/60" : ""}`}
+                    >
+                      <td className="py-2.5 pr-3 font-medium dash-heading">
+                        {slice ? (
+                          <button
+                            type="button"
+                            onClick={() => slice(r.id)}
+                            aria-pressed={selectedId === r.id}
+                            className="text-left underline-offset-4 hover:underline"
+                          >
+                            {r.label}
+                          </button>
+                        ) : (
+                          r.label
+                        )}
+                      </td>
                       <td className="py-2.5 pr-3 dash-muted">{r.n_transfers}</td>
                       <td className="py-2.5 pr-3">
                         {r.insufficient_data ? (

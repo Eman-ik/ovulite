@@ -2,17 +2,19 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import type { DashboardTrendResponse } from "@/lib/types";
+import { ROLE } from "@/lib/chartPalette";
 
 export default function TrendChart({
   data,
   title,
-  color = "#6aa5b8",
+  color = ROLE.positive.fill,
 }: {
   data: DashboardTrendResponse | null;
   title: string;
@@ -63,9 +65,15 @@ export default function TrendChart({
               labelStyle={{ color: "#596070" }}
               cursor={{ stroke: "rgba(46, 54, 69,0.18)" }}
             />
+            <Legend
+              verticalAlign="top"
+              height={28}
+              formatter={(v) => <span style={{ color: "#2E3645" }}>{v}</span>}
+            />
             <Area
               type="monotone"
               dataKey="value"
+              name={title}
               stroke={color}
               strokeWidth={2.5}
               dot={{ r: 3, fill: color, stroke: "#ffffff", strokeWidth: 1.5 }}

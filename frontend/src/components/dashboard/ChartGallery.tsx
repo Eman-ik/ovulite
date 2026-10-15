@@ -28,7 +28,8 @@ import {
   ZAxis,
 } from "recharts";
 import api from "@/lib/api";
-import { CHART_SERIES } from "@/lib/chartPalette";
+import { ROLE, roleProps, textOn, vsProgramme, type Role } from "@/lib/chartPalette";
+import RoleKey from "@/components/dashboard/RoleKey";
 
 /*
  * Programme-wide charts, each a different type, built only from real transfer
@@ -44,13 +45,6 @@ const SMALL_SAMPLE = 20;
 const AXIS = "#8a9a92";
 const GRID = "rgba(46, 54, 69, 0.07)";
 const INK = "#2E3645";
-const BERRY = CHART_SERIES[0];
-const WATERMELON = CHART_SERIES[1];
-const MANGO = CHART_SERIES[2];
-const GRAPE = CHART_SERIES[3];
-const LIME = CHART_SERIES[4];
-const OLD_ROSE = CHART_SERIES[5];
-const HAZELNUT = CHART_SERIES[6];
 
 interface Kpis {
   pregnant: number;
@@ -122,15 +116,15 @@ function Empty({ children }: { children: ReactNode }) {
   return <p className="py-10 text-center text-sm dash-muted">{children}</p>;
 }
 
-// Treemap cell: the default label is white, which fails on the pastel blocks.
-function TreemapCell(props: { x: number; y: number; width: number; height: number; name: string; fill: string }) {
-  const { x, y, width, height, name, fill } = props;
+// Treemap cell: the label colour follows the block, since the blocks run from light to dark.
+function TreemapCell(props: { x: number; y: number; width: number; height: number; name: string; fill: string; outline?: string }) {
+  const { x, y, width, height, name, fill, outline } = props;
   const showLabel = width > 64 && height > 26;
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} fill={fill} stroke="#ffffff" strokeWidth={2} />
+      <rect x={x} y={y} width={width} height={height} fill={fill} stroke={outline ?? "#ffffff"} strokeWidth={2} />
       {showLabel && (
-        <text x={x + 8} y={y + 18} fill={INK} fontSize={11} fontWeight={600}>
+        <text x={x + 8} y={y + 18} fill={textOn(fill)} stroke="none" fontSize={11} fontWeight={600}>
           {name}
         </text>
       )}
@@ -148,9 +142,18 @@ function Frame({ height, children }: { height: number; children: ReactElement })
   );
 }
 
+/** How the monthly chart is drawn: the same data as bars and a line, or either alone. */
+type MonthlyView = "combo" | "bars" | "line";
+const MONTHLY_VIEWS: { value: MonthlyView; label: string }[] = [
+  { value: "combo", label: "Bars and line" },
+  { value: "bars", label: "Transfers only" },
+  { value: "line", label: "Pregnancy rate only" },
+];
+
 export default function ChartGallery() {
   const [data, setData] = useState<Data>({ kpis: null, trends: null, protocols: null, breeds: null, donors: null, bins: null });
   const [failed, setFailed] = useState(false);
+  const [monthlyView, setMonthlyView] = useState<MonthlyView>("combo");
 
   useEffect(() => {
     Promise.allSettled([
@@ -173,6 +176,9 @@ export default function ChartGallery() {
     });
   }, []);
 
+  // The programme's pregnancy rate: the yardstick for every above/below colour.
+  const programmeRate = data.kpis && data.kpis.with_outcome > 0 ? data.kpis.pregnant / data.kpis.with_outcome : null;
+
   // 1. Donut: outcome split.
   const outcome = useMemo(
     () => (data.kpis ? [{ name: "Pregnant", value: data.kpis.pregnant }, { name: "Open", value: data.kpis.open }] : null),
@@ -183,13 +189,13 @@ export default function ChartGallery() {
   const freshFrozen = useMemo(() => {
     const f = data.kpis?.fresh_vs_frozen;
     if (!f) return null;
-    return Object.entries(f).map(([name, v], i) => ({
+    return Object.entries(f).map(([name, v]) => ({
       name,
       rate: v.rate * 100,
       n: v.n,
-      fill: [BERRY, MANGO][i % 2],
+      role: vsProgramme(v.rate, programmeRate),
     }));
-  }, [data.kpis]);
+  }, [data.kpis, programmeRate]);
 
   // 3. Combo: monthly volume (bars) and pregnancy rate (line).
   const monthly = useMemo(
@@ -209,11 +215,11 @@ export default function ChartGallery() {
     if (!k) return null;
     const noOutcome = k.total_transfers - k.with_outcome;
     return [
-      { name: "Transfers", base: 0, value: k.total_transfers, kind: "total" },
-      { name: "No outcome yet", base: k.with_outcome, value: noOutcome, kind: "loss" },
-      { name: "With outcome", base: 0, value: k.with_outcome, kind: "total" },
-      { name: "Open", base: k.pregnant, value: k.open, kind: "loss" },
-      { name: "Pregnant", base: 0, value: k.pregnant, kind: "total" },
+      { name: "Transfers", base: 0, value: k.total_transfers, kind: "volume" },
+      { name: "No outcome yet", base: k.with_outcome, value: noOutcome, kind: "pending" },
+      { name: "With outcome", base: 0, value: k.with_outcome, kind: "volume" },
+      { name: "Open", base: k.pregnant, value: k.open, kind: "negative" },
+      { name: "Pregnant", base: 0, value: k.pregnant, kind: "positive" },
     ];
   }, [data.kpis]);
 
@@ -226,7 +232,7 @@ export default function ChartGallery() {
       key: `p${i}`,
       label: p.protocol_name.length > 22 ? `${p.protocol_name.slice(0, 21)}…` : p.protocol_name,
       n: p.n_transfers,
-      color: CHART_SERIES[i % CHART_SERIES.length],
+      color: ROLE[vsProgramme(p.pregnancy_rate, programmeRate)].ink,
     }));
     const axes = [
       { axis: "Pregnancy rate", ...Object.fromEntries(rows.map((p, i) => [`p${i}`, p.pregnancy_rate * 100])) },
@@ -234,22 +240,22 @@ export default function ChartGallery() {
       { axis: "Share of transfers", ...Object.fromEntries(rows.map((p, i) => [`p${i}`, (p.n_transfers / total) * 100])) },
     ];
     return { axes, series };
-  }, [data.protocols]);
+  }, [data.protocols, programmeRate]);
 
   // 7. Bubble scatter: donors, transfers against pregnancy rate.
   const donors = useMemo(
     () =>
       data.donors
         ?.filter((d) => d.n_transfers > 0)
-        .map((d, i) => ({
+        .map((d) => ({
           x: d.n_transfers,
           y: d.pregnancy_rate * 100,
           z: d.n_transfers,
           tag: d.donor_tag,
           breed: d.breed ?? "Unknown",
-          fill: CHART_SERIES[i % CHART_SERIES.length],
+          role: vsProgramme(d.pregnancy_rate, programmeRate),
         })) ?? null,
-    [data.donors],
+    [data.donors, programmeRate],
   );
 
   // 8. Treemap: share of transfers by breed.
@@ -258,8 +264,8 @@ export default function ChartGallery() {
       data.breeds
         ?.filter((b) => b.n_transfers > 0)
         .sort((a, b) => b.n_transfers - a.n_transfers)
-        .map((b, i) => ({ name: b.donor_breed, size: b.n_transfers, rate: b.pregnancy_rate * 100, fill: CHART_SERIES[i % CHART_SERIES.length] })) ?? null,
-    [data.breeds],
+        .map((b) => ({ name: b.donor_breed, size: b.n_transfers, rate: b.pregnancy_rate * 100, fill: ROLE[vsProgramme(b.pregnancy_rate, programmeRate)].fill, outline: ROLE[vsProgramme(b.pregnancy_rate, programmeRate)].stroke ?? "#ffffff" })) ?? null,
+    [data.breeds, programmeRate],
   );
 
   // 9. Stacked horizontal bar: protocol outcome counts.
@@ -303,18 +309,31 @@ export default function ChartGallery() {
 
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="dash-card flex flex-wrap items-center gap-x-5 gap-y-2 text-xs dash-muted xl:col-span-2">
+        <span className="font-semibold dash-heading">Colour key</span>
+        <RoleKey items={[
+          { role: "positive", label: "Pregnant, or at or above the programme rate" },
+          { role: "negative", label: "Open or not pregnant, or below the programme rate" },
+          { role: "volume", label: "Transfers or oocytes counted (a volume, not an outcome)" },
+          { role: "transfer", label: "Transfer event" },
+          { role: "pending", label: "No outcome recorded yet" },
+        ]} />
+        {programmeRate != null && (
+          <span className="dash-heading">Programme rate: {(programmeRate * 100).toFixed(1)}% (pregnant ÷ transfers with an outcome)</span>
+        )}
+      </div>
       {/* 1. Donut */}
       <Card
         title="Outcome split"
-        caption={data.kpis ? `Pregnant vs open, of ${data.kpis.with_outcome} transfers with a recorded outcome (${data.kpis.total_transfers} in total).` : "Loading outcomes…"}
+        caption={data.kpis ? `Pregnant vs open, of ${data.kpis.with_outcome} transfers with a recorded outcome (${data.kpis.total_transfers} in total). Periwinkle is pregnant, pink is open.` : "Loading outcomes…"}
       >
         {outcome ? (
           <div className="relative">
             <Frame height={260}>
               <PieChart>
                 <Pie data={outcome} dataKey="value" nameKey="name" innerRadius={62} outerRadius={96} paddingAngle={2} stroke="none">
-                  <Cell fill={BERRY} />
-                  <Cell fill={HAZELNUT} />
+                  <Cell {...roleProps("positive")} />
+                  <Cell {...roleProps("negative")} />
                 </Pie>
                 <Tooltip />
                 <Legend verticalAlign="bottom" height={28} formatter={(v) => ink(v)} />
@@ -343,7 +362,7 @@ export default function ChartGallery() {
               <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
               <RadialBar dataKey="rate" background={{ fill: "rgba(46, 54, 69, 0.05)" }} cornerRadius={8}>
                 {freshFrozen.map((f) => (
-                  <Cell key={f.name} fill={f.fill} fillOpacity={f.n < SMALL_SAMPLE ? 0.45 : 1} />
+                  <Cell key={f.name} {...roleProps(f.role)} fillOpacity={f.n < SMALL_SAMPLE ? 0.45 : 1} />
                 ))}
               </RadialBar>
               <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% (n=${(item.payload as { n: number }).n})`, (item.payload as { name: string }).name]} />
@@ -359,21 +378,42 @@ export default function ChartGallery() {
       <Card
         wide
         title="Monthly volume and pregnancy rate"
-        caption="Bars show how many embryos were transferred each month; the line shows the pregnancy rate for that month. Months with few transfers carry little weight."
+        caption="Light blue bars are the embryos transferred each month; the periwinkle line is that month's pregnancy rate. Months with few transfers carry little weight."
       >
         {monthly ? (
-          <Frame height={280}>
-            <ComposedChart data={monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-              <XAxis dataKey="month" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
-              <YAxis yAxisId="left" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
-              <YAxis yAxisId="right" orientation="right" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
-              <Tooltip formatter={(v, name) => (name === "rate" ? `${Number(v).toFixed(1)}%` : v)} />
-              <Legend verticalAlign="top" height={28} formatter={(v) => ink(v === "transfers" ? "Transfers" : "Pregnancy rate")} />
-              <Bar yAxisId="left" dataKey="transfers" fill={BERRY} radius={[6, 6, 0, 0]} name="transfers" />
-              <Line yAxisId="right" type="monotone" dataKey="rate" stroke={OLD_ROSE} strokeWidth={2.2} dot={{ r: 4 }} connectNulls name="rate" />
-            </ComposedChart>
-          </Frame>
+          <>
+            <div className="mb-2 flex flex-wrap gap-2 text-xs">
+              {MONTHLY_VIEWS.map((v) => (
+                <button
+                  key={v.value}
+                  type="button"
+                  onClick={() => setMonthlyView(v.value)}
+                  aria-pressed={monthlyView === v.value}
+                  className={`rounded-full px-3 py-1 font-semibold transition ${
+                    monthlyView === v.value ? "bg-white shadow-sm dash-heading" : "bg-black/[0.045] dash-muted hover:bg-white/70"
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            <Frame height={280}>
+              <ComposedChart data={monthly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
+                <XAxis dataKey="month" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} />
+                <YAxis yAxisId="left" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
+                <YAxis yAxisId="right" orientation="right" stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
+                <Tooltip formatter={(v, name) => (name === "rate" ? `${Number(v).toFixed(1)}%` : v)} />
+                <Legend verticalAlign="top" height={28} formatter={(v) => ink(v === "transfers" ? "Transfers" : "Pregnancy rate")} />
+                {monthlyView !== "line" && (
+                  <Bar yAxisId="left" dataKey="transfers" {...roleProps("volume")} radius={[6, 6, 0, 0]} name="transfers" />
+                )}
+                {monthlyView !== "bars" && (
+                  <Line yAxisId="right" type="monotone" dataKey="rate" stroke={ROLE.positive.fill} strokeWidth={2.2} dot={{ r: 4 }} connectNulls name="rate" />
+                )}
+              </ComposedChart>
+            </Frame>
+          </>
         ) : (
           <Empty>Loading…</Empty>
         )}
@@ -382,7 +422,7 @@ export default function ChartGallery() {
       {/* 4. Stacked area */}
       <Card
         title="Monthly pregnant vs not pregnant"
-        caption="Each month's transfers split into pregnant and not yet pregnant or no record. Stacked, so the top edge is the month's total."
+        caption="Each month's transfers split into pregnant (periwinkle) and not pregnant or no record (pink). Stacked, so the top edge is the month's total."
       >
         {stackedMonthly ? (
           <Frame height={250}>
@@ -392,8 +432,8 @@ export default function ChartGallery() {
               <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} allowDecimals={false} />
               <Tooltip />
               <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no record")} />
-              <Area type="monotone" dataKey="notPregnant" stackId="m" stroke={HAZELNUT} fill={HAZELNUT} fillOpacity={0.55} name="notPregnant" />
-              <Area type="monotone" dataKey="pregnant" stackId="m" stroke={BERRY} fill={BERRY} fillOpacity={0.7} name="pregnant" />
+              <Area type="monotone" dataKey="notPregnant" stackId="m" stroke={ROLE.negative.stroke} fill={ROLE.negative.fill} fillOpacity={1} name="notPregnant" />
+              <Area type="monotone" dataKey="pregnant" stackId="m" stroke={ROLE.positive.fill} fill={ROLE.positive.fill} fillOpacity={0.85} name="pregnant" />
             </AreaChart>
           </Frame>
         ) : (
@@ -404,8 +444,14 @@ export default function ChartGallery() {
       {/* 5. Waterfall */}
       <Card
         title="From transfers to pregnancies"
-        caption="Each rose step is a count that leaves the total: transfers with no outcome yet, and open transfers. What remains is the pregnant count."
+        caption="Light blue steps are totals. The dashed step is transfers with no outcome yet, and pink steps are open transfers. What remains, in periwinkle, is the pregnant count."
       >
+        <RoleKey items={[
+          { role: "volume", label: "Totals" },
+          { role: "pending", label: "No outcome yet" },
+          { role: "negative", label: "Open" },
+          { role: "positive", label: "Pregnant" },
+        ]} />
         {waterfall ? (
           <Frame height={250}>
             <BarChart data={waterfall} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -416,7 +462,7 @@ export default function ChartGallery() {
               <Bar dataKey="base" stackId="w" fill="transparent" isAnimationActive={false} />
               <Bar dataKey="value" stackId="w" radius={[6, 6, 0, 0]} name="value">
                 {waterfall.map((w) => (
-                  <Cell key={w.name} fill={w.kind === "loss" ? OLD_ROSE : BERRY} fillOpacity={w.kind === "loss" ? 0.7 : 1} />
+                  <Cell key={w.name} {...roleProps(w.kind as Role)} />
                 ))}
               </Bar>
             </BarChart>
@@ -430,7 +476,7 @@ export default function ChartGallery() {
       <Card
         wide
         title="Protocol profile"
-        caption="Each protocol with at least 5 transfers, on pregnancy rate, the lower bound of its 95% interval, and its share of all transfers. Further out is better on the first two; on the third, further out means more used. The scale runs 0–60%."
+        caption="Each protocol with at least 5 transfers, on pregnancy rate, the lower bound of its 95% interval, and its share of all transfers. Further out is better on the first two; on the third, further out means more used. The scale runs 0–60%. A violet outline is at or above the programme rate, rose is below it."
       >
         {radar && radar.series.length > 0 ? (
           <Frame height={320}>
@@ -453,8 +499,12 @@ export default function ChartGallery() {
       {/* 7. Bubble scatter */}
       <Card
         title="Donor performance"
-        caption="One bubble per donor: how many transfers it has had (across) against its pregnancy rate (up). Bigger bubbles have more transfers. Donors with fewer than 20 transfers are faded."
+        caption="One bubble per donor: how many transfers it has had (across) against its pregnancy rate (up). Bigger bubbles have more transfers. Periwinkle bubbles are at or above the programme rate, pink below it. Donors with fewer than 20 transfers are faded."
       >
+        <RoleKey items={[
+          { role: "positive", label: "At or above the programme rate" },
+          { role: "negative", label: "Below the programme rate" },
+        ]} />
         {donors ? (
           <Frame height={280}>
             <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
@@ -480,7 +530,7 @@ export default function ChartGallery() {
               />
               <Scatter data={donors} name="donors">
                 {donors.map((d) => (
-                  <Cell key={d.tag} fill={d.fill} fillOpacity={d.x < SMALL_SAMPLE ? 0.45 : 0.85} />
+                  <Cell key={d.tag} {...roleProps(d.role)} fillOpacity={d.x < SMALL_SAMPLE ? 0.45 : 0.85} />
                 ))}
               </Scatter>
             </ScatterChart>
@@ -493,8 +543,12 @@ export default function ChartGallery() {
       {/* 8. Treemap */}
       <Card
         title="Transfers by donor breed"
-        caption="Each block is a breed, sized by its number of transfers. The tooltip gives its pregnancy rate. Small blocks have fewer than 20 transfers."
+        caption="Each block is a breed, sized by its number of transfers. Periwinkle blocks are at or above the programme rate, pink below it. The tooltip gives its pregnancy rate. Small blocks have fewer than 20 transfers."
       >
+        <RoleKey items={[
+          { role: "positive", label: "At or above the programme rate" },
+          { role: "negative", label: "Below the programme rate" },
+        ]} />
         {treemap ? (
           <Frame height={280}>
             <Treemap data={treemap} dataKey="size" aspectRatio={4 / 3} stroke="#ffffff" isAnimationActive={false} content={<TreemapCell x={0} y={0} width={0} height={0} name="" fill="" />}>
@@ -509,7 +563,7 @@ export default function ChartGallery() {
       {/* 9. Stacked horizontal bar */}
       <Card
         title="Outcomes by protocol"
-        caption="Pregnant and not-pregnant transfer counts for each protocol, so the sample behind every rate is visible."
+        caption="Pregnant (periwinkle) and not-pregnant (pink) transfer counts for each protocol, so the sample behind every rate is visible."
       >
         {protocolStack ? (
           <Frame height={250}>
@@ -522,8 +576,8 @@ export default function ChartGallery() {
                 labelFormatter={(_l, payload) => (payload?.[0]?.payload as { full?: string } | undefined)?.full ?? ""}
               />
               <Legend verticalAlign="top" height={26} formatter={(v) => ink(v === "pregnant" ? "Pregnant" : "Not pregnant / no record")} />
-              <Bar dataKey="pregnant" stackId="p" fill={BERRY} name="pregnant" />
-              <Bar dataKey="notPregnant" stackId="p" fill={HAZELNUT} radius={[0, 6, 6, 0]} name="notPregnant" />
+              <Bar dataKey="pregnant" stackId="p" {...roleProps("positive")} name="pregnant" />
+              <Bar dataKey="notPregnant" stackId="p" {...roleProps("negative")} radius={[0, 6, 6, 0]} name="notPregnant" />
             </BarChart>
           </Frame>
         ) : (
@@ -534,8 +588,12 @@ export default function ChartGallery() {
       {/* 10. Column */}
       <Card
         title="Pregnancy rate by corpus luteum size"
-        caption="Ultrasound CL size at transfer, in millimetres. The tooltip gives the 95% interval and the number of transfers. Faded columns have fewer than 20."
+        caption="Ultrasound CL size at transfer, in millimetres. Periwinkle columns are at or above the programme rate, pink below it. The tooltip gives the 95% interval and the number of transfers. Faded columns have fewer than 20."
       >
+        <RoleKey items={[
+          { role: "positive", label: "At or above the programme rate" },
+          { role: "negative", label: "Below the programme rate" },
+        ]} />
         {bins ? (
           <Frame height={250}>
             <BarChart data={bins} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -544,8 +602,8 @@ export default function ChartGallery() {
               <YAxis stroke={AXIS} tickLine={false} axisLine={false} fontSize={11} unit="%" domain={[0, 100]} />
               <Tooltip formatter={(v, _n, item) => [`${Number(v).toFixed(1)}% · n=${(item.payload as { n: number }).n} · CI ${(item.payload as { ci: string }).ci}`, "Pregnancy rate"]} />
               <Bar dataKey="rate" radius={[6, 6, 0, 0]} name="rate">
-                {bins.map((b, i) => (
-                  <Cell key={b.range} fill={[LIME, GRAPE, MANGO, WATERMELON, OLD_ROSE, BERRY][i % 6]} fillOpacity={b.n < SMALL_SAMPLE ? 0.45 : 1} />
+                {bins.map((b) => (
+                  <Cell key={b.range} {...roleProps(vsProgramme(b.rate == null ? null : b.rate / 100, programmeRate))} fillOpacity={b.n < SMALL_SAMPLE ? 0.45 : 1} />
                 ))}
               </Bar>
             </BarChart>

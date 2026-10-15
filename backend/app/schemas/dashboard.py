@@ -1,6 +1,7 @@
 """Response schemas for the homepage dashboard endpoints (live-query, not cached)."""
 
 from datetime import date
+from datetime import date as Date
 from typing import Optional
 
 from pydantic import BaseModel
@@ -77,7 +78,8 @@ class PipelineRow(BaseModel):
     stage: str
     entity_id: int
     label: str
-    date: Optional[date] = None
+    # Named Date in the import: a field called `date` would otherwise shadow the type here.
+    date: Optional[Date] = None
     detail: Optional[str] = None
 
 

@@ -13,13 +13,11 @@ import {
   Circle,
   ClipboardCheck,
   Dna,
-  Download,
   Droplets,
   FlaskConical,
   Info,
   Leaf,
   RotateCcw,
-  Save,
   ShieldCheck,
   Sparkles,
   Stethoscope,
@@ -829,8 +827,6 @@ function ResultPanel({
   modelQuality,
   bandTone,
   dataQuality,
-  onOpenAssistant,
-  onDecisionSupport,
 }: {
   loading: boolean;
   prediction: PredictionResult | null;

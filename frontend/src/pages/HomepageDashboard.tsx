@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 import api from "@/lib/api";
+import { MEANING } from "@/lib/chartPalette";
 import { useAuth } from "@/contexts/AuthContext";
 import { getPermissions, getRoleDisplayName, normalizeRole, type CanonicalRole } from "@/lib/roleRoutes";
 import type {
@@ -29,6 +30,15 @@ import InsightCards from "@/components/dashboard/InsightCards";
 import PerformancePanel from "@/components/dashboard/PerformancePanel";
 import DataQualityPanel from "@/components/dashboard/DataQualityPanel";
 
+/** Trend bucket size. "auto" follows the date range; the others drill down or roll up. */
+type Grain = "auto" | "day" | "week" | "month";
+const GRAIN_OPTIONS: { value: Grain; label: string }[] = [
+  { value: "auto", label: "Auto" },
+  { value: "day", label: "Day" },
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+];
+
 type QCSummary = {
   total_alerts: number;
   anomalous_batches: number;
@@ -55,7 +65,7 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       funnelStages: ["Oocytes Recovered", "Mature Oocytes", "Cleaved Embryos", "Blastocysts"],
       operationsTiles: ["opu_sessions_today", "ivf_batches_in_culture", "embryos_pending_grading"],
       pipelineStages: ["opu", "ivf", "grading"],
-      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: "#8d97c4" }],
+      trendMetrics: [{ metric: "cleavage_rate", title: "Cleavage Rate", color: MEANING.process }],
       performanceDimensions: ["donor", "sire"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -69,7 +79,7 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       funnelStages: ["Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"],
       operationsTiles: ["transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"],
       pipelineStages: ["transfer_scheduled", "pending_pc"],
-      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#b98ea8" }],
+      trendMetrics: [{ metric: "pregnancy_rate", title: "Pregnancy Rate", color: MEANING.positive }],
       performanceDimensions: ["protocol", "technician"],
       showIntelligence: canViewAnalytics,
       showDataQuality: canViewAllData,
@@ -92,8 +102,8 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
       operationsTiles: [],
       pipelineStages: [],
       trendMetrics: [
-        { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#b98ea8" },
-        { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#6aa5b8" },
+        { metric: "pregnancy_rate", title: "Pregnancy Rate", color: MEANING.positive },
+        { metric: "blastocyst_rate", title: "Blastocyst Rate", color: MEANING.process },
       ],
       performanceDimensions: ["donor", "sire", "protocol", "technician"],
       showIntelligence: true,
@@ -103,8 +113,8 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean, canView
   // admin and viewer see everything
   return {
     trendMetrics: [
-      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: "#b98ea8" },
-      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: "#6aa5b8" },
+      { metric: "pregnancy_rate", title: "Pregnancy Rate", color: MEANING.positive },
+      { metric: "blastocyst_rate", title: "Blastocyst Rate", color: MEANING.process },
     ],
     performanceDimensions: ["donor", "sire", "protocol", "technician"],
     showIntelligence: canViewAnalytics,
@@ -134,6 +144,7 @@ export default function HomepageDashboard() {
   const [alerts, setAlerts] = useState<DashboardAlertsResponse | null>(null);
   const [dataQuality, setDataQuality] = useState<DashboardDataQualityResponse | null>(null);
   const [trends, setTrends] = useState<Record<string, DashboardTrendResponse>>({});
+  const [grain, setGrain] = useState<Grain>("auto");
   const [qcSummary, setQcSummary] = useState<QCSummary | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -183,16 +194,20 @@ export default function HomepageDashboard() {
   }, [roleConfig.showDataQuality]);
 
   useEffect(() => {
+    // A failed level (e.g. daily points over a long range) leaves that chart without data
+    // rather than failing the others.
+    const level = grain === "auto" ? {} : { granularity: grain };
     Promise.all(
       roleConfig.trendMetrics.map((t) =>
         api
-          .get<DashboardTrendResponse>("/dashboard/trends", { params: { ...filters, metric: t.metric } })
+          .get<DashboardTrendResponse>("/dashboard/trends", { params: { ...filters, ...level, metric: t.metric } })
           .then((res) => [t.metric, res.data] as const)
+          .catch(() => null)
       )
     ).then((entries) => {
-      setTrends(Object.fromEntries(entries));
+      setTrends(Object.fromEntries(entries.filter((e): e is readonly [string, DashboardTrendResponse] => e !== null)));
     });
-  }, [filters, roleConfig.trendMetrics]);
+  }, [filters, grain, roleConfig.trendMetrics]);
 
   const filteredAlerts = alerts
     ? roleConfig.alertFilter
@@ -306,6 +321,24 @@ export default function HomepageDashboard() {
         </div>
       )}
 
+      <div className="flex flex-wrap items-center gap-2 text-xs dash-muted">
+        <span className="font-medium">Drill level</span>
+        {GRAIN_OPTIONS.map((g) => (
+          <button
+            key={g.value}
+            type="button"
+            onClick={() => setGrain(g.value)}
+            aria-pressed={grain === g.value}
+            className={`rounded-full px-3 py-1 font-semibold transition ${
+              grain === g.value ? "bg-white shadow-sm dash-heading" : "bg-black/[0.045] dash-muted hover:bg-white/70"
+            }`}
+          >
+            {g.label}
+          </button>
+        ))}
+        <span className="opacity-80">Day view covers a year or less.</span>
+      </div>
+
       <div className={`grid grid-cols-1 gap-5 ${roleConfig.trendMetrics.length > 1 ? "xl:grid-cols-2" : ""}`}>
         {roleConfig.trendMetrics.map((t) => (
           <div key={t.metric} className="dash-card">
@@ -317,7 +350,12 @@ export default function HomepageDashboard() {
 
       <div className="dash-card">
         <h3 className="mb-4 text-base font-semibold dash-heading">Performance</h3>
-        <PerformancePanel filters={filters} dimensions={roleConfig.performanceDimensions} />
+        <PerformancePanel
+          filters={filters}
+          dimensions={roleConfig.performanceDimensions}
+          onSlice={(key, id) => setFilters((f) => ({ ...f, [key]: id ?? undefined }))}
+          visibleFilters={roleConfig.filterFields}
+        />
       </div>
 
       {permissions.canViewAnalytics && <ChartGallery />}

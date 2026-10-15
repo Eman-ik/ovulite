@@ -1,19 +1,39 @@
 import type { ReactNode } from "react";
+import { ROLE, type Role } from "@/lib/chartPalette";
 
 export type KpiSparklinePoint = { bucket: string; value: number | null };
 export type KpiDelta = { pct: number; direction: "up" | "down" | "flat"; suffix?: string };
+export type KpiColor = Role;
 
-/** Soft pastels — each metric gets its own identity without shouting. */
-export const KPI_COLORS = {
-  rose: { solid: "#FFA7D7", soft: "rgba(255, 167, 215, 0.2)", ink: "#FFA7D7" },
-  blue: { solid: "#66CAC8", soft: "rgba(102, 202, 200, 0.2)", ink: "#66CAC8" },
-  green: { solid: "#C8E6A0", soft: "rgba(200, 230, 160, 0.2)", ink: "#C8E6A0" },
-  violet: { solid: "#D8BBF1", soft: "rgba(216, 187, 241, 0.2)", ink: "#D8BBF1" },
-  amber: { solid: "#FFB598", soft: "rgba(255, 181, 152, 0.2)", ink: "#FFB598" },
-  teal: { solid: "#CFE8FF", soft: "rgba(207, 232, 255, 0.2)", ink: "#CFE8FF" },
-  pink: { solid: "#C08081", soft: "rgba(192, 128, 129, 0.2)", ink: "#C08081" },
-  olive: { solid: "#D8C3A5", soft: "rgba(216, 195, 165, 0.2)", ink: "#D8C3A5" },
-};
+interface KpiCardProps {
+  title: string;
+  value: ReactNode;
+  subtitle?: string;
+  comparisonLabel?: string;
+  icon?: ReactNode;
+  delta?: KpiDelta;
+  sparkline?: KpiSparklinePoint[] | null;
+  color?: KpiColor;
+}
+
+/**
+ * KPI card colours carry meaning (see MEANING in lib/chartPalette.ts).
+ * solid: the role colour. ink: a darker shade of it for the sparkline, since the
+ * light swatches fail 3:1 on white. icon: text on the solid, chosen for contrast.
+ */
+export const KPI_COLORS = Object.fromEntries(
+  (Object.keys(ROLE) as Role[]).map((role) => [
+    role,
+    { solid: ROLE[role].fill, soft: `${ROLE[role].fill}55`, ink: ROLE[role].ink, icon: ROLE[role].icon },
+  ]),
+) as Record<Role, { solid: string; soft: string; ink: string; icon: string }>;
+
+/** Names the sparkline's granularity from its bucket labels: 2026-W27, 2026-07-04 or 2026-07. */
+function sparklineLabel(points: KpiSparklinePoint[]): string {
+  const bucket = points[0]?.bucket ?? "";
+  const grain = bucket.includes("W") ? "weekly" : bucket.length === 10 ? "daily" : "monthly";
+  return `${grain} trend, last ${points.length} ${grain === "daily" ? "days" : grain === "weekly" ? "weeks" : "months"}`;
+}
 
 function Sparkline({ points, color }: { points: KpiSparklinePoint[]; color: string }) {
   const values = points.map((p) => p.value).filter((v): v is number => v !== null);
@@ -66,16 +86,24 @@ export default function KpiCard({
   delta,
   sparkline,
   comparisonLabel,
-  color = "green",
+  color = "volume",
 }: KpiCardProps) {
   const palette = KPI_COLORS[color];
 
   return (
-    <div className="dash-card ov-hover-lift !p-5">
+    <div
+      className="dash-card ov-hover-lift !p-5"
+      style={{ background: `linear-gradient(135deg, ${palette.soft}, rgba(255, 255, 255, 0.74))` }}
+    >
       <div className="flex items-start justify-between">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: palette.soft, color: "#596070" }}
+          style={{
+            background: palette.solid,
+            color: palette.icon,
+            boxShadow: ROLE[color].stroke ? `inset 0 0 0 1.25px ${ROLE[color].stroke}` : undefined,
+            borderStyle: ROLE[color].dash ? "dashed" : undefined,
+          }}
         >
           {icon}
         </div>
@@ -99,7 +127,15 @@ export default function KpiCard({
       <p className="mt-5 text-xs font-medium uppercase tracking-wide dash-muted">{title}</p>
       <h2 className="mt-1.5 text-[32px] font-semibold leading-none dash-heading">{value}</h2>
       <p className="mt-2 text-xs dash-muted">{comparisonLabel ?? subtitle}</p>
-      {sparkline && sparkline.length > 1 ? <Sparkline points={sparkline} color={palette.ink} /> : null}
+      {sparkline && sparkline.length > 1 ? (
+        <>
+          <Sparkline points={sparkline} color={palette.ink} />
+          <p className="mt-1 flex items-center gap-1.5 text-[11px] dash-muted">
+            <span aria-hidden className="inline-block h-0.5 w-4 rounded" style={{ background: palette.ink }} />
+            {sparklineLabel(sparkline)}
+          </p>
+        </>
+      ) : null}
     </div>
   );
 }
