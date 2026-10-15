@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SilkBackdrop } from "@/components/backdrop/SilkBackdrop";
 import { ROLE_PERMISSIONS, getPermissions, getRoleDisplayName } from "@/lib/roleRoutes";
 import {
   LayoutDashboard,
@@ -97,15 +98,6 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     ],
   },
 ];
-
-// The sign-in background, carried through the whole app behind a light wash
-// so text and cards stay readable.
-const APP_BACKGROUND: React.CSSProperties = {
-  backgroundImage: "linear-gradient(rgba(234, 241, 241, 0.3), rgba(234, 241, 241, 0.3)), url(/auth/login-bg.png)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundAttachment: "fixed",
-};
 
 export default function AppLayout() {
   const { logout, user } = useAuth();
@@ -230,7 +222,8 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="ov-app min-h-screen text-[var(--foreground)] lg:flex lg:gap-5 lg:p-4" style={APP_BACKGROUND}>
+    <div className="ov-app relative isolate min-h-screen text-[var(--foreground)] lg:flex lg:gap-5 lg:p-4">
+      <SilkBackdrop />
       {/* Desktop sidebar */}
       <aside className="sidebar-glow hidden w-[264px] shrink-0 flex-col rounded-3xl border border-[var(--sidebar-border)] bg-white/55 backdrop-blur-xl lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-2rem)]">
         <SidebarBody />

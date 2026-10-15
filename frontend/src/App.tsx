@@ -5,7 +5,6 @@ import AppLayout from "@/layouts/AppLayout";
 import OvuliteLandingPage from "@/pages/OvuliteLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
-import LoginDebugPage from "@/pages/LoginDebugPage";
 import DashboardPage from "@/pages/DashboardPage";
 import DataEntryPage from "@/pages/DataEntryPage";
 import TransferFormPage from "@/pages/TransferFormPage";
@@ -40,7 +39,6 @@ function App() {
             <Route path="/" element={<OvuliteLandingPage />} />
             <Route path="/landing" element={<OvuliteLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/login/debug" element={<LoginDebugPage />} />
             <Route path="/signup" element={<SignupPage />} />
             
             

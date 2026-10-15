@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
-import { AuthBackdrop } from "@/components/auth/AuthBackdrop";
+import { SilkBackdrop } from "@/components/backdrop/SilkBackdrop";
 import api from "@/lib/api";
 
 const inputClass =
@@ -66,10 +66,10 @@ export function SignupPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-10">
-      <AuthBackdrop />
+    <div className="relative isolate flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-10">
+      <SilkBackdrop />
       <div
-        className="relative z-10 w-full max-w-[400px] rounded-[32px] p-8 md:p-9"
+        className="relative z-10 w-full max-w-[500px] rounded-[36px] p-8 sm:p-10 md:p-12"
         style={{
           background: "rgba(255, 255, 255, 0.3)",
           backdropFilter: "blur(22px) saturate(140%)",
@@ -80,7 +80,7 @@ export function SignupPage() {
         }}
       >
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-[30px] font-medium tracking-tight text-[#0F1B24]">Sign up</h1>
+          <h1 className="text-[36px] font-medium tracking-tight text-[#0F1B24]">Sign up</h1>
           <button
             type="button"
             onClick={() => navigate("/login")}

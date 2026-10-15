@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { SilkBackdrop } from "@/components/backdrop/SilkBackdrop";
 import {
   motion,
   type MotionValue,
@@ -109,7 +110,7 @@ export default function OvuliteLandingPage() {
   return (
     <div
       ref={containerRef}
-      className="ov-root relative min-h-screen w-full overflow-x-hidden"
+      className="ov-root relative isolate min-h-screen w-full overflow-x-hidden"
       style={{
         fontFamily: "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif",
         // Explicit rather than inherited: --background is light so in-app
@@ -128,7 +129,7 @@ export default function OvuliteLandingPage() {
       <GrainOverlay />
       <NoiseGradient />
       <LabStoryBackground />
-      <AmbientBubbles />
+      <SilkBackdrop />
       {!reduceMotion && <RollingCharacter />}
 
       <Header
@@ -704,40 +705,8 @@ function HitBubble({ p, t, x, y }: { p: MotionValue<number>; t: number; x: numbe
   );
 }
 
-// Ambient bubbles that rise through the background, not on the path.
-const AMBIENT_BUBBLES = [
-  { left: "6%", top: "22%", size: 26, dur: 16, delay: 0 },
-  { left: "18%", top: "58%", size: 16, dur: 13, delay: 3 },
-  { left: "42%", top: "14%", size: 20, dur: 18, delay: 6 },
-  { left: "63%", top: "36%", size: 30, dur: 17, delay: 2 },
-  { left: "80%", top: "52%", size: 14, dur: 12, delay: 5 },
-  { left: "92%", top: "24%", size: 22, dur: 19, delay: 1 },
-  { left: "34%", top: "78%", size: 18, dur: 14, delay: 4 },
-  { left: "74%", top: "86%", size: 24, dur: 16, delay: 7 },
-];
 
-function AmbientBubbles() {
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {AMBIENT_BUBBLES.map((b, i) => (
-        <div
-          key={i}
-          className="lp-bubble-rise absolute rounded-full"
-          style={{
-            left: b.left,
-            top: b.top,
-            width: b.size,
-            height: b.size,
-            background:
-              "radial-gradient(circle at 32% 28%, rgba(255,255,255,0.9) 0%, rgba(214,236,255,0.45) 45%, rgba(255,255,255,0.1) 100%)",
-            border: "1px solid rgba(255,255,255,0.7)",
-            animation: `lpBubbleRise ${b.dur}s ease-in-out ${b.delay}s infinite`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+
 
 function GrainOverlay() {
   return <div className="ov-grain" />;

@@ -77,17 +77,16 @@ Adopted 2026-10-15 for the whole website, replacing Minimal Green. Reference swa
   colours; import from there. Axes, gridlines and status colours are not part of it. The
   landing page's own charts keep the photo-sampled colours it was given. The pastels are
   light, so strokes sit near 1.5:1 on white. Charts rely on hue plus labels.
-- **App background:** after sign-in, `AppLayout` shows the spheres image (`/auth/login-bg.png`)
-  behind the whole app under a 30% light wash. Cards (`.dash-card`) are 74% white glass with blur,
-  and the sidebar and mobile top bar are glass, so the image shows through. Re-run the contrast check
-  if you change the wash or card opacity.
+- **Site background:** `components/backdrop/SilkBackdrop.tsx` is the one shared background. It shows the silk
+  picture (`/backdrop/silk.jpg`) with a light wash, and twelve glassy bubbles of different sizes drifting over
+  it. It is a fixed layer at z -10, so its parent needs the `isolate` class. It is used on login, signup, the
+  app shell and the landing page. Cards keep their glass (74% white, blurred), so text stays readable.
 - **Retired:** the Minimal Green values (`#051F20`, `#235347`, `#8EB69B`, `#DAF1DE`, `#f2f7f3` and
   the green rgba family). Do not reintroduce them.
 - **Scoping:** `.dash-blue` (dashboard) is now redundant with the global tokens but harmless.
 - **Landing page** keeps its black-text rule and its own scroll character and background story.
 - **Companion character** is a separate system (below), coloured in lilac and blue.
-- **Login and signup** share the same light frosted-glass design over the spheres background
-  (`/auth/login-bg.png`). Signup still shows the Google button, which login no longer does.
+- **Login and signup** share the same light frosted-glass design over the site background. Signup still shows the Google button, which login no longer does.
 - Verified: login, signup, dashboard, cases, laboratory and landing had zero AA failures on the
   gradient-aware check. Run the same check after any colour change.
 
@@ -96,8 +95,8 @@ Adopted 2026-10-15 for the whole website, replacing Minimal Green. Reference swa
 The lilac companion that walked and reacted to actions on app and auth pages was removed on
 2026-10-15 at the owner's request. It is no longer rendered anywhere. The landing page keeps its own
 scroll-driven character (`OvuliteLandingPage.tsx`, `RollingCharacter` and `HitBubble`), which is a
-separate piece of code. Login and signup use `components/auth/AuthBackdrop.tsx`: the sphere picture
-drifts slowly, with rising glints, and stops under reduced motion.
+separate piece of code. Login and signup use the shared `components/backdrop/SilkBackdrop.tsx`
+(see the site background note above).
 
 ## House style
 
