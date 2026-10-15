@@ -53,122 +53,51 @@ entry to `.claude/launch.json` and use the preview tooling.
 - Model training reads `docs/dataset/ovulite_cleaned_et_data.csv`, **not the database**. Seeded
   demo rows therefore cannot reach the model.
 
-## Design system — "Minimal Green"
+## Design system — blue-grey palette ("Sebum to Antibiotics")
 
-`#051F20` `#0B2B26` `#163832` `#235347` `#8EB69B` `#DAF1DE`
+Adopted 2026-10-15 for the whole website, replacing Minimal Green. Reference swatches:
+`#596070` Sebum, `#757F99` Cartilage, `#94A9BE` Substantia Grisea, `#B2CDDF` Lymphatic,
+`#C9D9E6` Neutrophils, `#EAF1F1` Antibiotics.
 
-- **App = light surfaces** on green tokens (`frontend/src/index.css`): background `#f2f7f3`,
-  card `#ffffff`, primary `#235347`, accent `#8EB69B`, muted text `#5c7268`.
-- **Landing page and auth pages = dark**, `#051F20` ground with `#DAF1DE` text.
-- **Dark is the default theme.** `ThemeContext` and both auth pages treat an absent stored
-  value as dark; only an explicit `"light"` opts out.
-- `#235347` and `#163832` are **surface colours only** — at 1.96:1 on the dark ground they are
-  invisible as text. Anything rendered as `color:` uses `#DAF1DE`, `#8EB69B`, `#c6dccd` or `#5c7268`.
-- Semantic colours, already tuned to pass AA: warning `#7a5a12`, danger `#9d3730`,
-  info/blue `#1f5468` and `#35748a`.
-- Fonts: `Plus Jakarta Sans` (display), `Inter` (body), `Instrument Serif` (accent italic).
-- No bubble/`GlassBubbles` animation on the auth pages — it was removed deliberately.
+- **Theme tokens** are in `frontend/src/index.css` under `:root` (light) and `[data-theme="dark"]`.
+  Components use the tokens, so changing a token changes every screen that uses it.
+- **Text** is `#2E3645` on the light grounds, or `#EAF1F1` on dark fills. `#3F4758` for secondary
+  text. Never Cartilage `#757F99` as text. Never light text on Lymphatic or Neutrophils.
+- **Status colours keep their meaning** and are not part of the palette: danger `#9d3730`, warning
+  `#7a5a12`, info `#35748a`. Do not recolour them to match the theme.
+- **Dashboard chart gallery:** `components/dashboard/ChartGallery.tsx` has ten programme-wide charts of
+  nine types: donut, radial, combo bar-and-line, stacked area, waterfall, radar, bubble scatter, treemap,
+  stacked bars, and columns. They use real transfer records only. The lab-side funnel (oocytes, embryos,
+  live births) comes from the demo seeder, so the gallery leaves it out. The dashboard's own Reproductive
+  Funnel still shows those seeded figures. The gallery shows only for roles with `canViewAnalytics`. It
+  ignores the dashboard filters, and its captions say so. Bars, segments, bubbles and columns from fewer
+  than 20 transfers are drawn faded. Legend, tooltip and treemap text is set in ink.
+- **Chart palette:** all chart series colours come from `frontend/src/lib/chartPalette.ts`
+  (`CHART_SERIES`, from the pastel Fruit Salad and swatch references). Don't hard-code chart
+  colours; import from there. Axes, gridlines and status colours are not part of it. The
+  landing page's own charts keep the photo-sampled colours it was given. The pastels are
+  light, so strokes sit near 1.5:1 on white. Charts rely on hue plus labels.
+- **App background:** after sign-in, `AppLayout` shows the spheres image (`/auth/login-bg.png`)
+  behind the whole app under a 30% light wash. Cards (`.dash-card`) are 74% white glass with blur,
+  and the sidebar and mobile top bar are glass, so the image shows through. Re-run the contrast check
+  if you change the wash or card opacity.
+- **Retired:** the Minimal Green values (`#051F20`, `#235347`, `#8EB69B`, `#DAF1DE`, `#f2f7f3` and
+  the green rgba family). Do not reintroduce them.
+- **Scoping:** `.dash-blue` (dashboard) is now redundant with the global tokens but harmless.
+- **Landing page** keeps its black-text rule and its own scroll character and background story.
+- **Companion character** is a separate system (below), coloured in lilac and blue.
+- **Login and signup** share the same light frosted-glass design over the spheres background
+  (`/auth/login-bg.png`). Signup still shows the Google button, which login no longer does.
+- Verified: login, signup, dashboard, cases, laboratory and landing had zero AA failures on the
+  gradient-aware check. Run the same check after any colour change.
 
-## Embryo grading — the one model that works
+## Companion character: removed
 
-`POST /grade/embryo` serves a **morphometric tabular model**, not the CNN.
-`ml/artifacts/grading/tabular_extracted_v1/` — random forest over 36 features that
-`ml/grading/morphometrics.py` computes from the raw image (Hough-located disc,
-watershed ICM, masked GLCM texture, grey-level statistics).
-
-Measured on the same held-out 72 images, identical split and seed:
-
-| model | accuracy | macro F1 | Grade 2 recall |
-|---|---|---|---|
-| tabular, our extractor (**served**) | 0.597 | 0.564 | 0.385 |
-| tabular, Rocha's published features | 0.625 | 0.611 | 0.423 |
-| EfficientNet-B0 + CORAL + fusion | 0.556 | 0.501 | 0.269 |
-| EfficientNet-B0 (previously served) | 0.542 | 0.475 | 0.192 |
-| majority class | 0.403 | — | — |
-
-**Quote 0.587 ± 0.041**, the cross-validated figure. The 72-image test number carries
-a ±0.11 interval either way.
-
-- **The ceiling is human disagreement.** Three graders agree unanimously on only 58.7%
-  of these images (pairwise kappa 0.411-0.727). Anything near 0.75 is the label's noise
-  floor, not headroom. Quote the kappa whenever quoting accuracy.
-- Labels: Rocha et al. (2017), already in the repo. Modal grade 112/173/194 across
-  grades 1/2/3 — real variance, unlike `embryos.grade` in the app database, which is
-  still 489/489 Grade 1 and remains unusable as a label.
-- **Never put the sanitiser before the measurement.** `_validate_and_normalize_image`
-  re-encodes to JPEG q95 to strip EXIF; measuring that copy instead of the original
-  flipped the grade on 3 of 39 images and shifted confidence by up to 0.47. Validate for
-  storage, measure the original pixels.
-- `heatmap_available` is **false** on this endpoint. Grad-CAM belongs to the CNN, which
-  still backs `/grade/embryo-with-heatmap`.
-- Ordinal loss (CORAL) was tried and did not help: arms at
-  `ml/artifacts/grading/ablation_*`, summary in `ablation_summary.json`. All CNN arms
-  fall within noise of each other.
-- **Untested outside Rocha's framing.** All 479 images are centred, uniformly lit and
-  1280x1024. A real lab photo has never been through this. Total failure returns 422;
-  silent degradation on awkward framing is unmeasured.
-
-## Demo data
-
-`backend/scripts/seed_demo_data.py` fills the gaps that make screens render empty (OPU oocyte
-counts, IVF lab numbers, IVM batches, embryo observations, recipient evaluations, protocol
-steps, synchronisation enrolments, PC2 checks, calving records, QC anomalies).
-
-- Every row it writes is tagged `[demo-seed v1]` in `notes`; `--purge` removes exactly those.
-- It never overwrites a recorded value and never touches the outcome spine (`et_date`,
-  `pc1_result`, embryo/donor/sire identity), so headline rates cannot move.
-- `calving_records` is the one table where it invents an outcome — no calving was ever
-  recorded for this programme, so **every live-birth figure in the app is synthetic**.
-- `backend/scripts/generate_predictions.py` produces real predictions by calling the live
-  `POST /predict/pregnancy`, then copies `pc1_result` into `actual_outcome`.
-- Take a `pg_dump` into `backups/` before any destructive data work.
-
-## What the model actually does
-
-The pipeline works end to end. The discrimination does not.
-
-- Deployed artifact `ml/artifacts/v1.0.0`, LogisticRegression, 35 features, holdout ROC-AUC
-  **0.510**; XGBoost 0.484; TabPFN is not installed and silently falls back to CalibratedLR.
-- Holdout confusion matrix is `tp=0` for all three models — they predict the majority class
-  for every case, so precision and recall for pregnancy are zero.
-- Grouped CV by donor: 0.552 / 0.572 against a shuffled-label null of 0.501 ± 0.040 /
-  0.503 ± 0.049, permutation **p = 0.143 / 0.190**. Events per feature 8.5.
-- **Retraining does not fix this** — `ml/permutation_test.py` and `ml/diagnose_split.py` already
-  establish it under pooled CV, within-regime CV and rolling origin. Do not propose a new split
-  as a remedy; more labelled outcomes are the only thing that would change the answer.
-- Live predictions span 0.112–0.238 (sd 0.018) against a **28.6%** base rate (136 pregnant of
-  476 scored rows in `ovulite_cleaned_et_data.csv`; the raw ET CSV agrees at 136/470 = 28.9%).
-  An earlier note here said 38.6% — wrong by ten points, and it never reached the code. Every
-  case still lands in the "Low" band and the Brier score is still worse than always predicting
-  the base rate; the band threshold is 0.35 and the predictions top out at 0.238.
-  The prediction page states this above the estimate rather than hiding it.
-
-## Lab QC (M7)
-
-`python -m ml.qc.acceptance_demo` walks the whole chain in one run — no data, normal data,
-injected faults, detection, alert contents — and prints a verdict. Run it before claiming
-anything about QC.
-
-- **The reporting contract holds. The detection does not.** Inject 5 faults across 4
-  technician-month batches and Isolation Forest finds **1**. Sweeping contamination from
-  0.10 to 0.42 (flagging 5 of 12 batches) finds the same one and adds four false positives,
-  so it is not a flag-budget problem — 12 batches over 4 technicians is no cohort to judge
-  against. Do not "fix" this by retuning contamination.
-- **Control charts cannot run on this data.** Only 3–4 months clear `MIN_MONTHLY_RECORDS`,
-  against `MIN_CHART_PERIODS = 8`. Below that an EWMA chart tests points against a baseline
-  estimated from those same points and flags its own noise; it was calling a
-  1.3-percentage-point move an out-of-control pregnancy rate. The chart now reports
-  `status: "insufficient_history"` and the dashboard says so instead of drawing an empty axis.
-- The first EWMA point is never alerted on: `ewma[0]` is seeded with `values[0]`, so point 0
-  is tested against a statistic it defines.
-- `pandas.DataFrame.get(name, default)` returns the **scalar** default when the column is
-  missing, not a Series. This bit twice: it killed `load_et_data` on any CSV missing a column,
-  and `verify_detection` did `df[df.get("is_synthetic", False) == True]` → `df[False]` →
-  KeyError, so the synthetic-verification path had never once executed.
-- QC reads the transfer-level ET CSV. Cleavage and blastocyst rates are **not** in its feature
-  space — they live on `ivf_batches` and every one of those numbers is demo-seeded.
-- Alerts carry `metric`, `metric_value`, `baseline_value`, `period` and `severity`, and state
-  no cause. Protocol, technician and month move together in this dataset; it cannot attribute.
+The lilac companion that walked and reacted to actions on app and auth pages was removed on
+2026-10-15 at the owner's request. It is no longer rendered anywhere. The landing page keeps its own
+scroll-driven character (`OvuliteLandingPage.tsx`, `RollingCharacter` and `HitBubble`), which is a
+separate piece of code. Login and signup use `components/auth/AuthBackdrop.tsx`: the sphere picture
+drifts slowly, with rising glints, and stops under reduced motion.
 
 ## House style
 

@@ -140,8 +140,8 @@ export default function AttributionPanel({ data }: { data: AttributionResponse |
           <div
             className="flex h-11 w-11 items-center justify-center rounded-2xl"
             style={{
-              background: rose ? "rgba(142,182,155,0.2)" : "rgba(185,142,168,0.2)",
-              color: rose ? "#235347" : "#9d3730",
+              background: rose ? "rgba(148, 169, 190,0.2)" : "rgba(185,142,168,0.2)",
+              color: rose ? "#3F4758" : "#9d3730",
             }}
           >
             {rose ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}

@@ -619,7 +619,7 @@ export default function GradingPage() {
                     )}
 
                     {savedNotice && (
-                      <p className="rounded-lg bg-[rgba(142,182,155,0.16)] px-3 py-2 text-xs text-[#235347]">
+                      <p className="rounded-lg bg-[rgba(148, 169, 190,0.16)] px-3 py-2 text-xs text-[#3F4758]">
                         {savedNotice}
                       </p>
                     )}

@@ -31,12 +31,12 @@ export default function OperationsPanel({
             <div className="flex items-start justify-between gap-2">
               <p className="text-[11px] font-medium uppercase tracking-wide dash-muted">{tile.label}</p>
               {data.estimated_fields.includes(tile.key) && (
-                <span className="shrink-0 rounded-full bg-[rgba(208,164,94,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
+                <span className="shrink-0 rounded-full bg-[rgba(148, 169, 190,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
                   est.
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-2xl font-semibold" style={{ color: palette.ink }}>
+            <p className="mt-1.5 text-2xl font-semibold" style={{ color: "#2E3645" }}>
               {data[tile.key] as number}
             </p>
           </div>

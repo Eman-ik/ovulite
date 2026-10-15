@@ -98,6 +98,15 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   },
 ];
 
+// The sign-in background, carried through the whole app behind a light wash
+// so text and cards stay readable.
+const APP_BACKGROUND: React.CSSProperties = {
+  backgroundImage: "linear-gradient(rgba(234, 241, 241, 0.3), rgba(234, 241, 241, 0.3)), url(/auth/login-bg.png)",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundAttachment: "fixed",
+};
+
 export default function AppLayout() {
   const { logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -160,7 +169,7 @@ export default function AppLayout() {
       <div className="flex items-center gap-3 px-5 py-5">
         <div
           className="ov-pulse-ring flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl"
-          style={{ background: "linear-gradient(135deg, #8EB69B, #235347)" }}
+          style={{ background: "linear-gradient(135deg, #94A9BE, #596070)" }}
         >
           <img src={ovuliteLogo} alt="" className="h-full w-full object-cover" />
         </div>
@@ -221,9 +230,9 @@ export default function AppLayout() {
   );
 
   return (
-    <div className="ov-app min-h-screen bg-[var(--background)] text-[var(--foreground)] lg:flex lg:gap-5 lg:p-4">
+    <div className="ov-app min-h-screen text-[var(--foreground)] lg:flex lg:gap-5 lg:p-4" style={APP_BACKGROUND}>
       {/* Desktop sidebar */}
-      <aside className="sidebar-glow hidden w-[264px] shrink-0 flex-col rounded-3xl border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-2rem)]">
+      <aside className="sidebar-glow hidden w-[264px] shrink-0 flex-col rounded-3xl border border-[var(--sidebar-border)] bg-white/55 backdrop-blur-xl lg:sticky lg:top-4 lg:flex lg:h-[calc(100vh-2rem)]">
         <SidebarBody />
       </aside>
 
@@ -250,7 +259,7 @@ export default function AppLayout() {
       {/* Main column */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar — global search + actions */}
-        <header className="sticky top-0 z-30 flex items-center gap-3 bg-[var(--background)]/85 px-3 py-3 backdrop-blur-xl lg:static lg:bg-transparent lg:px-0 lg:pb-4 lg:pt-0 lg:backdrop-blur-none">
+        <header className="sticky top-0 z-30 flex items-center gap-3 bg-white/50 px-3 py-3 backdrop-blur-xl lg:static lg:bg-transparent lg:px-0 lg:pb-4 lg:pt-0 lg:backdrop-blur-none">
           <button
             type="button"
             className="rounded-xl border border-[var(--border)] p-2 text-[var(--foreground)] lg:hidden"

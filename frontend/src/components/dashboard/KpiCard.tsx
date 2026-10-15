@@ -5,27 +5,14 @@ export type KpiDelta = { pct: number; direction: "up" | "down" | "flat"; suffix?
 
 /** Soft pastels — each metric gets its own identity without shouting. */
 export const KPI_COLORS = {
-  rose: { solid: "#b98ea8", soft: "rgba(185, 142, 168, 0.18)", ink: "#8c5a70" },
-  blue: { solid: "#6aa5b8", soft: "rgba(106, 165, 184, 0.18)", ink: "#3f7c91" },
-  green: { solid: "#8EB69B", soft: "rgba(142, 182, 155, 0.18)", ink: "#235347" },
-  violet: { solid: "#8d97c4", soft: "rgba(141, 151, 196, 0.18)", ink: "#5f6ba0" },
-  amber: { solid: "#d0a45e", soft: "rgba(208, 164, 94, 0.22)", ink: "#7a5a12" },
-  teal: { solid: "#4f8f7d", soft: "rgba(79, 143, 125, 0.18)", ink: "#2f6b5c" },
-  pink: { solid: "#c98fae", soft: "rgba(227, 163, 196, 0.18)", ink: "#96546f" },
-  olive: { solid: "#a8b87e", soft: "rgba(173, 187, 132, 0.22)", ink: "#6b7a44" },
-} as const;
-
-export type KpiColor = keyof typeof KPI_COLORS;
-
-type KpiCardProps = {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon?: ReactNode;
-  delta?: KpiDelta;
-  sparkline?: KpiSparklinePoint[];
-  comparisonLabel?: string;
-  color?: KpiColor;
+  rose: { solid: "#FFA7D7", soft: "rgba(255, 167, 215, 0.2)", ink: "#FFA7D7" },
+  blue: { solid: "#66CAC8", soft: "rgba(102, 202, 200, 0.2)", ink: "#66CAC8" },
+  green: { solid: "#C8E6A0", soft: "rgba(200, 230, 160, 0.2)", ink: "#C8E6A0" },
+  violet: { solid: "#D8BBF1", soft: "rgba(216, 187, 241, 0.2)", ink: "#D8BBF1" },
+  amber: { solid: "#FFB598", soft: "rgba(255, 181, 152, 0.2)", ink: "#FFB598" },
+  teal: { solid: "#CFE8FF", soft: "rgba(207, 232, 255, 0.2)", ink: "#CFE8FF" },
+  pink: { solid: "#C08081", soft: "rgba(192, 128, 129, 0.2)", ink: "#C08081" },
+  olive: { solid: "#D8C3A5", soft: "rgba(216, 195, 165, 0.2)", ink: "#D8C3A5" },
 };
 
 function Sparkline({ points, color }: { points: KpiSparklinePoint[]; color: string }) {
@@ -88,7 +75,7 @@ export default function KpiCard({
       <div className="flex items-start justify-between">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ background: palette.soft, color: palette.ink }}
+          style={{ background: palette.soft, color: "#596070" }}
         >
           {icon}
         </div>
@@ -96,9 +83,9 @@ export default function KpiCard({
           <span
             className={`inline-flex items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-semibold ${
               delta.direction === "up"
-                ? "bg-[rgba(142,182,155,0.22)] text-[#235347]"
+                ? "bg-[rgba(148, 169, 190,0.22)] text-[#596070]"
                 : delta.direction === "down"
-                ? "bg-[rgba(185,142,168,0.24)] text-[#9d3730]"
+                ? "bg-[rgba(117, 127, 153,0.24)] text-[#9d3730]"
                 : "bg-black/[0.05] text-[var(--muted-foreground)]"
             }`}
           >

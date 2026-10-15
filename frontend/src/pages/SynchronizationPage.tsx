@@ -40,7 +40,7 @@ function BoardTile({ count }: { count: BoardCount }) {
       </div>
       <p
         className="mt-2 text-[26px] font-semibold leading-none"
-        style={{ color: emphasis ? "#9d3730" : "#051F20" }}
+        style={{ color: emphasis ? "#9d3730" : "#2E3645" }}
       >
         {count.count}
       </p>
@@ -170,7 +170,7 @@ export default function SynchronizationPage() {
             <button
               type="button"
               onClick={() => setShowNew((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070]"
             >
               <Plus className="h-3.5 w-3.5" />
               Enroll recipient
@@ -233,7 +233,7 @@ export default function SynchronizationPage() {
                 type="button"
                 disabled={!form.recipient_id || !form.protocol_id || !form.start_date}
                 onClick={() => void createEnrollment()}
-                className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
               >
                 Enroll
               </button>

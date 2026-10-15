@@ -200,7 +200,7 @@ function UsersPanel() {
             setDraft(EMPTY_DRAFT);
             setCreating(true);
           }}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832]"
+          className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070]"
         >
           <Plus className="h-4 w-4" />
           Add user
@@ -252,7 +252,7 @@ function UsersPanel() {
                       <div className="font-medium dash-heading">
                         {u.username}
                         {isSelf && (
-                          <span className="ml-2 rounded-full bg-[rgba(142,182,155,0.22)] px-2 py-0.5 text-[10px] font-semibold text-[#235347]">
+                          <span className="ml-2 rounded-full bg-[rgba(148, 169, 190,0.22)] px-2 py-0.5 text-[10px] font-semibold text-[#3F4758]">
                             you
                           </span>
                         )}
@@ -265,7 +265,7 @@ function UsersPanel() {
                     <td className="px-4 py-3 dash-muted">{roleLabel(u.role)}</td>
                     <td className="px-4 py-3">
                       {u.active ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#235347]">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#3F4758]">
                           <Check className="h-3.5 w-3.5" /> Active
                         </span>
                       ) : (
@@ -317,7 +317,7 @@ function UsersPanel() {
                                 `${u.username} reactivated.`,
                               )
                             }
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#235347] transition hover:bg-[rgba(35,83,71,0.10)] disabled:opacity-35"
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#3F4758] transition hover:bg-[rgba(89, 96, 112,0.10)] disabled:opacity-35"
                           >
                             Reactivate
                           </button>
@@ -450,7 +450,7 @@ function Yes({ on, last = false }: { on: boolean; last?: boolean }) {
   return (
     <td className={`py-2.5 ${last ? "" : "pr-4"}`}>
       {on ? (
-        <Check className="h-4 w-4 text-[#235347]" aria-label="yes" />
+        <Check className="h-4 w-4 text-[#3F4758]" aria-label="yes" />
       ) : (
         <span className="dash-muted" aria-label="no">
           —
@@ -761,7 +761,7 @@ function SitesPanel() {
             setDraft(EMPTY_SITE);
             setCreating(true);
           }}
-          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832]"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-4 text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070]"
         >
           <Plus className="h-4 w-4" />
           Add site
@@ -818,7 +818,7 @@ function SitesPanel() {
                     </td>
                     <td className="px-4 py-3">
                       {s.active ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#235347]">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#3F4758]">
                           <Check className="h-3.5 w-3.5" /> Active
                         </span>
                       ) : (
@@ -863,7 +863,7 @@ function SitesPanel() {
                                 `${s.name} restored.`,
                               )
                             }
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#235347] transition hover:bg-[rgba(35,83,71,0.10)] disabled:opacity-35"
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#3F4758] transition hover:bg-[rgba(89, 96, 112,0.10)] disabled:opacity-35"
                           >
                             Restore
                           </button>
@@ -1084,7 +1084,7 @@ function SubmitRow({
     <button
       type="submit"
       disabled={busy || disabled}
-      className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+      className="mt-2 inline-flex h-10 w-full items-center justify-center rounded-xl bg-[var(--primary)] text-sm font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
     >
       {busy ? "Working…" : label}
     </button>
@@ -1123,7 +1123,7 @@ function Banner({
   body?: string;
 }) {
   const styles = {
-    ok: "border-[rgba(142,182,155,0.34)] bg-[rgba(142,182,155,0.16)] text-[#235347]",
+    ok: "border-[rgba(148, 169, 190,0.34)] bg-[rgba(148, 169, 190,0.16)] text-[#3F4758]",
     warn: "border-[rgba(122,90,18,0.28)] bg-[rgba(208,164,94,0.14)] text-[#7a5a12]",
     error: "border-[rgba(157,55,48,0.28)] bg-[rgba(157,55,48,0.10)] text-[#9d3730]",
   }[tone];

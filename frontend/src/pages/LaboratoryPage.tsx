@@ -14,7 +14,7 @@ import {
 
 const STATUS_STYLE: Record<string, string> = {
   "In Culture": "bg-[rgba(106,165,184,0.22)] text-[#3f7c91]",
-  Transferable: "bg-[rgba(142,182,155,0.22)] text-[#235347]",
+  Transferable: "bg-[rgba(148, 169, 190,0.22)] text-[#3F4758]",
   Frozen: "bg-[rgba(79,143,125,0.22)] text-[#2f6b5c]",
   Assigned: "bg-[rgba(141,151,196,0.24)] text-[#5f6ba0]",
   Transferred: "bg-black/[0.05] dash-muted",
@@ -187,7 +187,7 @@ export default function LaboratoryPage() {
                     <div key={w.label} className="flex items-stretch">
                       <div
                         className={`flex w-[150px] flex-col justify-between rounded-2xl p-3 ${
-                          unavailable ? "bg-[#f2f7f3]" : "bg-[#f6faf7]"
+                          unavailable ? "bg-[#EAF1F1]" : "bg-[#f6faf7]"
                         }`}
                         title={w.unavailable_reason ?? undefined}
                       >
@@ -444,7 +444,7 @@ export default function LaboratoryPage() {
                                     type="button"
                                     disabled={busy}
                                     onClick={() => void addObservation()}
-                                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[var(--primary)] px-3 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
                                   >
                                     <Plus className="h-3 w-3" />
                                     {busy ? "Saving…" : "Record look"}

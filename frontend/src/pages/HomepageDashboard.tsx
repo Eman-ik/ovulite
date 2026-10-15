@@ -17,6 +17,7 @@ import type {
   PaginatedResponse,
 } from "@/lib/types";
 import KpiRow from "@/components/dashboard/KpiRow";
+import ChartGallery from "@/components/dashboard/ChartGallery";
 import FilterBar from "@/components/dashboard/FilterBar";
 import ReproductiveFunnel from "@/components/dashboard/ReproductiveFunnel";
 import OperationsPanel from "@/components/dashboard/OperationsPanel";
@@ -213,7 +214,7 @@ export default function HomepageDashboard() {
   const heroLinkLabel = permissions.canViewAnalytics ? "Explore analytics" : "Browse case records";
 
   return (
-    <div className="space-y-5">
+    <div className="dash-blue space-y-5">
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -235,24 +236,24 @@ export default function HomepageDashboard() {
             className="relative h-full min-h-[220px] p-7"
             style={{
               background:
-                "radial-gradient(110% 130% at 100% 0%, rgba(255,255,255,0.75) 0%, rgba(246,223,174,0.55) 40%, rgba(246,223,174,0) 74%), linear-gradient(135deg, #DAF1DE 0%, #bcdcc4 55%, #a9d0b3 100%)",
+                "radial-gradient(110% 130% at 100% 0%, rgba(255,255,255,0.75) 0%, rgba(234, 241, 241,0.55) 40%, rgba(234, 241, 241,0) 74%), linear-gradient(135deg, #EAF1F1 0%, #C9D9E6 55%, #B2CDDF 100%)",
             }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(5,31,32,0.12)] bg-white/70 px-3 py-1.5 text-[11px] font-medium tracking-wide text-[#2f5a4a]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(46, 54, 69,0.12)] bg-white/70 px-3 py-1.5 text-[11px] font-medium tracking-wide text-[#596070]">
               <Sparkles className="h-3.5 w-3.5 text-[#7a5a12]" />
               Live data · updates with your filters
             </div>
 
-            <h2 className="hero-serif mt-5 max-w-[18ch] text-[42px] text-[#051F20] sm:text-[52px]">
+            <h2 className="hero-serif mt-5 max-w-[18ch] text-[42px] text-[#3F4758] sm:text-[52px]">
               Explore your <em className="text-[#7a5a12]">program</em>
             </h2>
-            <p className="mt-3 max-w-md text-sm text-[#3c5a4e]">
+            <p className="mt-3 max-w-md text-sm text-[#596070]">
               Track oocyte recovery through to confirmed pregnancies, and see exactly where the losses happen.
             </p>
 
             <Link
               to={heroLink}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[0_10px_24px_-14px_rgba(5,31,32,0.7)] transition hover:bg-[#163832]"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] shadow-[0_10px_24px_-14px_rgba(46, 54, 69,0.7)] transition hover:bg-[#596070]"
             >
               {heroLinkLabel}
               <ArrowUpRight className="h-4 w-4" />
@@ -274,7 +275,7 @@ export default function HomepageDashboard() {
       <FilterBar filters={filters} options={filterOptions} onChange={setFilters} visibleFields={roleConfig.filterFields} />
 
       {loadError && (
-        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(185,142,168,0.16)] p-4 text-sm text-[#9d3730]">
+        <div className="rounded-2xl border border-[rgba(179,69,63,0.28)] bg-[rgba(117, 127, 153,0.16)] p-4 text-sm text-[#9d3730]">
           {loadError}
         </div>
       )}
@@ -318,6 +319,8 @@ export default function HomepageDashboard() {
         <h3 className="mb-4 text-base font-semibold dash-heading">Performance</h3>
         <PerformancePanel filters={filters} dimensions={roleConfig.performanceDimensions} />
       </div>
+
+      {permissions.canViewAnalytics && <ChartGallery />}
 
       {showPipeline && (
         <div className="dash-card">

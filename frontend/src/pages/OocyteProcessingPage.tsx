@@ -1,3 +1,4 @@
+import { CHART_SERIES } from "@/lib/chartPalette";
 import { useCallback, useEffect, useState } from "react";
 import { Beaker, Info, Plus, Thermometer } from "lucide-react";
 import api, { fetchAllPages } from "@/lib/api";
@@ -7,7 +8,7 @@ import type { OocyteGradeSummary } from "@/lib/types";
 
 type OpuOption = { opu_id: number; opu_date: string; donor_id: number; donor_tag?: string | null };
 
-const GRADE_COLORS = ["#8EB69B", "#6aa5b8", "#d0a45e", "#b98ea8"] as const;
+const GRADE_COLORS = CHART_SERIES.slice(0, 4);
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -228,7 +229,7 @@ export default function OocyteProcessingPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void saveGrades()}
-                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
                     >
                       {busy ? "Saving…" : "Save"}
                     </button>
@@ -337,7 +338,7 @@ export default function OocyteProcessingPage() {
                     type="button"
                     disabled={busy}
                     onClick={() => void addIvm()}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     {busy ? "Adding…" : "Add batch"}

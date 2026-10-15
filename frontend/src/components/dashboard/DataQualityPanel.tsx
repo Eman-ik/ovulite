@@ -7,7 +7,7 @@ export default function DataQualityPanel({ data }: { data: DashboardDataQualityR
     <div className="space-y-2">
       {data.rows.map((row) => {
         const tone =
-          row.missing_pct > 20 ? "#9d3730" : row.missing_pct > 0 ? "#8a6418" : "#235347";
+          row.missing_pct > 20 ? "#9d3730" : row.missing_pct > 0 ? "#8a6418" : "#596070";
         return (
           <div
             key={`${row.table}.${row.field}`}
@@ -17,7 +17,7 @@ export default function DataQualityPanel({ data }: { data: DashboardDataQualityR
               <p className="truncate text-sm font-medium dash-heading">
                 {row.table}.{row.field}
                 {row.stale && (
-                  <span className="ml-2 rounded-full bg-[rgba(208,164,94,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
+                  <span className="ml-2 rounded-full bg-[rgba(148, 169, 190,0.22)] px-1.5 py-0.5 text-[9px] font-semibold text-[#7a5a12]">
                     stale &gt;45d
                   </span>
                 )}

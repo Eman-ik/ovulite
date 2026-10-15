@@ -15,7 +15,7 @@ import type {
 function heatRGB(pct: number | null): [number, number, number] {
   if (pct === null) return [234, 243, 236];
   const t = Math.max(0, Math.min(1, pct / 60));
-  // The dark end stops at a mid sage rather than continuing to #163832. Going
+  // The dark end stops at a mid sage rather than continuing to #596070. Going
   // darker lands the cell in a luminance band where neither a dark nor a light
   // label reaches 4.5:1 — the scale is bounded so one ink always works.
   const stops: [number, [number, number, number]][] = [
@@ -41,7 +41,7 @@ function heatColor(pct: number | null): string {
  *
  * With the bounded scale above every cell sits in the dark-ink branch; the
  * light branch is the guard that keeps this correct if the stops are ever
- * changed. 0.23 is where #051F20 stops reaching 4.5:1.
+ * changed. 0.23 is where #2E3645 stops reaching 4.5:1.
  */
 function heatInk(pct: number | null): string {
   const [r, g, b] = heatRGB(pct);
@@ -50,7 +50,7 @@ function heatInk(pct: number | null): string {
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
   };
   const luminance = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-  return luminance > 0.23 ? "#051F20" : "#FFFFFF";
+  return luminance > 0.23 ? "#2E3645" : "#FFFFFF";
 }
 
 function Rate({ cell }: { cell: RateCell }) {
@@ -91,7 +91,7 @@ function Diff({ value, bold, strike }: { value: number | null; bold?: boolean; s
   if (value === null) return <span className="dash-muted">—</span>;
   return (
     <span
-      className={`${value > 0 ? "text-[#235347]" : "text-[#9d3730]"} ${bold ? "font-semibold" : ""} ${
+      className={`${value > 0 ? "text-[#3F4758]" : "text-[#9d3730]"} ${bold ? "font-semibold" : ""} ${
         strike ? "line-through decoration-[#9d3730]/50" : ""
       }`}
     >
@@ -245,7 +245,7 @@ export default function ResearchPage() {
                         {p.rate_pct === null ? "" : `${Math.round(p.rate_pct)}%`}
                       </span>
                       <div
-                        className="w-full rounded-t bg-[#6aa5b8]"
+                        className="w-full rounded-t bg-[#66CAC8]"
                         style={{ height: `${Math.max(2, ((p.rate_pct ?? 0) / 60) * 52)}px` }}
                         title={`${p.period}: ${p.successes}/${p.n}`}
                       />
@@ -270,7 +270,7 @@ export default function ResearchPage() {
                     <th className="border-b border-[var(--border)] pb-1 pr-4 text-center font-medium" colSpan={2}>
                       Pooled (ignores timing)
                     </th>
-                    <th className="border-b border-[rgba(5,31,32,0.25)] pb-1 text-center font-medium text-[var(--foreground)]" colSpan={2}>
+                    <th className="border-b border-[rgba(46, 54, 69,0.25)] pb-1 text-center font-medium text-[var(--foreground)]" colSpan={2}>
                       Adjusted for month
                     </th>
                   </tr>
@@ -398,7 +398,7 @@ export default function ResearchPage() {
                               shown ? ` (${cell.rate_pct}%)` : " · below minimum sample"
                             }`}
                             className="h-[52px] w-[52px] rounded-lg text-center align-middle"
-                            style={{ background: shown ? heatColor(cell.rate_pct) : "#eaf3ec" }}
+                            style={{ background: shown ? heatColor(cell.rate_pct) : "#EAF1F1" }}
                           >
                             <div
                               className={shown ? "font-semibold" : "dash-muted"}
@@ -429,7 +429,7 @@ export default function ResearchPage() {
               />
               <span>60%+</span>
               <span className="ml-3 flex items-center gap-1.5">
-                <span className="inline-block h-3 w-3 rounded bg-[#eaf3ec]" /> below minimum sample
+                <span className="inline-block h-3 w-3 rounded bg-[#EAF1F1]" /> below minimum sample
               </span>
             </div>
             <SectionNote>{donorSire.note}</SectionNote>

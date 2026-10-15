@@ -9,11 +9,11 @@ const STAGE_LABEL: Record<DashboardPipelineRow["stage"], string> = {
 };
 
 const STAGE_COLOR: Record<DashboardPipelineRow["stage"], string> = {
-  opu: "#6aa5b8",
-  ivf: "#4f8f7d",
-  grading: "#8d97c4",
-  transfer_scheduled: "#d0a45e",
-  pending_pc: "#c98fae",
+  opu: "#94A9BE",
+  ivf: "#757F99",
+  grading: "#596070",
+  transfer_scheduled: "#B2CDDF",
+  pending_pc: "#94A9BE",
 };
 
 export default function ActivePipelineTable({

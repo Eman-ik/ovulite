@@ -37,10 +37,10 @@ export default function TrendChart({
                 <stop offset="95%" stopColor={color} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" vertical={false} />
-            <XAxis dataKey="label" stroke="#8a9a92" tickLine={false} axisLine={false} fontSize={11} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" vertical={false} />
+            <XAxis dataKey="label" stroke="#94A9BE" tickLine={false} axisLine={false} fontSize={11} />
             <YAxis
-              stroke="#8a9a92"
+              stroke="#94A9BE"
               tickLine={false}
               axisLine={false}
               fontSize={11}
@@ -55,13 +55,13 @@ export default function TrendChart({
               }
               contentStyle={{
                 borderRadius: 14,
-                border: "1px solid rgba(5,31,32,0.1)",
+                border: "1px solid rgba(46, 54, 69,0.1)",
                 background: "#ffffff",
-                boxShadow: "0 12px 32px -18px rgba(5,31,32,0.35)",
-                color: "#051F20",
+                boxShadow: "0 12px 32px -18px rgba(46, 54, 69,0.35)",
+                color: "#2E3645",
               }}
-              labelStyle={{ color: "#5c7268" }}
-              cursor={{ stroke: "rgba(5,31,32,0.18)" }}
+              labelStyle={{ color: "#596070" }}
+              cursor={{ stroke: "rgba(46, 54, 69,0.18)" }}
             />
             <Area
               type="monotone"

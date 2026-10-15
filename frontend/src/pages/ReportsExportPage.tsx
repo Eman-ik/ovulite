@@ -95,7 +95,7 @@ export default function ReportsExportPage() {
       )}
 
       {lastExport && (
-        <div className="rounded-2xl border border-[rgba(142,182,155,0.34)] bg-[rgba(142,182,155,0.16)] p-4 text-sm text-[#235347]">
+        <div className="rounded-2xl border border-[rgba(148, 169, 190,0.34)] bg-[rgba(148, 169, 190,0.16)] p-4 text-sm text-[#3F4758]">
           <p className="font-semibold">Downloaded {lastExport.name}</p>
           <p className="mt-1">
             {lastExport.rows === 0
@@ -146,7 +146,7 @@ export default function ReportsExportPage() {
               type="button"
               disabled={busy !== null}
               onClick={() => void download(d.key)}
-              className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+              className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
             >
               <Download className="h-3.5 w-3.5" />
               {busy === d.key ? "Generating…" : "Download CSV"}

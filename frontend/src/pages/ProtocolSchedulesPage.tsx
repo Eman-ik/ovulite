@@ -264,7 +264,7 @@ export default function ProtocolSchedulesPage() {
                       type="button"
                       disabled={!draft.step_name || saving}
                       onClick={() => void addStep()}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-[var(--primary)] px-3.5 text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       {saving ? "Adding…" : "Add step"}

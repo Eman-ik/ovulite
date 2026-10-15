@@ -15,59 +15,59 @@
        clinical tables stay readable across a shift, but every token is drawn
        from the same six-colour palette as the landing page rather than a
        separate scheme. */
-    --background: #f2f7f3;
-    --foreground: #051F20;
-    --card: #ffffff;
-    --card-foreground: #051F20;
-    --primary: #235347;
-    --primary-foreground: #DAF1DE;
-    --secondary: #e4efe6;
-    --secondary-foreground: #163832;
-    --muted: #eaf3ec;
-    --muted-foreground: #5c7268;
+    --background: #EAF1F1;
+    --foreground: #2E3645;
+    --card: #FFFFFF;
+    --card-foreground: #2E3645;
+    --primary: #596070;
+    --primary-foreground: #EAF1F1;
+    --secondary: #DDE7EE;
+    --secondary-foreground: #2E3645;
+    --muted: #DDE7EE;
+    --muted-foreground: #3F4758;
     /* Muted text reaches 5.17:1 on a white card but only 4.03-4.40:1 once it
        sits on a tinted surface — the page ground or a control strip. Use the
        strong variant anywhere the background is not --card. */
-    --muted-foreground-strong: #4f6359;
-    --accent: #8EB69B;
-    --accent-foreground: #051F20;
+    --muted-foreground-strong: #2E3645;
+    --accent: #94A9BE;
+    --accent-foreground: #2E3645;
     --destructive: #9d3730;
     --destructive-foreground: #ffffff;
-    --border: rgba(5, 31, 32, 0.10);
-    --input: #ffffff;
-    --ring: rgba(35, 83, 71, 0.45);
+    --border: rgba(46, 54, 69, 0.12);
+    --input: #FFFFFF;
+    --ring: rgba(89, 96, 112, 0.45);
     --radius: 1.25rem;
 
-    --sidebar-bg: #eef5f0;
-    --sidebar-border: rgba(5, 31, 32, 0.08);
-    --sidebar-text: #051F20;
-    --sidebar-muted: #5c7268;
-    --sidebar-active: #ffffff;
-    --sidebar-active-text: #163832;
+    --sidebar-bg: #E3EBEF;
+    --sidebar-border: rgba(46, 54, 69, 0.08);
+    --sidebar-text: #2E3645;
+    --sidebar-muted: #596070;
+    --sidebar-active: #FFFFFF;
+    --sidebar-active-text: #2E3645;
 
-    --panel-bg: #ffffff;
-    --panel-border: rgba(5, 31, 32, 0.09);
-    --surface-bg: #ffffff;
-    --surface-border: rgba(5, 31, 32, 0.09);
+    --panel-bg: #FFFFFF;
+    --panel-border: rgba(46, 54, 69, 0.1);
+    --surface-bg: #FFFFFF;
+    --surface-border: rgba(46, 54, 69, 0.1);
 
     /* Categorical chart palette. Anchored on the green family but kept
        genuinely distinguishable — six greens would make any grouped chart
        unreadable, so these are harmonics around it rather than shades of it. */
-    --chart-1: #235347;
-    --chart-2: #8EB69B;
-    --chart-3: #6aa5b8;
-    --chart-4: #b98ea8;
-    --chart-5: #d0a45e;
-    --chart-6: #4f8f7d;
-    --chart-7: #8d97c4;
-    --chart-8: #a8b87e;
+    --chart-1: #66CAC8;
+    --chart-2: #FFA7D7;
+    --chart-3: #FFB598;
+    --chart-4: #D8BBF1;
+    --chart-5: #C8E6A0;
+    --chart-6: #C08081;
+    --chart-7: #D8C3A5;
+    --chart-8: #CFE8FF;
   }
 
   /* The toggle keeps the same identity; "dark" deepens the canvas slightly
      rather than inverting, so the light design stays intact. */
   [data-theme="dark"] {
-    --background: #e6efe8;
-    --sidebar-bg: #e9f1eb;
+    --background: #E3EBEF;
+    --sidebar-bg: #DDE7EE;
   }
 }
 
@@ -96,8 +96,8 @@
     inset: 0;
     pointer-events: none;
     background-image:
-      radial-gradient(50rem 34rem at 88% -6%, rgba(142, 182, 155, 0.20), transparent 62%),
-      radial-gradient(44rem 32rem at 4% 4%, rgba(218, 241, 222, 0.55), transparent 58%);
+      radial-gradient(50rem 34rem at 88% -6%, rgba(148, 169, 190, 0.20), transparent 62%),
+      radial-gradient(44rem 32rem at 4% 4%, rgba(234, 241, 241, 0.55), transparent 58%);
     z-index: -1;
   }
 
@@ -126,8 +126,8 @@
   }
 
   ::selection {
-    background: rgba(142, 182, 155, 0.38);
-    color: #051F20;
+    background: rgba(148, 169, 190, 0.38);
+    color: #2E3645;
   }
 }
 
@@ -137,16 +137,18 @@
   .glass-panel, .ov-glass {
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
-    box-shadow: 0 1px 2px rgba(5, 31, 32, 0.05), 0 12px 32px -20px rgba(5, 31, 32, 0.20);
+    box-shadow: 0 1px 2px rgba(46, 54, 69, 0.05), 0 12px 32px -20px rgba(46, 54, 69, 0.20);
   }
 
   /* The workhorse card used across the dashboard. */
   .dash-card {
     border-radius: 1.5rem;
     padding: 1.5rem;
-    background: var(--card);
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
     border: 1px solid var(--border);
-    box-shadow: 0 1px 2px rgba(5, 31, 32, 0.05), 0 14px 36px -24px rgba(5, 31, 32, 0.22);
+    box-shadow: 0 1px 2px rgba(46, 54, 69, 0.05), 0 14px 36px -24px rgba(46, 54, 69, 0.22);
   }
 
   .dash-card-tight {
@@ -154,7 +156,7 @@
     padding: 1rem;
     background: var(--card);
     border: 1px solid var(--border);
-    box-shadow: 0 1px 2px rgba(5, 31, 32, 0.05), 0 14px 36px -24px rgba(5, 31, 32, 0.22);
+    box-shadow: 0 1px 2px rgba(46, 54, 69, 0.05), 0 14px 36px -24px rgba(46, 54, 69, 0.22);
   }
 
   /* Soft inset tile — small metric tiles inside a card. */
@@ -200,7 +202,7 @@
   }
 
   .nav-item:hover {
-    background: rgba(5, 31, 32, 0.05);
+    background: rgba(46, 54, 69, 0.05);
     color: var(--sidebar-text);
   }
 
@@ -208,7 +210,7 @@
     background: var(--sidebar-active);
     color: var(--sidebar-active-text);
     font-weight: 600;
-    box-shadow: 0 1px 2px rgba(5, 31, 32, 0.07), 0 8px 20px -12px rgba(5, 31, 32, 0.26);
+    box-shadow: 0 1px 2px rgba(46, 54, 69, 0.07), 0 8px 20px -12px rgba(46, 54, 69, 0.26);
   }
 
   .nav-item-active:hover {
@@ -222,7 +224,7 @@
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(111, 118, 128, 0.85);
+    color: var(--sidebar-muted);
   }
 
   .ov-soft-border {
@@ -251,8 +253,8 @@
 
   .ov-hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 1px 2px rgba(5, 31, 32, 0.06), 0 20px 40px -22px rgba(5, 31, 32, 0.28);
-    border-color: rgba(35, 83, 71, 0.22);
+    box-shadow: 0 1px 2px rgba(46, 54, 69, 0.06), 0 20px 40px -22px rgba(46, 54, 69, 0.28);
+    border-color: rgba(89, 96, 112, 0.22);
   }
 }
 
@@ -264,14 +266,14 @@
   .text-glow-blue  { text-shadow: none; }
   .text-glow-cyan  { text-shadow: none; }
 
-  .glow-shadow-amber { filter: drop-shadow(0px 6px 14px rgba(35, 83, 71, 0.28)); }
+  .glow-shadow-amber { filter: drop-shadow(0px 6px 14px rgba(89, 96, 112, 0.28)); }
   .glow-shadow-peach { filter: drop-shadow(0px 6px 14px rgba(231, 154, 154, 0.28)); }
   .glow-shadow-pink  { filter: drop-shadow(0px 6px 14px rgba(227, 163, 196, 0.28)); }
   .glow-shadow-blue  { filter: drop-shadow(0px 6px 14px rgba(143, 184, 222, 0.28)); }
   .glow-shadow-cyan  { filter: drop-shadow(0px 6px 14px rgba(121, 198, 187, 0.28)); }
 
   .cyber-gradient-text {
-    background: linear-gradient(to right, #051F20, #235347);
+    background: linear-gradient(to right, #2E3645, #596070);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -280,14 +282,14 @@
   .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(5, 31, 32, 0.20);
+    background: rgba(46, 54, 69, 0.20);
     border-radius: 4px;
   }
 }
 
 @keyframes ovPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(142, 182, 155, 0.45); }
-  50%      { box-shadow: 0 0 0 8px rgba(142, 182, 155, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(148, 169, 190, 0.45); }
+  50%      { box-shadow: 0 0 0 8px rgba(148, 169, 190, 0); }
 }
 
 @keyframes ovReveal {
@@ -305,7 +307,41 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1px rgba(5, 31, 32, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(46, 54, 69, 0.06);
   pointer-events: none;
   z-index: 20;
+}
+
+/* Dashboard theme: the blue-grey palette (Sebum to Antibiotics), scoped to the
+   dashboard only so the rest of the app keeps Minimal Green. Status colours are
+   not tokens here, so they keep their meaning. */
+.dash-blue {
+  --background: #EAF1F1;
+  --foreground: #2E3645;
+  --card: #FFFFFF;
+  --card-foreground: #2E3645;
+  --primary: #596070;
+  --primary-foreground: #EAF1F1;
+  --secondary: #DDE7EE;
+  --secondary-foreground: #2E3645;
+  --muted: #DDE7EE;
+  --muted-foreground: #3F4758;
+  --muted-foreground-strong: #2E3645;
+  --accent: #94A9BE;
+  --accent-foreground: #2E3645;
+  --border: rgba(46, 54, 69, 0.12);
+  --input: #FFFFFF;
+  --ring: rgba(89, 96, 112, 0.45);
+  --panel-bg: #FFFFFF;
+  --panel-border: rgba(46, 54, 69, 0.1);
+  --surface-bg: #FFFFFF;
+  --surface-border: rgba(46, 54, 69, 0.1);
+  --chart-1: #66CAC8;
+  --chart-2: #FFA7D7;
+  --chart-3: #FFB598;
+  --chart-4: #D8BBF1;
+  --chart-5: #C8E6A0;
+  --chart-6: #C08081;
+  --chart-7: #D8C3A5;
+  --chart-8: #CFE8FF;
 }

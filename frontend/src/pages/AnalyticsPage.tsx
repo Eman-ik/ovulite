@@ -1,3 +1,4 @@
+import { CHART_SERIES } from "@/lib/chartPalette";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Area,
@@ -194,14 +195,14 @@ function RatePill({ rate, n, pregnant }: { rate: number | null | undefined; n: n
 
 const CHART_TOOLTIP_STYLE = {
   borderRadius: 14,
-  border: "1px solid rgba(5,31,32,0.1)",
+  border: "1px solid rgba(46, 54, 69,0.1)",
   background: "#ffffff",
-  boxShadow: "0 12px 32px -18px rgba(5,31,32,0.35)",
-  color: "#051F20",
+  boxShadow: "0 12px 32px -18px rgba(46, 54, 69,0.35)",
+  color: "#2E3645",
   fontSize: 13,
 };
 
-const CATEGORY_COLORS = ["#b98ea8", "#6aa5b8", "#8EB69B", "#8d97c4", "#d0a45e", "#4f8f7d", "#c98fae", "#a8b87e"];
+const CATEGORY_COLORS = CHART_SERIES;
 
 /** Minimal, loosely-typed shape for recharts' custom Tooltip `content` render-prop.
  *  Recharts injects `active`/`payload` at render time via cloneElement, so a
@@ -492,11 +493,11 @@ function OverviewTab({
                     <AreaChart data={trendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="analyticsTrendFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6aa5b8" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#6aa5b8" stopOpacity={0.01} />
+                          <stop offset="5%" stopColor="#66CAC8" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#66CAC8" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" />
                       <XAxis dataKey="month" stroke="#8a9a92" tickLine={false} axisLine={false} />
                       <YAxis
                         stroke="#8a9a92"
@@ -508,9 +509,9 @@ function OverviewTab({
                       <Area
                         type="monotone"
                         dataKey="pregnancy_rate_pct"
-                        stroke="#6aa5b8"
+                        stroke="#66CAC8"
                         strokeWidth={3}
-                        dot={{ r: 5, fill: "#6aa5b8" }}
+                        dot={{ r: 5, fill: "#66CAC8" }}
                         fill="url(#analyticsTrendFill)"
                       />
                     </AreaChart>
@@ -577,7 +578,7 @@ function FreshFrozenPanel({ kpis }: { kpis: FetchState<AnalyticsKPIResponse> }) 
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" />
             <XAxis dataKey="label" stroke="#8a9a92" tickLine={false} axisLine={false} />
             <YAxis
               stroke="#8a9a92"
@@ -743,7 +744,7 @@ function ProtocolsTab({
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" />
                   <XAxis
                     dataKey="protocol_name"
                     stroke="#8a9a92"
@@ -763,7 +764,7 @@ function ProtocolsTab({
                     domain={[0, 100]}
                   />
                   <Tooltip content={<ProtocolTooltip />} />
-                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#8EB69B">
+                  <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#66CAC8">
                     {chartData.map((entry, index) => (
                       <Cell key={entry.protocol_name} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                     ))}
@@ -873,7 +874,7 @@ function RegressionPanel({ regression }: { regression: FetchState<AnalyticsProto
       {entries.map(([feature, oddsRatio]) => (
         <div key={feature} className="flex items-center justify-between rounded-xl border border-gray-100 px-3 py-2 text-sm">
           <span className="text-gray-700">{feature}</span>
-          <span className={`font-semibold ${oddsRatio >= 1 ? "text-[#235347]" : "text-[#9d3730]"}`}>
+          <span className={`font-semibold ${oddsRatio >= 1 ? "text-[#3F4758]" : "text-[#9d3730]"}`}>
             {oddsRatio.toFixed(3)}×
           </span>
         </div>
@@ -903,7 +904,7 @@ function ImportancePanel({ importance }: { importance: FetchState<AnalyticsProto
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
             <div
-              className="h-full rounded-full bg-[#8EB69B]"
+              className="h-full rounded-full bg-[#94A9BE]"
               style={{ width: `${Math.max(2, (v.mean / maxMean) * 100)}%` }}
             />
           </div>
@@ -970,7 +971,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={topByVolume} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" />
                 <XAxis
                   dataKey="donor_tag"
                   stroke="#8a9a92"
@@ -1000,7 +1001,7 @@ function DonorsTab({ donors }: { donors: FetchState<AnalyticsDonorStatsResponse>
                     ];
                   }}
                 />
-                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#8d97c4" />
+                <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]} fill="#D8BBF1" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1146,7 +1147,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(5,31,32,0.07)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(46, 54, 69,0.07)" />
             <XAxis dataKey="range" stroke="#8a9a92" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
             <YAxis
               stroke="#8a9a92"
@@ -1158,7 +1159,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
             <Tooltip content={<BiomarkerTooltip />} />
             <Bar dataKey="rate_pct" radius={[8, 8, 0, 0]}>
               {chartData.map((entry) => (
-                <Cell key={entry.range} fill={entry.isOptimal ? "#8EB69B" : "#cddbd2"} />
+                <Cell key={entry.range} fill={entry.isOptimal ? "#66CAC8" : "#D8C3A5"} />
               ))}
               {hasCI ? (
                 <ErrorBar
@@ -1191,7 +1192,7 @@ function BiomarkerPanel({ label, result }: { label: string; result: AnalyticsBio
             {result.bins.map((bin) => (
               <tr
                 key={bin.range}
-                className={`border-t border-gray-100 ${bin.range === optimalRange ? "bg-[rgba(142,182,155,0.16)] font-medium" : ""}`}
+                className={`border-t border-gray-100 ${bin.range === optimalRange ? "bg-[rgba(148, 169, 190,0.16)] font-medium" : ""}`}
               >
                 <td className="px-2 py-1">
                   {bin.range}

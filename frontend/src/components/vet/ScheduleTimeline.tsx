@@ -3,9 +3,9 @@ import type { ScheduledStep, StepState } from "@/lib/types";
 
 /** Colour carries the same meaning everywhere on this page. */
 export const STATE_STYLE: Record<StepState, { dot: string; text: string; chip: string }> = {
-  Done: { dot: "#8EB69B", text: "text-[#235347]", chip: "bg-[rgba(142,182,155,0.2)] text-[#235347]" },
+  Done: { dot: "#94A9BE", text: "text-[#3F4758]", chip: "bg-[rgba(148, 169, 190,0.2)] text-[#3F4758]" },
   Overdue: { dot: "#9d3730", text: "text-[#9d3730]", chip: "bg-[rgba(185,142,168,0.22)] text-[#9d3730]" },
-  "Due today": { dot: "#235347", text: "text-[#7a5a12]", chip: "bg-[rgba(208,164,94,0.26)] text-[#7a5a12]" },
+  "Due today": { dot: "#596070", text: "text-[#7a5a12]", chip: "bg-[rgba(208,164,94,0.26)] text-[#7a5a12]" },
   Upcoming: { dot: "#b7c9bd", text: "dash-muted", chip: "bg-black/[0.05] dash-muted" },
 };
 

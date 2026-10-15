@@ -10,11 +10,11 @@ export interface ButtonProps
 const buttonVariants = {
   variant: {
     default:
-      "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_1px_2px_rgba(5,31,32,0.08),0_10px_24px_-14px_rgba(5,31,32,0.5)] hover:bg-[#163832]",
+      "bg-[var(--primary)] text-[var(--primary-foreground)] shadow-[0_1px_2px_rgba(46, 54, 69,0.08),0_10px_24px_-14px_rgba(46, 54, 69,0.5)] hover:bg-[#596070]",
     destructive:
-      "bg-[var(--destructive)] text-white shadow-[0_1px_2px_rgba(5,31,32,0.08),0_10px_24px_-14px_rgba(179,69,63,0.6)] hover:brightness-105",
+      "bg-[var(--destructive)] text-white shadow-[0_1px_2px_rgba(46, 54, 69,0.08),0_10px_24px_-14px_rgba(179,69,63,0.6)] hover:brightness-105",
     outline:
-      "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[0_1px_2px_rgba(5,31,32,0.05)] hover:bg-black/[0.04]",
+      "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[0_1px_2px_rgba(46, 54, 69,0.05)] hover:bg-black/[0.04]",
     secondary:
       "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-black/[0.07]",
     ghost: "bg-transparent text-[var(--foreground)] hover:bg-black/[0.05]",

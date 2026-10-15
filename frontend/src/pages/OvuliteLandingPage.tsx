@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   motion,
+  type MotionValue,
   useScroll,
   useTransform,
   useSpring,
@@ -46,22 +47,22 @@ import {
  * and the two lightest are text, so every token here is named for the role it
  * plays rather than for the hue it happens to be.
  *
- * The one rule worth stating: `emerald` (#235347) and `terracotta*` (#163832)
+ * The one rule worth stating: `emerald` (#596070) and `terracotta*` (#C9D9E6)
  * are SURFACE colours only. At 1.96:1 against the page background they are
  * invisible as text — they belong in `background`, `border` and gradient stops.
- * Anything rendered as `color:` uses `cream`, `stone`, `emeraldGlow` or `bio`.
+ * Anything rendered as `color:"#000000", `stone`, `emeraldGlow` or `bio`.
  */
 const PALETTE = {
-  forest: "#051F20",         // page background — darkest
-  forestDeep: "#0B2B26",     // recessed surfaces
-  emerald: "#235347",        // mid surface / gradient stop — NOT a text colour
-  emeraldGlow: "#8EB69B",    // bright accent, readable as text on dark
-  terracotta: "#163832",     // secondary surface — NOT a text colour
-  terracottaSoft: "#235347", // softer secondary surface
-  cream: "#DAF1DE",          // primary text
-  stone: "#8EB69B",          // secondary text
-  bio: "#8EB69B",            // accent: glow, highlight, and accent text
-  ink: "#051F20",            // deepest contrast
+  forest: "#EAF1F1",         // page background — pastel pink ground
+  forestDeep: "#DDE7EE",     // recessed surfaces
+  emerald: "#D6E2EB",        // mid surface / gradient stop — NOT a text colour
+  emeraldGlow: "#3F4758",    // accent text (amber-800, AA on pink)
+  terracotta: "#B2CDDF",     // secondary surface — NOT a text colour
+  terracottaSoft: "#E3ECF2", // softer secondary surface
+  cream: "#2E3645",          // primary text (deep plum, 10.9:1 on pink)
+  stone: "#3F4758",          // secondary text (5.2:1 on pink)
+  bio: "#3F4758",            // accent: glow, highlight, and accent text
+  ink: "#2E3645",            // deepest contrast
 };
 
 const NAV = [
@@ -113,16 +114,22 @@ export default function OvuliteLandingPage() {
         fontFamily: "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif",
         // Explicit rather than inherited: --background is light so in-app
         // tables read well across a shift, and this page wants the opposite.
-        color: PALETTE.cream,
+        color: "#000000",
+        // Pastel dreamscape: pink-to-white ground with vibrant amber light
+        // pooling in the top-right and bottom-left corners.
         background:
-          "radial-gradient(60rem 40rem at 78% -8%, rgba(35,83,71,0.55), transparent 60%)," +
-          "radial-gradient(48rem 36rem at 8% 12%, rgba(22,56,50,0.5), transparent 58%)," +
-          PALETTE.forest,
+          "radial-gradient(60rem 40rem at 100% 0%, rgba(178, 205, 223, 0.55), transparent 60%)," +
+          "radial-gradient(52rem 40rem at 0% 100%, rgba(178, 205, 223, 0.45), transparent 58%)," +
+          "linear-gradient(135deg, #EAF1F1 0%, #DDE7EE 50%, #F5F9F9 100%)",
+        backgroundAttachment: "fixed",
       }}
     >
       <ScopedStyles />
       <GrainOverlay />
       <NoiseGradient />
+      <LabStoryBackground />
+      <AmbientBubbles />
+      {!reduceMotion && <RollingCharacter />}
 
       <Header
         navigate={navigate}
@@ -162,6 +169,9 @@ function ScopedStyles() {
       @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
       .ov-root, .ov-root * { font-feature-settings: "ss01","cv11"; }
+      /* Warm white spotlights at the four corners, as on the backlit mirror.
+         Outer box-shadows paint only outside the box, so the glass face stays clear. */
+      .ov-root { --lp-halo: -4px -4px 6px -3px rgba(255, 252, 244, 1), 4px -4px 6px -3px rgba(255, 252, 244, 1), -4px 4px 6px -3px rgba(255, 252, 244, 1), 4px 4px 6px -3px rgba(255, 252, 244, 1); }
       .ov-root .ov-serif {
         font-family: 'Fraunces', 'Times New Roman', serif;
         font-optical-sizing: auto;
@@ -179,44 +189,46 @@ function ScopedStyles() {
       }
 
       .ov-glass-card {
-        background: linear-gradient(180deg, rgba(218, 241, 222, 0.045), rgba(218, 241, 222, 0.018));
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018));
         backdrop-filter: blur(18px) saturate(140%);
         -webkit-backdrop-filter: blur(18px) saturate(140%);
-        border: 1px solid rgba(218, 241, 222, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow:
-          inset 0 1px 0 rgba(218, 241, 222, 0.06),
-          inset 0 0 30px rgba(142, 182, 155, 0.04),
-          0 30px 80px -30px rgba(5, 31, 32, 0.55);
+          var(--lp-halo),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06),
+          inset 0 0 30px rgba(178, 205, 223, 0.04),
+          0 30px 80px -30px rgba(46, 54, 69, 0.385);
         border-radius: 22px;
       }
 
       .ov-glass-card.ov-glow:hover {
-        border-color: rgba(142, 182, 155, 0.22);
+        border-color: "#000000";
         box-shadow:
-          inset 0 1px 0 rgba(218, 241, 222, 0.08),
-          inset 0 0 60px rgba(142, 182, 155, 0.10),
-          0 40px 100px -25px rgba(5, 31, 32, 0.6);
+          var(--lp-halo),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 0 60px rgba(178, 205, 223, 0.1),
+          0 40px 100px -25px rgba(46, 54, 69, 0.42);
       }
 
       .ov-text-grad {
-        background: linear-gradient(120deg, #FFFFFF 0%, #DAF1DE 38%, #A9D0B3 72%, #8EB69B 100%);
+        background: none;
         -webkit-background-clip: text;
         background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
+        -webkit-text-fill-color: #000000;
+        color: #000000;
       }
 
       .ov-text-warm {
-        background: linear-gradient(100deg, #DAF1DE 0%, #8EB69B 52%, #C4E3CC 100%);
+        background: none;
         -webkit-background-clip: text;
         background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
+        -webkit-text-fill-color: #000000;
+        color: #000000;
       }
 
       .ov-divider {
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(218, 241, 222, 0.18), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
       }
 
       .ov-grain {
@@ -228,9 +240,9 @@ function ScopedStyles() {
       .ov-vignette {
         position: fixed; inset: 0; pointer-events: none; z-index: 0;
         background:
-          radial-gradient(ellipse at 18% 0%, rgba(142, 182, 155, 0.16), transparent 55%),
-          radial-gradient(ellipse at 92% 8%, rgba(22, 56, 50, 0.12), transparent 50%),
-          radial-gradient(ellipse at 50% 100%, rgba(218, 241, 222, 0.6), transparent 60%);
+          radial-gradient(ellipse at 18% 0%, rgba(178, 205, 223, 0.16), transparent 55%),
+          radial-gradient(ellipse at 92% 8%, rgba(255, 255, 255, 0.12), transparent 50%),
+          radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.6), transparent 60%);
       }
 
       @keyframes ovFloat {
@@ -241,8 +253,8 @@ function ScopedStyles() {
       .ov-float-slow { animation: ovFloat 8s ease-in-out infinite; }
 
       @keyframes ovPulseRing {
-        0% { box-shadow: 0 0 0 0 rgba(142, 182, 155, 0.45); }
-        80%, 100% { box-shadow: 0 0 0 22px rgba(142, 182, 155, 0); }
+        0% { box-shadow: 0 0 0 0 rgba(178, 205, 223, 0.45); }
+        80%, 100% { box-shadow: 0 0 0 22px rgba(178, 205, 223, 0.0); }
       }
       .ov-pulse { animation: ovPulseRing 2.6s cubic-bezier(0.4,0,0.2,1) infinite; }
 
@@ -262,7 +274,7 @@ function ScopedStyles() {
       .ov-link::after {
         content: ''; position: absolute; left: 0; bottom: -4px;
         width: 100%; height: 1px;
-        background: linear-gradient(90deg, #8EB69B, #235347);
+        background: linear-gradient(90deg, #B2CDDF, #596070);
         transform: scaleX(0); transform-origin: left;
         transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
       }
@@ -270,42 +282,42 @@ function ScopedStyles() {
 
       .ov-btn-primary {
         position: relative; isolation: isolate;
-        background: linear-gradient(135deg, #235347 0%, #051F20 100%);
-        color: #DAF1DE;
-        border: 1px solid rgba(142, 182, 155, 0.28);
+        background: linear-gradient(135deg, #B2CDDF 0%, #94A9BE 100%);
+        color: "#000000";
+        border: 1px solid rgba(178, 205, 223, 0.28);
         box-shadow:
-          inset 0 1px 0 rgba(218, 241, 222, 0.14),
-          0 14px 40px -16px rgba(142, 182, 155, 0.6),
-          0 0 0 0 rgba(142, 182, 155, 0);
+          inset 0 1px 0 rgba(255, 255, 255, 0.14),
+          0 14px 40px -16px rgba(178, 205, 223, 0.6),
+          0 0 0 0 rgba(178, 205, 223, 0.0);
         transition: transform 240ms cubic-bezier(0.22,1,0.36,1), box-shadow 240ms ease;
       }
       .ov-btn-primary:hover {
         transform: translateY(-2px);
         box-shadow:
-          inset 0 1px 0 rgba(218, 241, 222, 0.2),
-          0 22px 50px -18px rgba(142, 182, 155, 0.8),
-          0 0 0 4px rgba(142, 182, 155, 0.08);
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          0 22px 50px -18px rgba(178, 205, 223, 0.8),
+          0 0 0 4px rgba(178, 205, 223, 0.08);
       }
       .ov-btn-primary::before {
         content: ''; position: absolute; inset: 0; border-radius: inherit; z-index: -1;
-        background: linear-gradient(135deg, rgba(142, 182, 155, 0.2), transparent 60%);
+        background: linear-gradient(135deg, rgba(178, 205, 223, 0.2), transparent 60%);
         opacity: 0; transition: opacity 240ms ease;
       }
       .ov-btn-primary:hover::before { opacity: 1; }
 
       .ov-btn-ghost {
-        background: rgba(218, 241, 222, 0.04);
-        color: #DAF1DE;
-        border: 1px solid rgba(218, 241, 222, 0.18);
+        background: rgba(255, 255, 255, 0.04);
+        color: "#000000";
+        border: 1px solid rgba(255, 255, 255, 0.18);
         transition: all 240ms ease;
       }
       .ov-btn-ghost:hover {
-        background: rgba(218, 241, 222, 0.09);
-        border-color: rgba(142, 182, 155, 0.4);
+        background: rgba(255, 255, 255, 0.09);
+        border-color: "#000000";
         transform: translateY(-2px);
       }
 
-      .ov-tick { color: #8EB69B; }
+      .ov-tick { color: "#000000"; }
 
       /* Marquee for trust badges */
       @keyframes ovScroll {
@@ -314,12 +326,416 @@ function ScopedStyles() {
       }
       .ov-marquee-track { animation: ovScroll 28s linear infinite; }
 
+      @keyframes labDrift {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(10px, -16px) rotate(4deg); }
+      }
+
+      @keyframes lpCharFloat {
+        0%, 100% { transform: translateY(0) scale(1, 1); }
+        50% { transform: translateY(-10px) scale(0.98, 1.03); }
+      }
+      .lp-char-float { animation: lpCharFloat 3.6s ease-in-out infinite; }
+      @keyframes lpBlink {
+        0%, 92%, 100% { transform: scaleY(1); }
+        95% { transform: scaleY(0.08); }
+      }
+      .lp-char-eyes { animation: lpBlink 4.8s ease-in-out infinite; }
+      @keyframes lpWink {
+        0%, 70%, 100% { transform: scaleY(1); }
+        74%, 78% { transform: scaleY(0.1); }
+      }
+      .lp-char-eye-r { animation: lpWink 9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+      @keyframes lpSwirl {
+        to { transform: rotate(360deg); }
+      }
+      .lp-char-swirl { animation: lpSwirl 9s linear infinite; }
+      @keyframes lpBubbleRise {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-22px); }
+      }
+
+      /* 3D pop: a shallow perspective tilt with amber light under the edge.
+         Static, no keyframes; the hover lift is the only motion. */
+      .ov-root .lp-pop {
+        transform: perspective(1400px) rotateX(1.2deg) rotateY(-0.8deg);
+        transform-origin: center;
+        box-shadow:
+          var(--lp-halo),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+          inset 0 1px 0 rgba(255, 255, 255, 0.85),
+          18px 22px 48px -18px rgba(46, 54, 69, 0.22),
+          10px 14px 30px -12px rgba(178, 205, 223, 0.55),
+          3px 6px 14px -6px rgba(89, 96, 112, 0.45);
+        transition: transform 420ms cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 420ms ease;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .ov-float, .ov-float-slow, .ov-pulse, .ov-dash, .ov-marquee-track {
           animation: none !important;
         }
+        .ov-root .lp-pop { transform: none; transition: none; }
+        .ov-root .lab-drift { animation: none !important; }
+        .lp-char-float, .lp-char-eyes, .lp-char-eye-r, .lp-char-swirl, .lp-bubble-rise { animation: none !important; }
       }
     `}</style>
+  );
+}
+
+/* -----------------------------------------------------------
+   Background story: the bovine IVF lab, drawn as faint line-art
+   that drifts in the margins. Decorative only; it sits behind the
+   content column and never intercepts input.
+   ----------------------------------------------------------- */
+const LAB_STROKE = "#3F4758";
+const LAB_FILL = "rgba(148, 169, 190, 0.55)";
+
+// 1. Oocyte with its cumulus halo (OPU, oocyte pick-up)
+function OocyteArt() {
+  const cells = Array.from({ length: 14 }, (_, i) => {
+    const a = (i / 14) * Math.PI * 2;
+    return { x: 60 + Math.cos(a) * 50, y: 60 + Math.sin(a) * 50 };
+  });
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <circle cx="60" cy="60" r="42" fill="rgba(255,255,255,0.35)" />
+      {cells.map((c, i) => <circle key={i} cx={c.x} cy={c.y} r="4" fill={LAB_FILL} />)}
+      <circle cx="60" cy="60" r="24" fill={LAB_FILL} />
+      <circle cx="60" cy="60" r="24" strokeDasharray="2 3" />
+    </svg>
+  );
+}
+
+// 2. Maturation dish (IVM, in-vitro maturation)
+function DishArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <ellipse cx="60" cy="66" rx="52" ry="20" fill="rgba(255,255,255,0.3)" />
+      <ellipse cx="60" cy="62" rx="48" ry="16" />
+      <ellipse cx="60" cy="58" rx="44" ry="12" strokeDasharray="2 3" />
+      {[[44, 58], [62, 52], [76, 60], [54, 66], [70, 68]].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="3.5" fill={LAB_FILL} />
+      ))}
+    </svg>
+  );
+}
+
+// 3. Sperm and pipette (IVF, fertilisation)
+function SpermArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <path d="M14 22 L92 98 L96 94 L18 18 Z" fill="rgba(255,255,255,0.4)" />
+      <path d="M92 98 L100 106" />
+      <circle cx="34" cy="78" r="6" fill={LAB_FILL} />
+      <path d="M38 74 C50 60, 56 52, 66 42 S 82 30, 92 24" strokeDasharray="2 3" />
+      <circle cx="78" cy="36" r="5" fill={LAB_FILL} />
+    </svg>
+  );
+}
+
+// 4. Cleavage-stage embryo, eight cells (day 3-4)
+function CleavageArt() {
+  const cells = [[50, 52], [70, 52], [44, 66], [60, 64], [76, 68], [54, 78], [70, 82], [64, 50]];
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <circle cx="60" cy="60" r="46" fill="rgba(255,255,255,0.3)" />
+      {cells.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="8" fill={LAB_FILL} />)}
+    </svg>
+  );
+}
+
+// 5. Blastocyst with inner cell mass (day 7-8)
+function BlastocystArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <circle cx="60" cy="60" r="48" fill="rgba(255,255,255,0.3)" />
+      <circle cx="60" cy="60" r="38" strokeDasharray="2 3" />
+      <ellipse cx="46" cy="70" rx="12" ry="11" fill={LAB_FILL} />
+      <path d="M40 62 C44 50, 62 48, 70 56" />
+      {[[68, 72], [74, 62], [58, 84]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3" fill={LAB_FILL} />)}
+    </svg>
+  );
+}
+
+// 6. Frozen-embryo straw (cryopreservation)
+function StrawArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <g transform="rotate(-30 60 60)">
+        <rect x="22" y="48" width="76" height="24" rx="12" fill="rgba(255,255,255,0.35)" />
+        <line x1="46" y1="48" x2="46" y2="72" />
+        <line x1="70" y1="48" x2="70" y2="72" />
+        <circle cx="34" cy="60" r="4" fill={LAB_FILL} />
+      </g>
+    </svg>
+  );
+}
+
+// 7. Embryo transfer catheter (ET)
+function CatheterArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <path d="M10 30 C40 20, 60 50, 84 40 S 104 70, 110 92" strokeWidth="6" strokeLinecap="round" stroke="rgba(89, 96, 112, 0.5)" />
+      <path d="M10 30 C40 20, 60 50, 84 40 S 104 70, 110 92" strokeWidth="1" />
+      <circle cx="110" cy="92" r="4" fill={LAB_FILL} />
+    </svg>
+  );
+}
+
+// 8. Ultrasound sector scan (pregnancy check)
+function ScanArt() {
+  return (
+    <svg viewBox="0 0 120 120" className="h-full w-full" fill="none" stroke={LAB_STROKE} strokeWidth="1">
+      <path d="M60 14 L100 104 A 56 56 0 0 1 20 104 Z" fill="rgba(255,255,255,0.3)" />
+      <path d="M44 56 A 28 28 0 0 1 76 56" />
+      <path d="M36 70 A 40 40 0 0 1 84 70" strokeDasharray="2 3" />
+      <circle cx="60" cy="84" r="5" fill={LAB_FILL} />
+    </svg>
+  );
+}
+
+// Eight steps, in story order, placed down the page margins.
+const LAB_STORY = [
+  { Art: OocyteArt, left: "3%", top: "5%", size: 188, dur: 22, delay: 0, mobile: true },
+  { Art: DishArt, left: "86%", top: "13%", size: 162, dur: 19, delay: 2, mobile: false },
+  { Art: SpermArt, left: "2%", top: "28%", size: 150, dur: 24, delay: 4, mobile: false },
+  { Art: CleavageArt, left: "88%", top: "40%", size: 175, dur: 21, delay: 1, mobile: true },
+  { Art: BlastocystArt, left: "1%", top: "55%", size: 200, dur: 26, delay: 3, mobile: false },
+  { Art: StrawArt, left: "90%", top: "68%", size: 138, dur: 18, delay: 5, mobile: false },
+  { Art: CatheterArt, left: "3%", top: "80%", size: 188, dur: 23, delay: 2, mobile: true },
+  { Art: ScanArt, left: "87%", top: "91%", size: 175, dur: 20, delay: 4, mobile: false },
+];
+
+function LabStoryBackground() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+      {LAB_STORY.map(({ Art, left, top, size, dur, delay, mobile }, i) => (
+        <div
+          key={i}
+          className={`lab-drift absolute ${mobile ? "" : "hidden md:block"}`}
+          style={{
+            left,
+            top,
+            width: size,
+            height: size,
+            opacity: 0.6,
+            animation: `labDrift ${dur}s ease-in-out ${delay}s infinite`,
+          }}
+        >
+          <Art />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* -----------------------------------------------------------
+   Rolling character: a glossy lilac sphere that zigzags down the page,
+   bouncing off bubbles. Each bubble is a hit point: the character
+   pops it, changes expression, and rebounds toward the next point.
+   Scroll is the clock, so the path is repeatable when scrubbing.
+   ----------------------------------------------------------- */
+type Expr = "happy" | "surprised" | "dizzy" | "wink";
+
+// Hit points in scroll progress (t) and viewport position (x vw, y vh).
+// Alternating sides force a zigzag rather than a straight fall.
+const HITS = [
+  { t: 0.1, x: 16, y: 22 },
+  { t: 0.26, x: 80, y: 30 },
+  { t: 0.42, x: 20, y: 44 },
+  { t: 0.58, x: 82, y: 58 },
+  { t: 0.74, x: 18, y: 70 },
+  { t: 0.9, x: 74, y: 82 },
+];
+const START = { t: 0, x: -8, y: 8 };
+const END = { t: 1, x: 106, y: 92 };
+
+// Triangle wave in [-1, 1]: a repeatable zigzag, no randomness at runtime.
+const tri = (u: number) => {
+  const f = u - Math.floor(u);
+  return f < 0.5 ? 4 * f - 1 : 3 - 4 * f;
+};
+
+function pathAt(p: number) {
+  const pts = [START, ...HITS, END];
+  let i = 0;
+  while (i < pts.length - 2 && p > pts[i + 1].t) i++;
+  const from = pts[i];
+  const to = pts[i + 1];
+  const u = (p - from.t) / (to.t - from.t);
+  const ease = u * u * (3 - 2 * u); // accelerate off a hit, settle into the next
+  // Zigzag tapers to zero at both ends, so the character lands on each hit point.
+  const taper = Math.sin(Math.PI * u);
+  const x = from.x + (to.x - from.x) * ease + 3 * tri(u * 4 + 0.25) * taper;
+  const y = from.y + (to.y - from.y) * ease + 5 * tri(u * 3) * taper;
+  return { x, y };
+}
+
+// How strongly the character is bouncing off a bubble right now (0..1).
+function bounceAt(p: number) {
+  let b = 0;
+  for (const h of HITS) b += Math.exp(-(((p - h.t) / 0.012) ** 2));
+  return Math.min(1, b);
+}
+
+// Expression: surprised at the instant of impact, then a new one per bounce.
+const AFTER_HIT: Expr[] = ["dizzy", "wink", "happy"];
+function expressionAt(p: number): Expr {
+  let passed = 0;
+  for (const h of HITS) {
+    if (Math.abs(p - h.t) < 0.025) return "surprised";
+    if (p >= h.t) passed++;
+  }
+  return passed === 0 ? "happy" : AFTER_HIT[(passed - 1) % AFTER_HIT.length];
+}
+
+function CharacterSvg({ expr }: { expr: Expr }) {
+  return (
+    <svg viewBox="0 0 200 200" className="h-full w-full overflow-visible" aria-hidden>
+      <defs>
+        <radialGradient id="lpBody" cx="36%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.98" />
+          <stop offset="45%" stopColor="#ECE8FB" stopOpacity="0.92" />
+          <stop offset="78%" stopColor="#C9D8F4" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#B4D6F2" stopOpacity="0.95" />
+        </radialGradient>
+        <linearGradient id="lpRim" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#F7C6E4" />
+          <stop offset="55%" stopColor="#D8D2FF" />
+          <stop offset="100%" stopColor="#9FE0FF" />
+        </linearGradient>
+      </defs>
+      <circle cx="100" cy="100" r="78" fill="url(#lpBody)" stroke="rgba(255,255,255,0.9)" strokeWidth="2" />
+      <circle cx="100" cy="100" r="74" fill="none" stroke="url(#lpRim)" strokeWidth="4" opacity="0.75" />
+      <g className="lp-char-swirl" style={{ transformOrigin: "100px 100px" }} fill="none" stroke="rgba(160,215,255,0.7)" strokeWidth="1">
+        <ellipse cx="100" cy="112" rx="70" ry="22" />
+        <ellipse cx="100" cy="112" rx="70" ry="22" transform="rotate(60 100 112)" />
+        <ellipse cx="100" cy="112" rx="70" ry="22" transform="rotate(-60 100 112)" />
+      </g>
+
+      {expr === "dizzy" ? (
+        <g stroke="#13213A" strokeWidth="3" strokeLinecap="round">
+          <path d="M70 84 L86 100 M86 84 L70 100" />
+          <path d="M114 84 L130 100 M130 84 L114 100" />
+        </g>
+      ) : expr === "wink" ? (
+        <g>
+          <path d="M70 94 Q78 84 86 94" fill="none" stroke="#13213A" strokeWidth="3" strokeLinecap="round" />
+          <g className="lp-char-eye-r">
+            <ellipse cx="122" cy="92" rx="9" ry="11" fill="#13213A" />
+            <circle cx="125" cy="88" r="3" fill="#FFFFFF" />
+          </g>
+        </g>
+      ) : (
+        <g className="lp-char-eyes" style={{ transformOrigin: "100px 92px" }}>
+          <ellipse cx="78" cy="92" rx="9" ry={expr === "surprised" ? 14 : 11} fill="#13213A" />
+          <circle cx="81" cy="88" r="3" fill="#FFFFFF" />
+          <ellipse cx="122" cy="92" rx="9" ry={expr === "surprised" ? 14 : 11} fill="#13213A" />
+          <circle cx="125" cy="88" r="3" fill="#FFFFFF" />
+        </g>
+      )}
+
+      <circle cx="62" cy="114" r="8" fill="#FF9EC6" opacity={expr === "surprised" ? 0.7 : 0.45} />
+      <circle cx="138" cy="114" r="8" fill="#FF9EC6" opacity={expr === "surprised" ? 0.7 : 0.45} />
+
+      {expr === "surprised" ? (
+        <ellipse cx="100" cy="124" rx="5" ry="7" fill="#13213A" />
+      ) : expr === "dizzy" ? (
+        <path d="M84 122 Q 92 114 100 122 T 116 122" fill="none" stroke="#13213A" strokeWidth="3" strokeLinecap="round" />
+      ) : (
+        <path d="M 88 118 Q 100 129 112 118" fill="none" stroke="#13213A" strokeWidth="3" strokeLinecap="round" />
+      )}
+    </svg>
+  );
+}
+
+function RollingCharacter() {
+  const { scrollYProgress: p } = useScroll();
+  const [expr, setExpr] = useState<Expr>("happy");
+  useMotionValueEvent(p, "change", (v) => {
+    const next = expressionAt(v);
+    setExpr((prev) => (prev === next ? prev : next));
+  });
+
+  const left = useTransform(p, (v) => `${pathAt(v).x}vw`);
+  const top = useTransform(p, (v) => `${pathAt(v).y - 7 * bounceAt(v)}vh`);
+  const rotate = useTransform(p, (v) => v * 900 + bounceAt(v) * 25);
+
+  return (
+    <>
+      <motion.div
+        aria-hidden
+        className="lp-rolling pointer-events-none fixed z-0 w-28 md:w-40"
+        style={{ left, top, rotate, x: "-50%", y: "-50%", aspectRatio: "1" }}
+      >
+        <div className="lp-char-float h-full w-full">
+          <CharacterSvg expr={expr} />
+        </div>
+      </motion.div>
+      {HITS.map((h) => (
+        <HitBubble key={h.t} p={p} t={h.t} x={h.x} y={h.y} />
+      ))}
+    </>
+  );
+}
+
+// A bubble at a hit point. It pops as the character reaches it.
+function HitBubble({ p, t, x, y }: { p: MotionValue<number>; t: number; x: number; y: number }) {
+  const scale = useTransform(p, (v) => (v >= t ? 0.2 : 1));
+  const opacity = useTransform(p, (v) => (v >= t ? 0 : 0.85));
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none fixed z-0 h-16 w-16 rounded-full md:h-20 md:w-20"
+      style={{
+        left: `${x}vw`,
+        top: `${y - 8}vh`,
+        x: "-50%",
+        y: "-50%",
+        scale,
+        opacity,
+        transition: "transform 0.35s ease-out, opacity 0.35s ease-out",
+        background:
+          "radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(214,236,255,0.55) 38%, rgba(190,220,250,0.35) 70%, rgba(255,255,255,0.1) 100%)",
+        border: "1px solid rgba(255,255,255,0.8)",
+        boxShadow: "0 8px 24px -8px rgba(89,96,112,0.35), inset 0 -6px 12px rgba(178,205,223,0.35)",
+      }}
+    />
+  );
+}
+
+// Ambient bubbles that rise through the background, not on the path.
+const AMBIENT_BUBBLES = [
+  { left: "6%", top: "22%", size: 26, dur: 16, delay: 0 },
+  { left: "18%", top: "58%", size: 16, dur: 13, delay: 3 },
+  { left: "42%", top: "14%", size: 20, dur: 18, delay: 6 },
+  { left: "63%", top: "36%", size: 30, dur: 17, delay: 2 },
+  { left: "80%", top: "52%", size: 14, dur: 12, delay: 5 },
+  { left: "92%", top: "24%", size: 22, dur: 19, delay: 1 },
+  { left: "34%", top: "78%", size: 18, dur: 14, delay: 4 },
+  { left: "74%", top: "86%", size: 24, dur: 16, delay: 7 },
+];
+
+function AmbientBubbles() {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      {AMBIENT_BUBBLES.map((b, i) => (
+        <div
+          key={i}
+          className="lp-bubble-rise absolute rounded-full"
+          style={{
+            left: b.left,
+            top: b.top,
+            width: b.size,
+            height: b.size,
+            background:
+              "radial-gradient(circle at 32% 28%, rgba(255,255,255,0.9) 0%, rgba(214,236,255,0.45) 45%, rgba(255,255,255,0.1) 100%)",
+            border: "1px solid rgba(255,255,255,0.7)",
+            animation: `lpBubbleRise ${b.dur}s ease-in-out ${b.delay}s infinite`,
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -359,22 +775,22 @@ function Header({
       <div
         className="mx-auto flex max-w-[1600px] items-center justify-between rounded-full px-5 py-3 transition-all duration-500"
         style={{
-          background: scrolled ? "rgba(11, 43, 38, 0.78)" : "rgba(11, 43, 38, 0.42)",
+          background: scrolled ? "rgba(255, 255, 255, 0.78)" : "rgba(255, 255, 255, 0.42)",
           backdropFilter: "blur(16px) saturate(150%)",
           WebkitBackdropFilter: "blur(16px) saturate(150%)",
-          border: `1px solid ${scrolled ? "rgba(218, 241, 222, 0.10)" : "rgba(218, 241, 222, 0.06)"}`,
-          boxShadow: scrolled ? "0 16px 40px -20px rgba(5, 31, 32, 0.5)" : "none",
+          border: `1px solid ${scrolled ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.06)"}`,
+          boxShadow: scrolled ? "0 16px 40px -20px rgba(46, 54, 69, 0.35)" : "none",
         }}
       >
         <a href="#top" className="flex items-center gap-3">
           <Logo />
           <div className="leading-none">
-            <div className="ov-serif text-[15px] font-semibold tracking-tight" style={{ color: PALETTE.cream }}>
+            <div className="ov-serif text-[15px] font-semibold tracking-tight" style={{ color: "#000000" }}>
               Ovulite
             </div>
             <div
               className="ov-eyebrow mt-0.5"
-              style={{ color: "#8EB69B", fontSize: 9, fontWeight: 700 }}
+              style={{ color: "#000000", fontSize: 9, fontWeight: 700 }}
             >
               Reproductive&nbsp;Intelligence
             </div>
@@ -387,7 +803,7 @@ function Header({
               key={n.id}
               href={`#${n.id}`}
               className="ov-link text-[13px] font-medium"
-              style={{ color: "rgba(218, 241, 222, 0.85)" }}
+              style={{ color: "#000000" }}
             >
               {n.label}
             </a>
@@ -398,7 +814,7 @@ function Header({
           <button
             onClick={() => navigate("/login")}
             className="rounded-full px-4 py-2 text-[13px] font-medium ov-link"
-            style={{ color: "rgba(218, 241, 222, 0.85)" }}
+            style={{ color: "#000000" }}
           >
             Sign in
           </button>
@@ -406,11 +822,11 @@ function Header({
             onClick={() => navigate("/login")}
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold transition-all duration-200 hover:-translate-y-0.5"
             style={{
-              background: "linear-gradient(135deg, #051F20 0%, #DAF1DE 100%)",
-              color: "#DAF1DE",
-              border: "1px solid rgba(218, 241, 222, 0.6)",
+              background: "linear-gradient(135deg, #D6E2EB 0%, #FFFFFF 100%)",
+              color: "#000000",
+              border: "1px solid rgba(255, 255, 255, 0.6)",
               boxShadow:
-                "0 10px 24px -10px rgba(5, 31, 32, 0.6), inset 0 1px 0 rgba(218, 241, 222, 0.12)",
+                "0 10px 24px -10px rgba(46, 54, 69, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
             }}
           >
             Request Demo
@@ -422,7 +838,7 @@ function Header({
           className="rounded-full p-2 sm:hidden"
           aria-label="Open menu"
           onClick={() => setMobileOpen(!mobileOpen)}
-          style={{ color: PALETTE.cream }}
+          style={{ color: "#000000" }}
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -435,14 +851,14 @@ function Header({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             className="mx-auto mt-2 max-w-[1600px] overflow-hidden rounded-3xl px-5 py-3 sm:hidden"
-            style={{ background: "rgba(11, 43, 38, 0.92)", border: "1px solid rgba(218, 241, 222, 0.08)" }}
+            style={{ background: "rgba(255, 255, 255, 0.92)", border: "1px solid rgba(255, 255, 255, 0.08)" }}
           >
             {NAV.map((n) => (
               <a
                 key={n.id}
                 href={`#${n.id}`}
                 className="block py-2.5 text-sm"
-                style={{ color: "rgba(218, 241, 222, 0.85)" }}
+                style={{ color: "#000000" }}
                 onClick={() => setMobileOpen(false)}
               >
                 {n.label}
@@ -475,22 +891,22 @@ function Logo() {
       <svg viewBox="0 0 40 40" className="absolute inset-0">
         <defs>
           <radialGradient id="lg1" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#8EB69B" stopOpacity="0.95" />
-            <stop offset="60%" stopColor="#235347" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#051F20" stopOpacity="1" />
+            <stop offset="0%" stopColor="#B2CDDF" stopOpacity="0.95" />
+            <stop offset="60%" stopColor="#596070" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#D6E2EB" stopOpacity="1" />
           </radialGradient>
           <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#235347" />
-            <stop offset="100%" stopColor="#163832" />
+            <stop offset="0%" stopColor="#596070" />
+            <stop offset="100%" stopColor="#C9D9E6" />
           </linearGradient>
         </defs>
         <circle cx="20" cy="20" r="17" fill="url(#lg1)" />
-        <circle cx="20" cy="20" r="17" fill="none" stroke="rgba(142, 182, 155, 0.4)" strokeWidth="0.6" />
-        <circle cx="20" cy="20" r="6.5" fill="none" stroke="rgba(218, 241, 222, 0.5)" strokeWidth="0.8" />
+        <circle cx="20" cy="20" r="17" fill="none" stroke="rgba(178, 205, 223, 0.4)" strokeWidth="0.6" />
+        <circle cx="20" cy="20" r="6.5" fill="none" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="0.8" />
         <circle cx="14.5" cy="18" r="2.4" fill="url(#lg2)" />
-        <circle cx="22.5" cy="16" r="1.8" fill="rgba(142, 182, 155, 0.85)" />
-        <circle cx="24" cy="22" r="2" fill="rgba(218, 241, 222, 0.85)" />
-        <circle cx="17" cy="24" r="1.6" fill="rgba(142, 182, 155, 0.7)" />
+        <circle cx="22.5" cy="16" r="1.8" fill="rgba(178, 205, 223, 0.85)" />
+        <circle cx="24" cy="22" r="2" fill="rgba(255, 255, 255, 0.85)" />
+        <circle cx="17" cy="24" r="1.6" fill="rgba(178, 205, 223, 0.7)" />
       </svg>
     </div>
   );
@@ -513,18 +929,43 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
       ref={ref}
       className="relative px-4 pt-24 sm:px-6"
     >
-      {/* Hero panel — bronze gradient container that frames the entire hero */}
+      {/* Hero panel — pure glass card framing the hero, with a shallow 3D tilt */}
       <div
-        className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[36px]"
+        className="lp-pop relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[36px]"
         style={{
           background:
-            "radial-gradient(95% 85% at 72% 8%, rgba(142,182,155,0.30) 0%, transparent 55%)," +
-            "radial-gradient(120% 120% at 22% 92%, #163832 0%, #0B2B26 48%, #051F20 100%)",
-          border: "1px solid rgba(142, 182, 155, 0.22)",
+            "linear-gradient(135deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.34) 100%)",
+          backdropFilter: "blur(16px) saturate(130%)",
+          WebkitBackdropFilter: "blur(16px) saturate(130%)",
+          border: "1px solid rgba(178, 205, 223, 0.22)",
           boxShadow:
-            "inset 0 1px 0 rgba(218, 241, 222, 0.35), inset 0 0 60px rgba(142, 182, 155, 0.08), 0 40px 90px -30px rgba(5, 31, 32, 0.45), 0 12px 28px -10px rgba(35, 83, 71, 0.35)",
+            "inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 0 60px rgba(178, 205, 223, 0.08), 0 40px 90px -30px rgba(46, 54, 69, 0.315), 0 12px 28px -10px rgba(89, 96, 112, 0.28)",
         }}
       >
+        {/* Architecture image, blurred and washed into the ground so it reads as
+            atmosphere rather than a picture. Sits under the content (z-10). */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <img
+            src="/landing/hero-bg.webp"
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+            style={{
+              filter: "blur(5px) saturate(0.9)",
+              opacity: 1,
+              transform: "scale(1.08)",
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(234, 241, 241, 0.3) 0%, rgba(234, 241, 241, 0.5) 60%, rgba(234, 241, 241, 0.78) 100%)",
+            }}
+          />
+        </div>
+
         {/* Soft inner glow accents (parallax) — kept inside the panel */}
         <motion.div
           style={{ y: y3 }}
@@ -549,7 +990,7 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(218, 241, 222, 0.55), transparent)",
+              "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent)",
           }}
         />
 
@@ -564,15 +1005,15 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-semibold"
             style={{
-              background: "rgba(11, 43, 38, 0.85)",
-              border: "1px solid rgba(22, 56, 50, 0.35)",
-              color: "#8EB69B",
+              background: "rgba(255, 255, 255, 0.85)",
+              border: "1px solid rgba(255, 255, 255, 0.35)",
+              color: "#000000",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
-              boxShadow: "0 4px 14px -6px rgba(35, 83, 71, 0.35)",
+              boxShadow: "0 4px 14px -6px rgba(89, 96, 112, 0.28)",
             }}
           >
-            <CircleDot className="h-3 w-3" style={{ color: "#8EB69B" }} />
+            <CircleDot className="h-3 w-3" style={{ color: "#000000" }} />
             <span>Reproductive Intelligence Platform</span>
           </motion.div>
 
@@ -581,11 +1022,17 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="ov-serif text-[clamp(2.8rem,5.6vw,5.2rem)] font-light leading-[0.98] tracking-tight"
-            style={{ color: PALETTE.cream }}
+            style={{ color: "#000000" }}
           >
-            Precision <span className="ov-text-warm italic">Reproduction.</span>
+            Precision{" "}
+            <span className="ov-text-warm italic" style={{ background: "none", color: "#000000", WebkitTextFillColor: "#000000" }}>
+              Reproduction.
+            </span>
             <br />
-            Powered by <span className="ov-text-grad">Intelligence.</span>
+            Powered by{" "}
+            <span className="ov-text-grad" style={{ background: "none", color: "#000000", WebkitTextFillColor: "#000000" }}>
+              Intelligence.
+            </span>
           </motion.h1>
 
           <motion.p
@@ -593,7 +1040,7 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="max-w-xl text-[17px] leading-relaxed"
-            style={{ color: "rgba(218, 241, 222, 0.82)" }}
+            style={{ color: "#000000" }}
           >
             AI-driven embryo grading, pregnancy prediction, and lab QC — engineered for
             bovine embryo transfer programs that demand objective, traceable, and
@@ -616,9 +1063,9 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
             <button className="ov-btn-ghost inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold">
               <span
                 className="grid h-6 w-6 place-items-center rounded-full"
-                style={{ background: "rgba(142, 182, 155, 0.18)" }}
+                style={{ background: "rgba(178, 205, 223, 0.18)" }}
               >
-                <Play className="h-3 w-3" fill="#8EB69B" stroke="#8EB69B" />
+                <Play className="h-3 w-3" fill="#B2CDDF" stroke="#B2CDDF" />
               </span>
               Watch 2-min Demo
             </button>
@@ -645,24 +1092,24 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
                   c.active
                     ? {
                         background:
-                          "linear-gradient(135deg, #8EB69B 0%, #235347 100%)",
-                        color: "#DAF1DE",
-                        border: "1px solid rgba(142, 182, 155, 0.5)",
+                          "linear-gradient(135deg, #B2CDDF 0%, #94A9BE 100%)",
+                        color: "#000000",
+                        border: "1px solid rgba(178, 205, 223, 0.5)",
                         boxShadow:
-                          "0 10px 22px -8px rgba(35, 83, 71, 0.6), inset 0 1px 0 rgba(218, 241, 222, 0.35)",
+                          "0 10px 22px -8px rgba(89, 96, 112, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35)",
                       }
                     : {
-                        background: "rgba(11, 43, 38, 0.78)",
-                        color: "#DAF1DE",
-                        border: "1px solid rgba(22, 56, 50, 0.3)",
+                        background: "rgba(255, 255, 255, 0.78)",
+                        color: "#000000",
+                        border: "1px solid rgba(255, 255, 255, 0.3)",
                       }
                 }
               >
                 <span
                   className="h-2 w-2 rounded-full"
                   style={{
-                    background: c.active ? "#DAF1DE" : "#8EB69B",
-                    boxShadow: c.active ? "0 0 6px #DAF1DE" : "none",
+                    background: c.active ? "#FFFFFF" : "#B2CDDF",
+                    boxShadow: c.active ? "0 0 6px #FFFFFF" : "none",
                   }}
                 />
                 {c.label}
@@ -684,11 +1131,11 @@ function Hero({ navigate, reduceMotion: _reduceMotion }: { navigate: (p: string)
               <div key={s.l}>
                 <div
                   className="ov-serif text-3xl font-medium"
-                  style={{ color: PALETTE.cream }}
+                  style={{ color: "#000000" }}
                 >
                   {s.k}
                 </div>
-                <div className="ov-eyebrow mt-1" style={{ color: "rgba(218, 241, 222, 0.72)" }}>
+                <div className="ov-eyebrow mt-1" style={{ color: "#000000" }}>
                   {s.l}
                 </div>
               </div>
@@ -715,21 +1162,21 @@ function BackdropGlow() {
       <div
         className="absolute -left-32 top-10 h-[520px] w-[520px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(142, 182, 155, 0.30), transparent 65%)",
+          background: "radial-gradient(circle, rgba(178, 205, 223, 0.3), transparent 65%)",
           filter: "blur(44px)",
         }}
       />
       <div
         className="absolute right-[-10%] top-[40%] h-[520px] w-[520px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(22, 56, 50, 0.20), transparent 65%)",
+          background: "radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 65%)",
           filter: "blur(48px)",
         }}
       />
       <div
         className="absolute left-[40%] bottom-0 h-[420px] w-[420px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(142, 182, 155, 0.16), transparent 65%)",
+          background: "radial-gradient(circle, rgba(178, 205, 223, 0.16), transparent 65%)",
           filter: "blur(50px)",
         }}
       />
@@ -745,10 +1192,10 @@ function ScrollIndicator() {
       transition={{ delay: 1.4, duration: 1 }}
       className="pointer-events-none absolute inset-x-0 bottom-8 z-20 flex flex-col items-center gap-2"
     >
-      <span className="ov-eyebrow text-[10px]" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+      <span className="ov-eyebrow text-[10px]" style={{ color: "#000000" }}>
         Scroll to explore
       </span>
-      <div className="relative h-9 w-[18px] rounded-full" style={{ border: "1px solid rgba(218, 241, 222, 0.25)" }}>
+      <div className="relative h-9 w-[18px] rounded-full" style={{ border: "1px solid rgba(255, 255, 255, 0.25)" }}>
         <motion.div
           className="absolute left-1/2 top-1.5 h-1.5 w-1.5 -translate-x-1/2 rounded-full"
           style={{ background: PALETTE.bio }}
@@ -778,8 +1225,8 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
           className="ov-pulse h-[78%] w-[78%] rounded-full"
           style={{
             background:
-              "radial-gradient(circle, rgba(142, 182, 155, 0.10) 0%, rgba(142, 182, 155, 0.05) 40%, transparent 70%)",
-            border: "1px solid rgba(142, 182, 155, 0.18)",
+              "radial-gradient(circle, rgba(178, 205, 223, 0.1) 0%, rgba(178, 205, 223, 0.05) 40%, transparent 70%)",
+            border: "1px solid rgba(178, 205, 223, 0.18)",
           }}
         />
       </div>
@@ -792,7 +1239,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
             className="absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full"
             style={{
               background: PALETTE.bio,
-              boxShadow: "0 0 12px rgba(142, 182, 155, 0.7)",
+              boxShadow: "0 0 12px rgba(178, 205, 223, 0.7)",
               transform: `rotate(${deg}deg) translate(180px) rotate(-${deg}deg)`,
             }}
           />
@@ -802,17 +1249,17 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
       <svg viewBox="0 0 600 600" className="absolute inset-0 h-full w-full">
         <defs>
           <radialGradient id="cellGrad" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#8EB69B" stopOpacity="0.95" />
-            <stop offset="60%" stopColor="#8EB69B" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="#051F20" stopOpacity="1" />
+            <stop offset="0%" stopColor="#B2CDDF" stopOpacity="0.95" />
+            <stop offset="60%" stopColor="#B2CDDF" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#D6E2EB" stopOpacity="1" />
           </radialGradient>
           <radialGradient id="warmCell" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#235347" stopOpacity="0.92" />
-            <stop offset="100%" stopColor="#163832" stopOpacity="0.95" />
+            <stop offset="0%" stopColor="#596070" stopOpacity="0.92" />
+            <stop offset="100%" stopColor="#C9D9E6" stopOpacity="0.95" />
           </radialGradient>
           <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8EB69B" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#235347" stopOpacity="0.7" />
+            <stop offset="0%" stopColor="#B2CDDF" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#596070" stopOpacity="0.7" />
           </linearGradient>
           <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="6" result="blur" />
@@ -860,7 +1307,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
             cy={0}
             r={150}
             fill="none"
-            stroke="rgba(142, 182, 155, 0.35)"
+            stroke="rgba(178, 205, 223, 0.35)"
             strokeWidth="1"
             animate={reduceMotion ? {} : { opacity: phase === 0 ? 0.7 : 0.1 }}
             transition={{ duration: 1.4 }}
@@ -927,7 +1374,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
           <motion.path
             d="M -130 30 C -130 -10, -100 -50, -60 -52 C -40 -85, 10 -90, 40 -70 C 80 -78, 120 -55, 130 -10 C 140 30, 130 60, 100 70 L 90 110 L 70 110 L 70 80 L 30 80 L 30 110 L 10 110 L 10 80 C -20 80, -60 85, -90 80 L -90 110 L -110 110 L -110 80 C -125 70, -135 55, -130 30 Z"
             fill="url(#cellGrad)"
-            stroke="rgba(142, 182, 155, 0.45)"
+            stroke="rgba(178, 205, 223, 0.45)"
             strokeWidth="1.2"
             filter="url(#softGlow)"
             initial={false}
@@ -946,7 +1393,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
             cx={-50}
             cy={-60}
             r={4}
-            fill="#DAF1DE"
+            fill="#FFFFFF"
             initial={false}
             animate={reduceMotion ? {} : { opacity: phase === 2 ? 1 : 0 }}
             transition={{ duration: 1.2 }}
@@ -955,7 +1402,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
           <motion.path
             d="M -100 130 L -60 130 L -50 110 L -30 150 L -10 100 L 10 160 L 30 130 L 100 130"
             fill="none"
-            stroke="#235347"
+            stroke="#596070"
             strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -972,7 +1419,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
             fontFamily="Fraunces, serif"
             fontStyle="italic"
             fontSize="14"
-            fill="rgba(218, 241, 222, 0.6)"
+            fill="rgba(255, 255, 255, 0.6)"
             initial={false}
             animate={{ opacity: 1 }}
           >
@@ -989,7 +1436,7 @@ function BiologyScene({ reduceMotion }: { reduceMotion: boolean }) {
             className="h-1 rounded-full transition-all duration-500"
             style={{
               width: phase === i ? 22 : 8,
-              background: phase === i ? PALETTE.bio : "rgba(218, 241, 222, 0.25)",
+              background: phase === i ? PALETTE.bio : "rgba(255, 255, 255, 0.25)",
             }}
           />
         ))}
@@ -1002,16 +1449,16 @@ function FloatingHeroChips() {
   // Solid-cream glass card style — high contrast for readable text on top of
   // the cow image. Reused inline so we don't disturb the page-wide .ov-glass-card.
   const chipBg: React.CSSProperties = {
-    background: "rgba(11, 43, 38, 0.94)",
+    background: "rgba(255, 255, 255, 0.94)",
     backdropFilter: "blur(14px) saturate(150%)",
     WebkitBackdropFilter: "blur(14px) saturate(150%)",
-    border: "1px solid rgba(22, 56, 50, 0.22)",
+    border: "1px solid rgba(255, 255, 255, 0.22)",
     boxShadow:
-      "inset 0 1px 0 rgba(218, 241, 222, 0.8), 0 24px 60px -22px rgba(5, 31, 32, 0.45), 0 6px 18px -6px rgba(35, 83, 71, 0.25)",
+      "inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 24px 60px -22px rgba(46, 54, 69, 0.315), 0 6px 18px -6px rgba(89, 96, 112, 0.2)",
     borderRadius: 18,
   };
   const eyebrow: React.CSSProperties = {
-    color: "#8EB69B",
+    color: "#000000",
     fontSize: 9,
     letterSpacing: "0.16em",
     textTransform: "uppercase",
@@ -1033,21 +1480,21 @@ function FloatingHeroChips() {
         </div>
         <div className="space-y-1.5">
           {[
-            { k: "CL Size", v: 0.84, c: "#8EB69B" },
-            { k: "Progesterone", v: 0.67, c: "#8EB69B" },
-            { k: "Day 7 Stage", v: 0.51, c: "#163832" },
-            { k: "Blood Flow", v: 0.38, c: "#235347" },
+            { k: "CL Size", v: 0.84, c: "#B2CDDF" },
+            { k: "Progesterone", v: 0.67, c: "#B2CDDF" },
+            { k: "Day 7 Stage", v: 0.51, c: "#C9D9E6" },
+            { k: "Blood Flow", v: 0.38, c: "#596070" },
           ].map((b) => (
             <div key={b.k} className="flex items-center gap-2">
               <span
                 className="w-20 text-[10.5px] font-medium"
-                style={{ color: "#DAF1DE" }}
+                style={{ color: "#000000" }}
               >
                 {b.k}
               </span>
               <div
                 className="relative h-1.5 flex-1 overflow-hidden rounded-full"
-                style={{ background: "rgba(218, 241, 222, 0.12)" }}
+                style={{ background: "rgba(255, 255, 255, 0.12)" }}
               >
                 <motion.div
                   initial={{ width: 0 }}
@@ -1075,7 +1522,7 @@ function FloatingHeroChips() {
             <div style={eyebrow}>Pregnancy Probability</div>
             <div
               className="ov-serif mt-1 text-3xl font-semibold leading-none"
-              style={{ color: "#DAF1DE" }}
+              style={{ color: "#000000" }}
             >
               74<span className="text-base font-medium">%</span>
             </div>
@@ -1084,11 +1531,11 @@ function FloatingHeroChips() {
         </div>
         <div
           className="mt-2 flex items-center gap-1.5 text-[10.5px] font-semibold"
-          style={{ color: "#8EB69B" }}
+          style={{ color: "#000000" }}
         >
           <span
             className="h-1.5 w-1.5 rounded-full"
-            style={{ background: "#8EB69B", boxShadow: "0 0 6px #8EB69B" }}
+            style={{ background: "#B2CDDF", boxShadow: "0 0 6px #B2CDDF" }}
           />
           Confidence: High · RAG · Green
         </div>
@@ -1109,12 +1556,12 @@ function FloatingHeroChips() {
           className="h-14 w-full rounded-lg"
           style={{
             background:
-              "radial-gradient(circle at 30% 40%, rgba(22, 56, 50, 0.9), transparent 45%), radial-gradient(circle at 70% 60%, rgba(142, 182, 155, 0.85), transparent 50%), linear-gradient(135deg, #0B2B26, #8EB69B)",
+              "radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.9), transparent 45%), radial-gradient(circle at 70% 60%, rgba(178, 205, 223, 0.85), transparent 50%), linear-gradient(135deg, #D6E2EB, #B2CDDF)",
           }}
         />
         <div
           className="mt-2 text-[10.5px] font-medium"
-          style={{ color: "#DAF1DE" }}
+          style={{ color: "#000000" }}
         >
           E-211 · Grade A · 92% conf
         </div>
@@ -1129,19 +1576,19 @@ function RagGauge({ value }: { value: number }) {
   const dash = (value / 100) * c;
   return (
     <svg viewBox="0 0 50 50" width={50} height={50} className="-rotate-90">
-      <circle cx="25" cy="25" r={r} fill="none" stroke="rgba(218, 241, 222, 0.1)" strokeWidth="3" />
+      <circle cx="25" cy="25" r={r} fill="none" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="3" />
       <motion.circle
         cx="25"
         cy="25"
         r={r}
         fill="none"
-        stroke="#8EB69B"
+        stroke="#B2CDDF"
         strokeWidth="3"
         strokeLinecap="round"
         initial={{ strokeDasharray: `0 ${c}` }}
         animate={{ strokeDasharray: `${dash} ${c}` }}
         transition={{ duration: 1.4, delay: 1.2, ease: "easeOut" }}
-        style={{ filter: "drop-shadow(0 0 4px rgba(142, 182, 155, 0.7))" }}
+        style={{ filter: "drop-shadow(0 0 4px rgba(178, 205, 223, 0.7))" }}
       />
     </svg>
   );
@@ -1175,9 +1622,9 @@ function ProblemSection() {
           {/* Left: counters */}
           <div className="space-y-6">
             {[
-              { v: 35, suffix: "%", label: "Grading Variance Between Technicians", color: PALETTE.emeraldGlow },
-              { v: 42, suffix: "%", label: "Average ET Pregnancy Success Rate", color: PALETTE.bio },
-              { v: 58, suffix: "%", label: "Embryo Wastage From Suboptimal Selection", color: PALETTE.emeraldGlow },
+              { v: 35, suffix: "%", label: "Grading Variance Between Technicians", color: "#000000" },
+              { v: 42, suffix: "%", label: "Average ET Pregnancy Success Rate", color: "#000000" },
+              { v: 58, suffix: "%", label: "Embryo Wastage From Suboptimal Selection", color: "#000000" },
             ].map((s) => (
               <CounterCard key={s.label} {...s} />
             ))}
@@ -1185,16 +1632,16 @@ function ProblemSection() {
 
           {/* Right: subjective → objective transformation */}
           <div className="ov-glass-card relative overflow-hidden p-6 sm:p-8">
-            <div className="ov-eyebrow mb-3" style={{ color: "rgba(142, 182, 155, 0.95)" }}>
+            <div className="ov-eyebrow mb-3" style={{ color: "#000000" }}>
               From Subjective → Objective
             </div>
-            <div className="ov-serif text-2xl font-medium leading-snug" style={{ color: PALETTE.cream }}>
+            <div className="ov-serif text-2xl font-medium leading-snug" style={{ color: "#000000" }}>
               Same embryo. Different lens.
             </div>
 
             <div className="mt-8 grid grid-cols-2 gap-4">
               <div>
-                <div className="ov-eyebrow mb-2 text-[9px]" style={{ color: "rgba(218, 241, 222, 0.68)" }}>
+                <div className="ov-eyebrow mb-2 text-[9px]" style={{ color: "#000000" }}>
                   Manual Eye
                 </div>
                 <motion.div
@@ -1203,13 +1650,13 @@ function ProblemSection() {
                 >
                   <EmbryoMicroscope />
                 </motion.div>
-                <div className="mt-2 text-xs" style={{ color: "rgba(218, 241, 222, 0.72)" }}>
-                  Grade?  <span style={{ color: PALETTE.emeraldGlow }}>Subjective</span>
+                <div className="mt-2 text-xs" style={{ color: "#000000" }}>
+                  Grade?  <span style={{ color: "#000000" }}>Subjective</span>
                 </div>
               </div>
 
               <div>
-                <div className="ov-eyebrow mb-2 text-[9px]" style={{ color: PALETTE.bio }}>
+                <div className="ov-eyebrow mb-2 text-[9px]" style={{ color: "#000000" }}>
                   Ovulite AI
                 </div>
                 <div className="relative aspect-square w-full overflow-hidden rounded-xl">
@@ -1225,9 +1672,9 @@ function ProblemSection() {
                     <span
                       className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
                       style={{
-                        background: "rgba(11, 43, 38, 0.85)",
-                        color: PALETTE.bio,
-                        border: "1px solid rgba(142, 182, 155, 0.4)",
+                        background: "rgba(255, 255, 255, 0.85)",
+                        color: "#000000",
+                        border: "1px solid rgba(178, 205, 223, 0.4)",
                       }}
                     >
                       <span className="h-1.5 w-1.5 rounded-full" style={{ background: PALETTE.bio }} />
@@ -1235,8 +1682,8 @@ function ProblemSection() {
                     </span>
                   </motion.div>
                 </div>
-                <div className="mt-2 text-xs" style={{ color: "rgba(218, 241, 222, 0.72)" }}>
-                  Grade <span style={{ color: PALETTE.bio }}>Objective · Reproducible</span>
+                <div className="mt-2 text-xs" style={{ color: "#000000" }}>
+                  Grade <span style={{ color: "#000000" }}>Objective · Reproducible</span>
                 </div>
               </div>
             </div>
@@ -1247,7 +1694,7 @@ function ProblemSection() {
   );
 }
 
-function CounterCard({ v, suffix, label, color }: { v: number; suffix: string; label: string; color: string }) {
+function CounterCard({ v, suffix, label }: { v: number; suffix: string; label: string; color?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 80%", "center center"] });
   const motionVal = useTransform(scrollYProgress, [0, 1], [0, v]);
@@ -1265,11 +1712,11 @@ function CounterCard({ v, suffix, label, color }: { v: number; suffix: string; l
       whileHover={{ y: -4 }}
       className="ov-glass-card ov-glow flex items-center gap-6 p-7"
     >
-      <div className="ov-serif text-6xl font-light" style={{ color }}>
+      <div className="ov-serif text-6xl font-light" style={{ color: "#000000" }}>
         {n}
         <span className="text-3xl">{suffix}</span>
       </div>
-      <div className="flex-1 text-sm leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.85)" }}>
+      <div className="flex-1 text-sm leading-relaxed" style={{ color: "#000000" }}>
         {label}
       </div>
     </motion.div>
@@ -1281,23 +1728,23 @@ function EmbryoMicroscope() {
     <svg viewBox="0 0 200 200" className="h-full w-full">
       <defs>
         <radialGradient id="emField" cx="50%" cy="50%" r="55%">
-          <stop offset="0%" stopColor="#235347" />
-          <stop offset="100%" stopColor="#051F20" />
+          <stop offset="0%" stopColor="#596070" />
+          <stop offset="100%" stopColor="#D6E2EB" />
         </radialGradient>
         <radialGradient id="emCell" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#8EB69B" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#235347" stopOpacity="1" />
+          <stop offset="0%" stopColor="#B2CDDF" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="#596070" stopOpacity="1" />
         </radialGradient>
       </defs>
       <rect width="200" height="200" fill="url(#emField)" />
-      <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(142, 182, 155, 0.18)" strokeWidth="0.5" />
-      <circle cx="100" cy="100" r="55" fill="none" stroke="rgba(142, 182, 155, 0.12)" strokeWidth="0.5" />
+      <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(178, 205, 223, 0.18)" strokeWidth="0.5" />
+      <circle cx="100" cy="100" r="55" fill="none" stroke="rgba(178, 205, 223, 0.12)" strokeWidth="0.5" />
       {[
         [85, 88, 14], [108, 82, 12], [115, 105, 13], [95, 115, 14], [80, 102, 11], [105, 95, 9],
       ].map(([cx, cy, r], i) => (
         <circle key={i} cx={cx} cy={cy} r={r} fill="url(#emCell)" opacity="0.85" />
       ))}
-      <circle cx="100" cy="100" r="42" fill="none" stroke="rgba(218, 241, 222, 0.18)" strokeWidth="0.6" />
+      <circle cx="100" cy="100" r="42" fill="none" stroke="rgba(255, 255, 255, 0.18)" strokeWidth="0.6" />
     </svg>
   );
 }
@@ -1308,7 +1755,7 @@ function GradCamOverlay() {
       className="absolute inset-0"
       style={{
         background:
-          "radial-gradient(circle at 45% 48%, rgba(35, 83, 71, 0.55) 0%, transparent 30%), radial-gradient(circle at 60% 55%, rgba(142, 182, 155, 0.45) 0%, transparent 28%), radial-gradient(circle at 35% 60%, rgba(142, 182, 155, 0.4) 0%, transparent 35%)",
+          "radial-gradient(circle at 45% 48%, rgba(89, 96, 112, 0.55) 0%, transparent 30%), radial-gradient(circle at 60% 55%, rgba(178, 205, 223, 0.45) 0%, transparent 28%), radial-gradient(circle at 35% 60%, rgba(178, 205, 223, 0.4) 0%, transparent 35%)",
         mixBlendMode: "screen",
       }}
     />
@@ -1405,31 +1852,31 @@ function PillarCard({
       />
 
       <div className="flex items-center justify-between">
-        <span className="ov-eyebrow" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+        <span className="ov-eyebrow" style={{ color: "#000000" }}>
           {tag}
         </span>
         <div
           className="grid h-10 w-10 place-items-center rounded-xl"
-          style={{ background: "rgba(142, 182, 155, 0.08)", border: "1px solid rgba(142, 182, 155, 0.2)" }}
+          style={{ background: "rgba(178, 205, 223, 0.08)", border: "1px solid rgba(178, 205, 223, 0.2)" }}
         >
-          <Icon className="h-4 w-4" style={{ color: accent }} />
+          <Icon className="h-4 w-4" style={{ color: "#000000"}} />
         </div>
       </div>
 
-      <h3 className="ov-serif mt-6 text-3xl font-medium leading-tight" style={{ color: PALETTE.cream }}>
+      <h3 className="ov-serif mt-6 text-3xl font-medium leading-tight" style={{ color: "#000000" }}>
         {title}
       </h3>
-      <div className="ov-mono mt-1 text-[11px]" style={{ color: accent }}>
+      <div className="ov-mono mt-1 text-[11px]" style={{ color: "#000000"}}>
         {sub}
       </div>
 
-      <p className="mt-5 text-sm leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.82)" }}>
+      <p className="mt-5 text-sm leading-relaxed" style={{ color: "#000000" }}>
         {body}
       </p>
 
       <ul className="mt-6 space-y-2">
         {points.map((p) => (
-          <li key={p} className="flex items-center gap-2 text-[13px]" style={{ color: "rgba(218, 241, 222, 0.85)" }}>
+          <li key={p} className="flex items-center gap-2 text-[13px]" style={{ color: "#000000" }}>
             <span
               className="h-1.5 w-1.5 rounded-full"
               style={{ background: accent, boxShadow: `0 0 6px ${accent}` }}
@@ -1439,7 +1886,7 @@ function PillarCard({
         ))}
       </ul>
 
-      <div className="mt-7 flex items-center gap-2 text-[12px] font-medium" style={{ color: accent }}>
+      <div className="mt-7 flex items-center gap-2 text-[12px] font-medium" style={{ color: "#000000"}}>
         Learn more <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
       </div>
     </motion.div>
@@ -1491,7 +1938,7 @@ function HowItWorksSection() {
 
         <div className="relative mt-24 pl-6 sm:pl-12">
           {/* Rail */}
-          <div className="absolute left-1.5 top-2 bottom-2 w-px sm:left-3.5" style={{ background: "rgba(218, 241, 222, 0.1)" }}>
+          <div className="absolute left-1.5 top-2 bottom-2 w-px sm:left-3.5" style={{ background: "rgba(255, 255, 255, 0.1)" }}>
             <motion.div
               style={{ height: railH }}
               className="absolute left-0 top-0 w-px"
@@ -1541,18 +1988,18 @@ function TimelineStep({
         style={{
           background: PALETTE.forestDeep,
           border: `1px solid ${PALETTE.bio}`,
-          boxShadow: `0 0 0 4px rgba(142, 182, 155, 0.08)`,
+          boxShadow: `0 0 0 4px rgba(178, 205, 223, 0.08)`,
         }}
       >
-        <Icon className="h-3.5 w-3.5" style={{ color: PALETTE.bio }} />
+        <Icon className="h-3.5 w-3.5" style={{ color: "#000000" }} />
       </div>
-      <div className="ov-eyebrow mb-2" style={{ color: "rgba(142, 182, 155, 0.75)" }}>
+      <div className="ov-eyebrow mb-2" style={{ color: "#000000" }}>
         Step {n}
       </div>
-      <h3 className="ov-serif text-3xl font-medium tracking-tight sm:text-4xl" style={{ color: PALETTE.cream }}>
+      <h3 className="ov-serif text-3xl font-medium tracking-tight sm:text-4xl" style={{ color: "#000000" }}>
         {title}
       </h3>
-      <p className="mt-3 max-w-2xl text-[15px] leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.82)" }}>
+      <p className="mt-3 max-w-2xl text-[15px] leading-relaxed" style={{ color: "#000000" }}>
         {body}
       </p>
     </motion.div>
@@ -1631,16 +2078,16 @@ function FeaturesSection() {
               <div
                 className="grid h-9 w-9 place-items-center rounded-lg transition-all duration-300 group-hover:scale-110"
                 style={{
-                  background: "rgba(142, 182, 155, 0.08)",
-                  border: "1px solid rgba(142, 182, 155, 0.18)",
+                  background: "rgba(178, 205, 223, 0.08)",
+                  border: "1px solid rgba(178, 205, 223, 0.18)",
                 }}
               >
-                <f.icon className="h-4 w-4" style={{ color: PALETTE.bio }} />
+                <f.icon className="h-4 w-4" style={{ color: "#000000" }} />
               </div>
-              <h4 className="ov-serif mt-4 text-lg font-medium leading-snug" style={{ color: PALETTE.cream }}>
+              <h4 className="ov-serif mt-4 text-lg font-medium leading-snug" style={{ color: "#000000" }}>
                 {f.title}
               </h4>
-              <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.8)" }}>
+              <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "#000000" }}>
                 {f.body}
               </p>
             </motion.div>
@@ -1672,16 +2119,16 @@ function DashboardPreviewSection() {
           style={{ borderRadius: 28 }}
         >
           {/* Window chrome */}
-          <div className="mb-5 flex items-center justify-between border-b pb-4" style={{ borderColor: "rgba(218, 241, 222, 0.06)" }}>
+          <div className="mb-5 flex items-center justify-between border-b pb-4" style={{ borderColor: "rgba(255, 255, 255, 0.06)" }}>
             <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "#235347" }} />
-              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(218, 241, 222, 0.25)" }} />
-              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(218, 241, 222, 0.25)" }} />
-              <div className="ov-mono ml-3 text-[10px]" style={{ color: "rgba(218, 241, 222, 0.68)" }}>
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "#596070" }} />
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255, 255, 255, 0.25)" }} />
+              <div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255, 255, 255, 0.25)" }} />
+              <div className="ov-mono ml-3 text-[10px]" style={{ color: "#000000" }}>
                 ovulite.app / dashboard
               </div>
             </div>
-            <div className="ov-eyebrow text-[9px]" style={{ color: PALETTE.bio }}>
+            <div className="ov-eyebrow text-[9px]" style={{ color: "#000000" }}>
               Live · Synced
             </div>
           </div>
@@ -1700,15 +2147,15 @@ function DashboardPreviewSection() {
                     key={kpi.k}
                     whileHover={{ y: -3 }}
                     className="rounded-xl p-3.5"
-                    style={{ background: "rgba(218, 241, 222, 0.025)", border: "1px solid rgba(218, 241, 222, 0.05)" }}
+                    style={{ background: "rgba(255, 255, 255, 0.025)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
                   >
-                    <div className="ov-eyebrow text-[9px]" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+                    <div className="ov-eyebrow text-[9px]" style={{ color: "#000000" }}>
                       {kpi.k}
                     </div>
-                    <div className="ov-serif mt-1 text-2xl font-medium" style={{ color: kpi.c }}>
+                    <div className="ov-serif mt-1 text-2xl font-medium" style={{ color: "#000000"}}>
                       {kpi.v}
                     </div>
-                    <div className="mt-1 text-[10px]" style={{ color: "rgba(218, 241, 222, 0.75)" }}>
+                    <div className="mt-1 text-[10px]" style={{ color: "#000000" }}>
                       {kpi.d}
                     </div>
                   </motion.div>
@@ -1718,18 +2165,18 @@ function DashboardPreviewSection() {
               {/* IVF Funnel */}
               <div
                 className="rounded-2xl p-5"
-                style={{ background: "rgba(218, 241, 222, 0.025)", border: "1px solid rgba(218, 241, 222, 0.05)" }}
+                style={{ background: "rgba(255, 255, 255, 0.025)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
               >
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <div className="ov-eyebrow text-[9px]" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+                    <div className="ov-eyebrow text-[9px]" style={{ color: "#000000" }}>
                       IVF Funnel
                     </div>
-                    <div className="ov-serif mt-1 text-base font-medium" style={{ color: PALETTE.cream }}>
+                    <div className="ov-serif mt-1 text-base font-medium" style={{ color: "#000000" }}>
                       OPU → Embryo → ET → Pregnancy
                     </div>
                   </div>
-                  <div className="ov-mono text-[10px]" style={{ color: PALETTE.bio }}>
+                  <div className="ov-mono text-[10px]" style={{ color: "#000000" }}>
                     Last 90 days
                   </div>
                 </div>
@@ -1741,13 +2188,13 @@ function DashboardPreviewSection() {
             <div className="space-y-3">
               <div
                 className="rounded-2xl p-4"
-                style={{ background: "rgba(218, 241, 222, 0.025)", border: "1px solid rgba(218, 241, 222, 0.05)" }}
+                style={{ background: "rgba(255, 255, 255, 0.025)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="ov-eyebrow text-[9px]" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+                  <div className="ov-eyebrow text-[9px]" style={{ color: "#000000" }}>
                     Grading Queue · Today
                   </div>
-                  <Microscope className="h-3.5 w-3.5" style={{ color: PALETTE.bio }} />
+                  <Microscope className="h-3.5 w-3.5" style={{ color: "#000000" }} />
                 </div>
                 <div className="space-y-2">
                   {[
@@ -1764,18 +2211,18 @@ function DashboardPreviewSection() {
                       transition={{ delay: i * 0.06 }}
                       whileHover={{ x: 3 }}
                       className="flex items-center gap-3 rounded-xl p-2.5"
-                      style={{ background: "rgba(142, 182, 155, 0.04)", border: "1px solid rgba(142, 182, 155, 0.1)" }}
+                      style={{ background: "rgba(178, 205, 223, 0.04)", border: "1px solid rgba(178, 205, 223, 0.1)" }}
                     >
                       <div
                         className="h-9 w-9 rounded-lg"
                         style={{
                           background:
-                            "radial-gradient(circle at 35% 45%, rgba(35, 83, 71, 0.6), transparent 50%), radial-gradient(circle at 65% 55%, rgba(142, 182, 155, 0.5), transparent 50%), #051F20",
+                            "radial-gradient(circle at 35% 45%, rgba(89, 96, 112, 0.6), transparent 50%), radial-gradient(circle at 65% 55%, rgba(178, 205, 223, 0.5), transparent 50%), #D6E2EB",
                         }}
                       />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="ov-mono text-xs font-semibold" style={{ color: PALETTE.cream }}>
+                          <span className="ov-mono text-xs font-semibold" style={{ color: "#000000" }}>
                             {e.id}
                           </span>
                           <span
@@ -1786,24 +2233,24 @@ function DashboardPreviewSection() {
                               // by brightness instead of depth.
                               background:
                                 e.grade === "1"
-                                  ? "rgba(218, 241, 222, 0.18)"
+                                  ? "rgba(255, 255, 255, 0.18)"
                                   : e.grade === "2"
-                                  ? "rgba(142, 182, 155, 0.16)"
-                                  : "rgba(142, 182, 155, 0.10)",
-                              color: e.grade === "1" ? "#DAF1DE" : e.grade === "2" ? "#8EB69B" : "#7FA98D",
+                                  ? "rgba(178, 205, 223, 0.16)"
+                                  : "rgba(178, 205, 223, 0.1)",
+                              color: "#000000",
                               border: `1px solid ${
                                 e.grade === "1"
-                                  ? "rgba(218, 241, 222, 0.35)"
+                                  ? "rgba(255, 255, 255, 0.35)"
                                   : e.grade === "2"
-                                  ? "rgba(142, 182, 155, 0.32)"
-                                  : "rgba(142, 182, 155, 0.22)"
+                                  ? "rgba(178, 205, 223, 0.32)"
+                                  : "rgba(178, 205, 223, 0.22)"
                               }`,
                             }}
                           >
                             Grade {e.grade}
                           </span>
                         </div>
-                        <div className="mt-0.5 text-[10px]" style={{ color: "rgba(218, 241, 222, 0.75)" }}>
+                        <div className="mt-0.5 text-[10px]" style={{ color: "#000000" }}>
                           Day {e.day} · {e.conf}% conf
                         </div>
                       </div>
@@ -1814,9 +2261,9 @@ function DashboardPreviewSection() {
 
               <div
                 className="rounded-2xl p-4"
-                style={{ background: "rgba(218, 241, 222, 0.025)", border: "1px solid rgba(218, 241, 222, 0.05)" }}
+                style={{ background: "rgba(255, 255, 255, 0.025)", border: "1px solid rgba(255, 255, 255, 0.05)" }}
               >
-                <div className="ov-eyebrow text-[9px]" style={{ color: "rgba(218, 241, 222, 0.7)" }}>
+                <div className="ov-eyebrow text-[9px]" style={{ color: "#000000" }}>
                   Sweet Spot · CL Size
                 </div>
                 <SweetSpotChart />
@@ -1840,10 +2287,10 @@ function FunnelChart() {
     <div className="space-y-2">
       {stages.map((s, i) => (
         <div key={s.label} className="flex items-center gap-3">
-          <div className="ov-mono w-20 text-[10px]" style={{ color: "rgba(218, 241, 222, 0.8)" }}>
+          <div className="ov-mono w-20 text-[10px]" style={{ color: "#000000" }}>
             {s.label}
           </div>
-          <div className="relative h-8 flex-1 overflow-hidden rounded-lg" style={{ background: "rgba(218, 241, 222, 0.04)" }}>
+          <div className="relative h-8 flex-1 overflow-hidden rounded-lg" style={{ background: "rgba(255, 255, 255, 0.04)" }}>
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${s.value}%` }}
@@ -1851,11 +2298,12 @@ function FunnelChart() {
               transition={{ delay: i * 0.15, duration: 1, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-y-0 left-0 rounded-lg"
               style={{
-                background: `linear-gradient(90deg, ${PALETTE.emerald}, ${PALETTE.bio} ${i === 3 ? "60%" : "100%"}${i === 3 ? `, ${PALETTE.terracottaSoft}` : ""})`,
-                boxShadow: "inset 0 1px 0 rgba(218, 241, 222, 0.1)",
+                // Sampled from the reference photo: sky blue, yellow, orange, and green for the outcome.
+                background: `linear-gradient(90deg, ${["#6FB4ED", "#DBD723", "#F76602", "#5E983C"][i]}99, ${["#6FB4ED", "#DBD723", "#F76602", "#5E983C"][i]})`,
+                boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.1)",
               }}
             />
-            <div className="ov-mono absolute inset-y-0 right-3 flex items-center text-[10px]" style={{ color: PALETTE.cream }}>
+            <div className="ov-mono absolute inset-y-0 right-3 flex items-center text-[10px]" style={{ color: "#000000" }}>
               {s.count} · {s.value}%
             </div>
           </div>
@@ -1879,8 +2327,8 @@ function SweetSpotChart() {
       <svg viewBox="0 0 100 70" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
         <defs>
           <linearGradient id="sweetFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8EB69B" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#8EB69B" stopOpacity="0" />
+            <stop offset="0%" stopColor="#83BBAE" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#83BBAE" stopOpacity="0" />
           </linearGradient>
         </defs>
         <motion.path
@@ -1894,8 +2342,8 @@ function SweetSpotChart() {
         <motion.path
           d={path}
           fill="none"
-          stroke="#8EB69B"
-          strokeWidth="1"
+          stroke="#5E983C"
+          strokeWidth="1.2"
           strokeLinecap="round"
           initial={{ pathLength: 0 }}
           whileInView={{ pathLength: 1 }}
@@ -1903,11 +2351,11 @@ function SweetSpotChart() {
           transition={{ duration: 1.4, ease: "easeInOut" }}
         />
         {/* Sweet spot band */}
-        <rect x="38" y="0" width="16" height="70" fill="rgba(142, 182, 155, 0.08)" />
-        <line x1="46" y1="0" x2="46" y2="70" stroke="rgba(142, 182, 155, 0.4)" strokeWidth="0.4" strokeDasharray="2 2" />
-        <circle cx="46" cy="14" r="1.6" fill="#235347" style={{ filter: "drop-shadow(0 0 3px #235347)" }} />
+        <rect x="38" y="0" width="16" height="70" fill="rgba(244, 170, 202, 0.3)" />
+        <line x1="46" y1="0" x2="46" y2="70" stroke="#59A2BA" strokeWidth="0.6" strokeDasharray="2 2" />
+        <circle cx="46" cy="14" r="1.8" fill="#F76602" style={{ filter: "drop-shadow(0 0 3px #F76602)" }} />
       </svg>
-      <div className="absolute bottom-1 right-2 ov-mono text-[9px]" style={{ color: "rgba(142, 182, 155, 0.8)" }}>
+      <div className="absolute bottom-1 right-2 ov-mono text-[9px]" style={{ color: "#000000" }}>
         Optimum: 18–22 mm
       </div>
     </div>
@@ -1946,11 +2394,11 @@ function TrustSection() {
               whileHover={{ y: -6 }}
               className="ov-glass-card ov-glow p-6"
             >
-              <p.icon className="h-4 w-4" style={{ color: PALETTE.bio }} />
-              <h4 className="ov-serif mt-4 text-xl font-medium" style={{ color: PALETTE.cream }}>
+              <p.icon className="h-4 w-4" style={{ color: "#000000" }} />
+              <h4 className="ov-serif mt-4 text-xl font-medium" style={{ color: "#000000" }}>
                 {p.title}
               </h4>
-              <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.8)" }}>
+              <p className="mt-2 text-[13px] leading-relaxed" style={{ color: "#000000" }}>
                 {p.body}
               </p>
             </motion.div>
@@ -1958,7 +2406,7 @@ function TrustSection() {
         </div>
 
         <div className="mt-16">
-          <div className="ov-eyebrow mb-5 text-center" style={{ color: "rgba(218, 241, 222, 0.68)" }}>
+          <div className="ov-eyebrow mb-5 text-center" style={{ color: "#000000" }}>
             Built With
           </div>
           <div className="relative overflow-hidden">
@@ -1967,7 +2415,7 @@ function TrustSection() {
                 <span
                   key={i}
                   className="ov-serif italic"
-                  style={{ color: "rgba(218, 241, 222, 0.72)", fontSize: 22 }}
+                  style={{ color: "#000000", fontSize: 22 }}
                 >
                   {s}
                 </span>
@@ -2029,16 +2477,16 @@ function TestimonialsSection() {
               whileHover={{ y: -6 }}
               className="ov-glass-card ov-glow relative p-7"
             >
-              <Quote className="absolute right-6 top-6 h-7 w-7 opacity-20" style={{ color: PALETTE.bio }} />
-              <blockquote className="ov-serif text-[18px] font-light leading-relaxed" style={{ color: PALETTE.cream }}>
+              <Quote className="absolute right-6 top-6 h-7 w-7 opacity-20" style={{ color: "#000000" }} />
+              <blockquote className="ov-serif text-[18px] font-light leading-relaxed" style={{ color: "#000000" }}>
                 "{q.quote}"
               </blockquote>
-              <figcaption className="mt-6 flex items-center gap-3 border-t pt-5" style={{ borderColor: "rgba(218, 241, 222, 0.08)" }}>
+              <figcaption className="mt-6 flex items-center gap-3 border-t pt-5" style={{ borderColor: "rgba(255, 255, 255, 0.08)" }}>
                 <div
                   className="grid h-10 w-10 place-items-center rounded-full"
                   style={{
                     background: `linear-gradient(135deg, ${PALETTE.emerald}, ${PALETTE.terracotta})`,
-                    color: PALETTE.cream,
+                    color: "#000000",
                     fontFamily: "Fraunces, serif",
                     fontWeight: 600,
                   }}
@@ -2046,10 +2494,10 @@ function TestimonialsSection() {
                   {q.name.split(" ")[1]?.[0] || q.name[0]}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold" style={{ color: PALETTE.cream }}>
+                  <div className="text-sm font-semibold" style={{ color: "#000000" }}>
                     {q.name}
                   </div>
-                  <div className="text-[11px]" style={{ color: "rgba(218, 241, 222, 0.75)" }}>
+                  <div className="text-[11px]" style={{ color: "#000000" }}>
                     {q.role} · {q.org}
                   </div>
                 </div>
@@ -2067,16 +2515,16 @@ function TestimonialsSection() {
    ----------------------------------------------------------- */
 function Footer() {
   return (
-    <footer className="relative border-t px-5 py-12 sm:px-8" style={{ borderColor: "rgba(218, 241, 222, 0.06)" }}>
+    <footer className="relative border-t px-5 py-12 sm:px-8" style={{ borderColor: "rgba(255, 255, 255, 0.06)" }}>
       <div className="mx-auto flex max-w-[1600px] flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-md">
           <div className="flex items-center gap-3">
             <Logo />
-            <div className="ov-serif text-base font-semibold" style={{ color: PALETTE.cream }}>
+            <div className="ov-serif text-base font-semibold" style={{ color: "#000000" }}>
               Ovulite
             </div>
           </div>
-          <p className="mt-4 text-[13px] leading-relaxed" style={{ color: "rgba(218, 241, 222, 0.75)" }}>
+          <p className="mt-4 text-[13px] leading-relaxed" style={{ color: "#000000" }}>
             Reproductive intelligence for bovine embryo transfer. Objective. Explainable. Continuous.
           </p>
         </div>
@@ -2088,13 +2536,13 @@ function Footer() {
             { h: "Company", l: ["About", "Contact", "Careers", "Press"] },
           ].map((g) => (
             <div key={g.h}>
-              <div className="ov-eyebrow mb-4" style={{ color: "rgba(218, 241, 222, 0.68)" }}>
+              <div className="ov-eyebrow mb-4" style={{ color: "#000000" }}>
                 {g.h}
               </div>
               <ul className="space-y-2.5">
                 {g.l.map((x) => (
                   <li key={x}>
-                    <a href="#" className="ov-link text-[13px]" style={{ color: "rgba(218, 241, 222, 0.85)" }}>
+                    <a href="#" className="ov-link text-[13px]" style={{ color: "#000000" }}>
                       {x}
                     </a>
                   </li>
@@ -2107,7 +2555,7 @@ function Footer() {
 
       <div
         className="mx-auto mt-12 flex max-w-[1600px] flex-col items-start justify-between gap-3 border-t pt-6 text-[12px] sm:flex-row sm:items-center"
-        style={{ borderColor: "rgba(218, 241, 222, 0.06)", color: "rgba(218, 241, 222, 0.7)" }}
+        style={{ borderColor: "rgba(255, 255, 255, 0.06)", color: "#000000" }}
       >
         <div>© {new Date().getFullYear()} Ovulite. All rights reserved.</div>
         <div className="flex gap-6">
@@ -2131,7 +2579,7 @@ function SectionEyebrow({ text }: { text: string }) {
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.6 }}
       className="ov-eyebrow flex items-center gap-3"
-      style={{ color: PALETTE.bio }}
+      style={{ color: "#000000" }}
     >
       <span className="h-px w-8" style={{ background: PALETTE.bio }} />
       {text}
@@ -2147,7 +2595,7 @@ function SectionTitle({ children }: { children: ReactNode }) {
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       className="ov-serif mt-5 max-w-4xl text-[clamp(2.2rem,4.4vw,4rem)] font-light leading-[1.02] tracking-tight"
-      style={{ color: PALETTE.cream }}
+      style={{ color: "#000000" }}
     >
       {children}
     </motion.h2>
@@ -2162,7 +2610,7 @@ function SectionLead({ children }: { children: ReactNode }) {
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.7, delay: 0.15 }}
       className="mt-6 max-w-2xl text-[16px] leading-relaxed"
-      style={{ color: "rgba(218, 241, 222, 0.82)" }}
+      style={{ color: "#000000" }}
     >
       {children}
     </motion.p>

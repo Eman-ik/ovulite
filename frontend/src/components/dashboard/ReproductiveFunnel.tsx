@@ -4,19 +4,19 @@ import type { DashboardFunnelResponse } from "@/lib/types";
  *  tracks the drop-off instead of cycling unrelated hues. Bars carry a dark
  *  label on the light end and a cream one once the fill goes dark. */
 const STAGE_GRADIENTS = [
-  "linear-gradient(90deg, #DAF1DE, #B6D9C0)",
-  "linear-gradient(90deg, #B6D9C0, #A0CBAC)",
-  "linear-gradient(90deg, #A0CBAC, #8EB69B)",
-  "linear-gradient(90deg, #8EB69B, #74A386)",
-  "linear-gradient(90deg, #74A386, #5F9078)",
-  "linear-gradient(90deg, #5F9078, #4A7C68)",
-  "linear-gradient(90deg, #4A7C68, #356A57)",
-  "linear-gradient(90deg, #356A57, #235347)",
-  "linear-gradient(90deg, #235347, #163832)",
+  "linear-gradient(90deg, #CFE8FF, #C2E4F5)",
+  "linear-gradient(90deg, #C2E4F5, #B0DEE6)",
+  "linear-gradient(90deg, #B0DEE6, #9FD8DA)",
+  "linear-gradient(90deg, #9FD8DA, #8ED3CC)",
+  "linear-gradient(90deg, #8ED3CC, #7FCDC9)",
+  "linear-gradient(90deg, #7FCDC9, #66CAC8)",
+  "linear-gradient(90deg, #66CAC8, #66CAC8)",
+  "linear-gradient(90deg, #66CAC8, #66CAC8)",
+  "linear-gradient(90deg, #66CAC8, #66CAC8)",
 ];
 
 /** Index at which the fill is dark enough to need light text. */
-const DARK_FILL_FROM = 5;
+const DARK_FILL_FROM = 99;
 
 export default function ReproductiveFunnel({
   data,
@@ -58,7 +58,7 @@ export default function ReproductiveFunnel({
                 style={{
                   width: `${widthPct}%`,
                   background: STAGE_GRADIENTS[globalIndex % STAGE_GRADIENTS.length],
-                  color: globalIndex >= DARK_FILL_FROM ? "#DAF1DE" : "#051F20",
+                  color: globalIndex >= DARK_FILL_FROM ? "#EAF1F1" : "#2E3645",
                 }}
               >
                 {stage.value.toLocaleString()}

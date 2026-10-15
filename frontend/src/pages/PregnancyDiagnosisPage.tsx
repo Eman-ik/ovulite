@@ -14,7 +14,7 @@ const RESULTS: CheckResult[] = ["Pregnant", "Open", "Recheck", "Lost"];
 const METHODS: CheckMethod[] = ["Ultrasound", "Rectal Palpation", "Blood Test", "Other"];
 
 const RESULT_STYLE: Record<CheckResult, string> = {
-  Pregnant: "bg-[rgba(142,182,155,0.22)] text-[#235347]",
+  Pregnant: "bg-[rgba(148, 169, 190,0.22)] text-[#3F4758]",
   Open: "bg-black/[0.05] dash-muted",
   Recheck: "bg-[rgba(208,164,94,0.24)] text-[#7a5a12]",
   Lost: "bg-[rgba(185,142,168,0.24)] text-[#9d3730]",
@@ -138,7 +138,7 @@ export default function PregnancyDiagnosisPage() {
                           {s.retained_from_previous_pct === null ? (
                             <span className="dash-muted">—</span>
                           ) : (
-                            <span className="font-medium text-[#235347]">
+                            <span className="font-medium text-[#3F4758]">
                               {s.retained_from_previous_pct}%
                             </span>
                           )}
@@ -258,8 +258,8 @@ export default function PregnancyDiagnosisPage() {
             )}
 
             {chain.calving && (
-              <div className="mt-4 rounded-2xl bg-[rgba(142,182,155,0.14)] p-4 text-sm">
-                <p className="font-semibold text-[#235347]">{chain.calving.outcome}</p>
+              <div className="mt-4 rounded-2xl bg-[rgba(148, 169, 190,0.14)] p-4 text-sm">
+                <p className="font-semibold text-[#3F4758]">{chain.calving.outcome}</p>
                 <p className="mt-1 dash-muted">
                   {chain.calving.calving_date}
                   {chain.calving.gestation_days && ` · ${chain.calving.gestation_days} days gestation`}
@@ -317,7 +317,7 @@ export default function PregnancyDiagnosisPage() {
                       type="button"
                       disabled={saving}
                       onClick={() => void addCheck()}
-                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#163832] disabled:opacity-40"
+                      className="h-9 w-full rounded-xl bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] transition hover:bg-[#596070] disabled:opacity-40"
                     >
                       {saving ? "Saving…" : "Record"}
                     </button>

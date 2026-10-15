@@ -87,20 +87,20 @@ export default function ModelPerformancePage() {
           <div
             className={`dash-card border-l-4 ${
               data.is_better_than_chance
-                ? "border-l-[#8EB69B]"
+                ? "border-l-[#94A9BE]"
                 : "border-l-[#9d3730]"
             }`}
           >
             <div className="flex items-start gap-3">
               {data.is_better_than_chance ? (
-                <TrendingUp className="mt-0.5 h-5 w-5 text-[#235347]" />
+                <TrendingUp className="mt-0.5 h-5 w-5 text-[#3F4758]" />
               ) : (
                 <AlertTriangle className="mt-0.5 h-5 w-5 text-[#9d3730]" />
               )}
               <div>
                 <p
                   className={`text-base font-semibold ${
-                    data.is_better_than_chance ? "text-[#235347]" : "text-[#9d3730]"
+                    data.is_better_than_chance ? "text-[#3F4758]" : "text-[#9d3730]"
                   }`}
                 >
                   {data.is_better_than_chance
@@ -210,7 +210,7 @@ export default function ModelPerformancePage() {
                       </span>
                       <div className="h-3 rounded bg-black/[0.04]">
                         <div
-                          className="h-3 rounded bg-[#6aa5b8]"
+                          className="h-3 rounded bg-[#66CAC8]"
                           style={{ width: `${(Math.abs(value) / max) * 100}%` }}
                         />
                       </div>

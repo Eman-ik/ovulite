@@ -115,7 +115,7 @@ export default function CaseRecordsPage() {
   };
 
   const getPredictionColor = (prob: number | null) => {
-    if (prob === null) return "text-[#5c7268]";
+    if (prob === null) return "text-[#596070]";
     if (prob < 0.3) return "text-red-600";
     if (prob < 0.6) return "text-yellow-600";
     return "text-green-600";
@@ -147,7 +147,7 @@ export default function CaseRecordsPage() {
               <label className="block text-sm font-medium mb-1">Search</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 w-4 h-4 text-[#5c7268]" />
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-[#596070]" />
                   <Input
                     placeholder="Search by transfer ID, donor, recipient..."
                     value={filter.search}
