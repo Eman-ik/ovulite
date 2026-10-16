@@ -10,7 +10,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-import jwt  # PyJWT — replaces python-jose, which has unfixed CVEs
+import jwt  # PyJWT â€” replaces python-jose, which has unfixed CVEs
 from fastapi import HTTPException, status
 from jwt import PyJWTError as JWTError
 from passlib.context import CryptContext
@@ -40,7 +40,7 @@ def _secret_problem(secret: str) -> str | None:
 
 def _secret_looks_like_phrase(secret: str) -> bool:
     """Heuristic warning only: readable phrases ("ovulite-local-secret-2026")
-    are easy to guess. Never used to refuse startup — no heuristic can tell
+    are easy to guess. Never used to refuse startup â€” no heuristic can tell
     every random key from a phrase, and a false positive that blocks a deploy
     is worse than a log line."""
     chunks = re.split(r"[-_ .:/]+", secret)
@@ -56,12 +56,12 @@ if not _configured_secret:
     if ENVIRONMENT == "production":
         raise RuntimeError(
             "SECRET_KEY is not set. Per NFR-SEC-05, secrets must come from environment/secrets "
-            "management, not source defaults — refusing to start in production without one. "
+            "management, not source defaults â€” refusing to start in production without one. "
             "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
         )
     logger.warning(
         "SECRET_KEY is not set; using the documented development placeholder. "
-        "This is only safe outside production — set a real SECRET_KEY in .env before deploying."
+        "This is only safe outside production â€” set a real SECRET_KEY in .env before deploying."
     )
     _configured_secret = _INSECURE_DEFAULT_SECRET
 else:
@@ -125,7 +125,12 @@ def create_access_token(
         expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     # `iat` is what lets a password change invalidate tokens minted before it.
-    to_encode.update({"exp": expire, "iat": int(time.time()), "type": "access", "jti": str(uuid.uuid4())})
+    to_encode.update({
+        "exp": expire,
+        "iat": int(time.time()),
+        "type": "access",
+        "jti": str(uuid.uuid4()),
+    })
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -138,7 +143,12 @@ def create_refresh_token(
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     )
-    to_encode.update({"exp": expire, "iat": int(time.time()), "type": "refresh", "jti": str(uuid.uuid4())})
+    to_encode.update({
+        "exp": expire,
+        "iat": int(time.time()),
+        "type": "refresh",
+        "jti": str(uuid.uuid4()),
+    })
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -171,7 +181,7 @@ def decode_token_unverified_type(token: str) -> dict[str, Any] | None:
         return None
 
 
-# ── Account lockout ────────────────────────────────────────────────────────
+# â”€â”€ Account lockout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def is_account_locked(locked_until: datetime | None) -> bool:
     """True if the account is currently inside its lockout window."""
@@ -191,7 +201,7 @@ def compute_lockout_after_failed_attempt(failed_count: int) -> tuple[int, dateti
     return new_count, None
 
 
-# ── Password reset tokens ──────────────────────────────────────────────────
+# â”€â”€ Password reset tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def generate_reset_token() -> tuple[str, datetime]:
     """A cryptographically random reset token and its expiry."""
@@ -204,12 +214,12 @@ def generate_reset_token() -> tuple[str, datetime]:
 def hash_reset_token(token: str) -> str:
     """SHA-256 of a reset token. Only this is stored, so a leaked database row
     cannot be used to reset someone's password. Plain SHA-256 rather than
-    argon2 because the token is 256 bits of entropy already — there is nothing
-    to brute-force — and reset has to look the row up by value."""
+    argon2 because the token is 256 bits of entropy already â€” there is nothing
+    to brute-force â€” and reset has to look the row up by value."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-# ── Session invalidation ───────────────────────────────────────────────────
+# â”€â”€ Session invalidation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def issued_before_password_change(
     payload: dict[str, Any], sessions_valid_after: datetime | None
@@ -229,3 +239,20 @@ def issued_before_password_change(
     if issued is None:
         return True  # minted before `iat` was added: cannot prove it is current
     return int(issued) < int(sessions_valid_after.timestamp())
+
+
+def revocation_stamp() -> datetime:
+    """A ``sessions_revoked_at`` value that reliably kills tokens issued right now.
+
+    JWT ``iat`` is whole seconds and the check above is "issued strictly
+    before the stamp", so stamping the current instant leaves a token minted
+    in the same second alive — which made "log out everywhere" silently do
+    nothing when called moments after logging in. One second into the future
+    closes that window.
+
+    Only for paths that issue NO replacement token. A future stamp cannot be
+    paired with a freshly minted one: PyJWT refuses a token whose ``iat`` is
+    ahead of the clock (ImmatureSignatureError). Those paths stamp the current
+    second and revoke the caller's old token by jti instead.
+    """
+    return datetime.now(timezone.utc) + timedelta(seconds=1)

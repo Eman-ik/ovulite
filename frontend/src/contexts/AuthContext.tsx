@@ -12,6 +12,8 @@ export interface User {
   email: string | null;
   active: boolean;
   created_at: string;
+  /** Temporary password: the API refuses everything but the change-password flow. */
+  must_change_password?: boolean;
 }
 
 export interface AuthContextType {
@@ -21,6 +23,8 @@ export interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   loginFromGoogle: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => void;
+  /** Adopt a token pair the API handed back mid-session (password change). */
+  applyTokens: (accessToken: string, refreshToken: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,6 +80,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const newAccessToken = res.data.access_token;
       localStorage.setItem(TOKEN_KEY, newAccessToken);
       setToken(newAccessToken);
+
+      // Refresh tokens rotate and are single-use: the one just sent is now
+      // revoked. Storing the new one is not optional — keeping the old one
+      // would replay a dead token at the next refresh, which the backend
+      // reads as a stolen token and responds to by ending every session.
+      const rotated = res.data.refresh_token;
+      if (rotated) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, rotated);
+        setRefreshToken(rotated);
+      }
       console.log("[AuthContext] Token refreshed successfully");
       return true;
     } catch (error) {
@@ -152,6 +166,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("[AuthContext] Got user profile:", userRes.data.username);
         setUser(userRes.data);
 
+        // On a temporary password the API answers nothing but the
+        // change-password flow, so landing on a dashboard would just render a
+        // screen of failed requests.
+        if (userRes.data.must_change_password) {
+          navigate("/change-password");
+          return;
+        }
         navigate(getRoleLandingPath(userRes.data.role));
       } catch (error) {
         console.error("[AuthContext] Login failed:", error);
@@ -160,6 +181,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [navigate],
   );
+
+  const applyTokens = useCallback(async (accessToken: string, refreshTokenValue: string) => {
+    // Used after /auth/change-password, which revokes the token the caller
+    // was holding and hands back a replacement pair. Without adopting them,
+    // changing your own password logs you straight out.
+    localStorage.setItem(TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshTokenValue);
+    setToken(accessToken);
+    setRefreshToken(refreshTokenValue);
+    const res = await api.get<User>("/auth/me", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    setUser(res.data);
+  }, []);
 
   const loginFromGoogle = useCallback(
     async (accessToken: string, refreshTokenValue: string) => {
@@ -181,12 +216,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     const currentToken = localStorage.getItem(TOKEN_KEY);
+    const currentRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (currentToken) {
       // Best-effort: revoke the token server-side so it can't be reused if
       // leaked, but don't block clearing local state if the request fails
       // (e.g. offline logout).
+      //
+      // The refresh token goes with it. Revoking only the access token left
+      // the refresh token valid for days, so "log out" did not end the
+      // session — anyone holding it could mint a new access token.
       api
-        .post("/auth/logout", null, { headers: { Authorization: `Bearer ${currentToken}` } })
+        .post(
+          "/auth/logout",
+          currentRefreshToken ? { refresh_token: currentRefreshToken } : null,
+          { headers: { Authorization: `Bearer ${currentToken}` } },
+        )
         .catch((error) => console.error("[AuthContext] Server-side logout failed:", error));
     }
     localStorage.removeItem(TOKEN_KEY);
@@ -198,7 +242,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, loginFromGoogle, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, isLoading, login, loginFromGoogle, logout, applyTokens }}
+    >
       {children}
     </AuthContext.Provider>
   );

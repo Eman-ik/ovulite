@@ -908,6 +908,14 @@ export interface AdminUser {
   organization_id: number | null;
   created_at: string | null;
   last_login: string | null;
+  /** Self-registered and not yet approved: the account cannot log in. */
+  pending_approval?: boolean;
+  /** On a temporary password: the API answers nothing but the change flow. */
+  must_change_password?: boolean;
+  /** Set while a failed-login lockout is in force. */
+  locked_until?: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
 }
 
 /** A role plus what it actually grants, served from the same tuples the API

@@ -3,7 +3,9 @@ import {
   AlertTriangle,
   Building2,
   Check,
+  Clock,
   KeyRound,
+  Lock,
   Pencil,
   Plus,
   Search,
@@ -12,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import api from "@/lib/api";
+import { PasswordRules, passwordProblems } from "@/components/auth/PasswordRules";
 import { useAuth } from "@/contexts/AuthContext";
 import type {
   AdminUser,
@@ -50,7 +53,13 @@ function formatDate(value: string | null): string {
   return Number.isNaN(parsed.getTime()) ? "—" : parsed.toISOString().slice(0, 10);
 }
 
-const MIN_PASSWORD_LENGTH = 10;
+/** True while a failed-login lockout is still in force. */
+function isLocked(user: AdminUser): boolean {
+  if (!user.locked_until) return false;
+  const until = new Date(user.locked_until).getTime();
+  return !Number.isNaN(until) && until > Date.now();
+}
+
 
 type Tab = "users" | "sites";
 
@@ -264,26 +273,95 @@ function UsersPanel() {
                     </td>
                     <td className="px-4 py-3 dash-muted">{roleLabel(u.role)}</td>
                     <td className="px-4 py-3">
-                      {u.active ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#3F4758]">
-                          <Check className="h-3.5 w-3.5" /> Active
+                      {/* Ordered by what is actually blocking the user. A
+                          pending account reads as "Active" otherwise, which
+                          says nothing about why they cannot sign in. */}
+                      {u.pending_approval ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#7a5a12]">
+                          <Clock className="h-3.5 w-3.5" /> Pending approval
                         </span>
-                      ) : (
+                      ) : !u.active ? (
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-[#9d3730]">
                           <X className="h-3.5 w-3.5" /> Deactivated
+                        </span>
+                      ) : isLocked(u) ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#9d3730]">
+                          <Lock className="h-3.5 w-3.5" /> Locked out
+                        </span>
+                      ) : u.must_change_password ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#7a5a12]">
+                          <KeyRound className="h-3.5 w-3.5" /> Must change password
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-[#3F4758]">
+                          <Check className="h-3.5 w-3.5" /> Active
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 dash-muted">{formatDate(u.last_login)}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1.5">
+                        {u.pending_approval && (
+                          <>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              title="Approve this signup so the account can log in"
+                              onClick={() =>
+                                void run(
+                                  async () => {
+                                    await api.post(`/admin/users/${u.user_id}/approve`);
+                                  },
+                                  `${u.username} approved.`,
+                                )
+                              }
+                              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#35748a] transition hover:bg-[rgba(53,116,138,0.10)] disabled:opacity-35"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              disabled={busy}
+                              title="Refuse this signup"
+                              onClick={() =>
+                                void run(
+                                  async () => {
+                                    await api.post(`/admin/users/${u.user_id}/reject`);
+                                  },
+                                  `${u.username} rejected.`,
+                                )
+                              }
+                              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#9d3730] transition hover:bg-[rgba(157,55,48,0.10)] disabled:opacity-35"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        {isLocked(u) && (
+                          <button
+                            type="button"
+                            disabled={busy}
+                            title="Clear the failed-login lockout now"
+                            onClick={() =>
+                              void run(
+                                async () => {
+                                  await api.post(`/admin/users/${u.user_id}/unlock`);
+                                },
+                                `${u.username} unlocked.`,
+                              )
+                            }
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#3F4758] transition hover:bg-[rgba(89,96,112,0.10)] disabled:opacity-35"
+                          >
+                            Unlock
+                          </button>
+                        )}
                         <IconButton label="Edit" icon={Pencil} onClick={() => setEditing(u)} />
                         <IconButton
                           label="Reset password"
                           icon={KeyRound}
                           onClick={() => setResetting(u)}
                         />
-                        {u.active && (
+                        {u.active && !u.pending_approval && (
                           <button
                             type="button"
                             disabled={busy || isSelf}
@@ -477,11 +555,11 @@ function UserForm({
   requirePassword: boolean;
   submitLabel: string;
 }) {
-  const passwordTooShort =
-    requirePassword && draft.password.length > 0 && draft.password.length < MIN_PASSWORD_LENGTH;
+  // The backend enforces app/auth/password_policy.py on admin-set passwords
+  // too, so a length-only check here would promise a password the API refuses.
   const canSubmit =
     draft.username.trim().length >= 3 &&
-    (!requirePassword || draft.password.length >= MIN_PASSWORD_LENGTH);
+    (!requirePassword || passwordProblems(draft.password).length === 0);
 
   return (
     <form
@@ -502,7 +580,7 @@ function UserForm({
       {requirePassword && (
         <Field
           label="Password"
-          hint={`At least ${MIN_PASSWORD_LENGTH} characters. The user cannot change it themselves yet — you set it and tell them.`}
+          hint="A temporary password — the user must replace it at first sign-in."
         >
           <input
             type="password"
@@ -510,12 +588,9 @@ function UserForm({
             onChange={(e) => onChange({ ...draft, password: e.target.value })}
             className={inputClass}
           />
-          {passwordTooShort && (
-            <p className="mt-1 text-xs text-[#9d3730]">
-              {MIN_PASSWORD_LENGTH - draft.password.length} more character
-              {MIN_PASSWORD_LENGTH - draft.password.length === 1 ? "" : "s"} needed.
-            </p>
-          )}
+          <div className="mt-2">
+            <PasswordRules password={draft.password} />
+          </div>
         </Field>
       )}
       <Field label="Role">
@@ -618,9 +693,9 @@ function PasswordForm({
 }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const tooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH;
+  const problems = passwordProblems(password);
   const mismatch = confirm.length > 0 && confirm !== password;
-  const canSubmit = password.length >= MIN_PASSWORD_LENGTH && confirm === password;
+  const canSubmit = problems.length === 0 && confirm === password;
 
   return (
     <form
@@ -630,7 +705,7 @@ function PasswordForm({
         if (canSubmit) void onSubmit(password);
       }}
     >
-      <Field label="New password" hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}>
+      <Field label="New password" hint="The user must replace it at their next sign-in.">
         <input
           type="password"
           value={password}
@@ -638,7 +713,9 @@ function PasswordForm({
           onChange={(e) => setPassword(e.target.value)}
           className={inputClass}
         />
-        {tooShort && <p className="mt-1 text-xs text-[#9d3730]">Too short.</p>}
+        <div className="mt-2">
+          <PasswordRules password={password} />
+        </div>
       </Field>
       <Field label="Confirm">
         <input

@@ -44,6 +44,7 @@ from app.auth.security import (
     hash_reset_token,
     is_account_locked,
     issued_before_password_change,
+    revocation_stamp,
     verify_password,
     verify_token,
 )
@@ -389,7 +390,7 @@ def refresh_access_token(
     if revoked is not None:
         revoked_at = revoked.revoked_at if revoked.revoked_at.tzinfo else revoked.revoked_at.replace(tzinfo=timezone.utc)
         if user is not None and (datetime.now(timezone.utc) - revoked_at).total_seconds() > REFRESH_REUSE_GRACE_SECONDS:
-            user.sessions_revoked_at = datetime.now(timezone.utc)
+            user.sessions_revoked_at = revocation_stamp()
             db.commit()
             record_auth(
                 SessionLocal, AUTH_LOGIN_FAILURE, actor=user, actor_label=user.username,
@@ -541,15 +542,19 @@ def logout(
 @router.post("/logout-all", response_model=LogoutResponse)
 def logout_everywhere(
     request: Request,
+    token: str = Depends(oauth2_scheme),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> LogoutResponse:
     """End every session of this account on every device.
 
     Works by timestamp rather than by revoking each jti, so it also covers
-    tokens this server has never seen.
+    tokens this server has never seen. The caller's own token is additionally
+    revoked by jti, since a timestamp of whole seconds cannot distinguish it
+    from a token minted in the same second.
     """
-    current_user.sessions_revoked_at = datetime.now(timezone.utc)
+    _revoke(db, decode_token_unverified_type(token))
+    current_user.sessions_revoked_at = revocation_stamp()
     record(db, AUTH_LOGOUT, actor=current_user, target_type="user",
            target_id=current_user.user_id, request=request,
            message="Logged out on every device")
@@ -563,6 +568,7 @@ def logout_everywhere(
 def change_password(
     request: Request,
     payload: ChangePasswordRequest,
+    token: str = Depends(oauth2_scheme),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TokenResponse:
@@ -589,6 +595,13 @@ def change_password(
         )
 
     _set_password(current_user, payload.new_password)
+    # Two mechanisms, because `iat` alone cannot do this. password_changed_at
+    # ends every session from an earlier second, and the caller's own token is
+    # revoked by jti — which is exact, and is what covers the case where the
+    # login and the change land in the same second. A future-dated stamp is
+    # not an option here: PyJWT refuses a token whose iat is ahead of the
+    # clock, so the replacement pair would be unusable.
+    _revoke(db, decode_token_unverified_type(token))
     record(db, AUTH_LOGIN_SUCCESS, actor=current_user, target_type="user",
            target_id=current_user.user_id, request=request, message="Password changed")
     db.commit()
@@ -664,7 +677,7 @@ def reset_password(
     _set_password(user, payload.new_password)
     # Also end sessions opened before the reset, not just ones predating the
     # password change, so a stolen live token cannot survive the reset.
-    user.sessions_revoked_at = datetime.now(timezone.utc)
+    user.sessions_revoked_at = revocation_stamp()
     record(db, AUTH_LOGIN_SUCCESS, actor=user, target_type="user", target_id=user.user_id,
            request=request, message="Password reset completed")
     db.commit()

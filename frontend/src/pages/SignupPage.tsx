@@ -23,6 +23,7 @@ export function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [signupMessage, setSignupMessage] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,14 +45,23 @@ export function SignupPage() {
 
     setIsLoading(true);
     try {
-      await api.post("/auth/register", {
-        username: email,
-        email: email,
-        password: password,
-        full_name: fullName,
-      });
+      const res = await api.post<{ message: string; pending_approval: boolean }>(
+        "/auth/register",
+        {
+          username: email,
+          email: email,
+          password: password,
+          full_name: fullName,
+        },
+      );
       setSuccess(true);
-      setTimeout(() => navigate("/login"), 2000);
+      setSignupMessage(res.data.message);
+      // A pending account cannot log in yet, so bouncing to the sign-in form
+      // would send the user somewhere that can only refuse them. Leave the
+      // message on screen and let them navigate.
+      if (!res.data.pending_approval) {
+        setTimeout(() => navigate("/login"), 2000);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -97,9 +107,11 @@ export function SignupPage() {
         )}
 
         {success && (
-          <div role="status" className="mb-5 flex items-center gap-2 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-[#0F1B24]">
-            <CheckCircle className="h-5 w-5 text-[#1F5468]" />
-            Account created. Taking you to log in...
+          <div role="status" className="mb-5 flex items-start gap-2 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 text-sm text-[#0F1B24]">
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#1F5468]" />
+            {/* The server says whether approval is needed; saying "taking you
+                to log in" regardless would promise a sign-in that is refused. */}
+            <span>{signupMessage || "Account created. Taking you to log in..."}</span>
           </div>
         )}
 

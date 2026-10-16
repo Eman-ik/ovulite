@@ -37,9 +37,17 @@ export function LoginPage() {
     try {
       await login(username, password);
     } catch (err) {
-      const status = (err as { response?: { status?: number } }).response?.status;
+      const response = (err as { response?: { status?: number; data?: { detail?: string } } }).response;
+      const status = response?.status;
+      const detail = response?.data?.detail;
       if (status === 401) {
         setError("Wrong username or password. Please try again.");
+      } else if (status === 403 || status === 429) {
+        // The server explains these: the account is locked after too many
+        // attempts, is waiting for an administrator, is disabled, or this
+        // address has been throttled. Replacing them with a generic message
+        // would leave the user with no idea what to do next.
+        setError(detail || "This account cannot sign in right now.");
       } else {
         setError(err instanceof Error ? err.message : "Login failed. Please try again.");
       }
@@ -128,7 +136,12 @@ export function LoginPage() {
           </label>
 
           <div className="flex justify-end px-1">
-            <button type="button" className="text-sm font-semibold text-[#1F5468] hover:underline">
+            {/* Was a button that did nothing at all. */}
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm font-semibold text-[#1F5468] hover:underline"
+            >
               Forgot password?
             </button>
           </div>

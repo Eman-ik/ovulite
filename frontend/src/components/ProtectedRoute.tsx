@@ -22,6 +22,12 @@ export default function ProtectedRoute({ allowedRoles, children }: ProtectedRout
     return <Navigate to="/login" replace />;
   }
 
+  // A temporary password gets you exactly one screen. Enforced here as well
+  // as at login, so a bookmarked deep link cannot walk past it.
+  if (user.must_change_password) {
+    return <Navigate to="/change-password" replace />;
+  }
+
   const role = user.role?.toLowerCase();
 
   if (allowedRoles && !allowedRoles.includes(role || "")) {

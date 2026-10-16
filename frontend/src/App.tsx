@@ -5,6 +5,9 @@ import AppLayout from "@/layouts/AppLayout";
 import OvuliteLandingPage from "@/pages/OvuliteLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import ChangePasswordPage from "@/pages/ChangePasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import DataEntryPage from "@/pages/DataEntryPage";
 import TransferFormPage from "@/pages/TransferFormPage";
@@ -41,6 +44,11 @@ function App() {
             <Route path="/landing" element={<OvuliteLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            {/* Outside the app shell: a user on a temporary password cannot
+                load anything the shell renders, so there is nothing to wrap. */}
+            <Route path="/change-password" element={<ChangePasswordPage />} />
             
             
             <Route element={<ProtectedRoute />}>
