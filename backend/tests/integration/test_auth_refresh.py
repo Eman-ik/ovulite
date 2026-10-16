@@ -41,9 +41,12 @@ class TestAuthRefresh:
         new_tokens = refresh_response.json()
         assert "access_token" in new_tokens
         assert "refresh_token" in new_tokens
-        # Refresh token should be the same
-        assert new_tokens["refresh_token"] == tokens["refresh_token"]
-        
+        # Refresh tokens now ROTATE: each one is single-use, so a new one comes
+        # back and the presented one is revoked. This assertion used to require
+        # the opposite — that the same refresh token was returned — which meant
+        # one leaked refresh token stayed valid for its full seven days.
+        assert new_tokens["refresh_token"] != tokens["refresh_token"]
+
         # Verify the refreshed token works for protected endpoints
         me_response = client.get(
             "/auth/me",

@@ -20,6 +20,7 @@ of who did what.
 """
 
 import math
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -159,6 +160,105 @@ def get_user(
     return _owned(user_id, db, actor)
 
 
+@router.post("/users/{user_id}/approve", response_model=AdminUserResponse)
+def approve_user(
+    user_id: int,
+    role: str | None = Query(None, description="Role to grant; defaults to the signup role"),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_role(*ADMIN_ROLES)),
+):
+    """Approve a self-registered account so it can log in.
+
+    Self-signup creates the account with the lowest-privilege role and leaves
+    it pending; this is the only path that clears that, and it is admin-only.
+    An admin can grant a different role in the same step, which is the point —
+    otherwise approving and then promoting would be two audit entries for one
+    decision.
+    """
+    target = _owned(user_id, db, actor)
+    if not target.pending_approval:
+        raise HTTPException(status_code=409, detail="That account is not waiting for approval.")
+
+    if role is not None:
+        if role not in CANONICAL_ROLES:
+            raise HTTPException(status_code=422, detail=f"role must be one of {', '.join(CANONICAL_ROLES)}")
+        target.role = role
+
+    target.pending_approval = False
+    target.active = True
+    target.approved_by = actor.username
+    target.approved_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(target)
+    record(
+        db,
+        "admin.user.approved",
+        actor=actor,
+        target_type="user",
+        target_id=target.user_id,
+        detail={"username": target.username, "role": target.role},
+        message=f"Approved {target.username} as {target.role}",
+    )
+    db.commit()
+    db.refresh(target)
+    return target
+
+
+@router.post("/users/{user_id}/reject", status_code=status.HTTP_204_NO_CONTENT)
+def reject_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_role(*ADMIN_ROLES)),
+):
+    """Refuse a pending signup.
+
+    Deactivated rather than deleted, like every other removal here: the row is
+    referenced by the audit trail of its own signup, and a rejected request is
+    itself worth being able to look up later.
+    """
+    target = _owned(user_id, db, actor)
+    if not target.pending_approval:
+        raise HTTPException(status_code=409, detail="That account is not waiting for approval.")
+    target.active = False
+    db.commit()
+    record(
+        db,
+        "admin.user.rejected",
+        actor=actor,
+        target_type="user",
+        target_id=target.user_id,
+        detail={"username": target.username},
+        message=f"Rejected signup for {target.username}",
+    )
+    db.commit()
+    return None
+
+
+@router.post("/users/{user_id}/unlock", response_model=AdminUserResponse)
+def unlock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_role(*ADMIN_ROLES)),
+):
+    """Clear a failed-login lockout without waiting it out."""
+    target = _owned(user_id, db, actor)
+    target.failed_login_count = 0
+    target.locked_until = None
+    db.commit()
+    record(
+        db,
+        "admin.user.unlocked",
+        actor=actor,
+        target_type="user",
+        target_id=target.user_id,
+        detail={"username": target.username},
+        message=f"Cleared the lockout on {target.username}",
+    )
+    db.commit()
+    db.refresh(target)
+    return target
+
+
 @router.post("/users", response_model=AdminUserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(
     payload: AdminUserCreate,
@@ -205,6 +305,10 @@ def update_user(
 
     for field, value in changes.items():
         setattr(target, field, value)
+    # Same reason as DELETE: deactivating here must end the live sessions, and
+    # a role change must stop tokens that still carry the old role claim.
+    if changes.get("active") is False or "role" in changes:
+        target.sessions_revoked_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(target)
     return target
@@ -224,6 +328,16 @@ def reset_password(
     """
     target = _owned(user_id, db, actor)
     target.password_hash = hash_password(payload.new_password)
+    # An admin-set password is a hand-off credential: the admin knows it, so
+    # the user must replace it before anything else answers.
+    target.must_change_password = True
+    # Ends sessions opened with the old password — otherwise resetting the
+    # password of a compromised account left the intruder logged in.
+    target.password_changed_at = datetime.now(timezone.utc)
+    target.failed_login_count = 0
+    target.locked_until = None
+    target.reset_token = None
+    target.reset_token_expires = None
     db.commit()
     record(
         db,
@@ -249,5 +363,9 @@ def deactivate_user(
     _guard_self(target, actor, "deactivate")
     _guard_last_admin(target, db, actor, "deactivate")
     target.active = False
+    # Deactivation has to end the sessions too. Clearing the flag alone left
+    # any token the user already held working until it expired, so "remove
+    # this person's access" did not remove it for up to 30 minutes.
+    target.sessions_revoked_at = datetime.now(timezone.utc)
     db.commit()
     return None

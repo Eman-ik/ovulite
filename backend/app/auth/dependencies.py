@@ -6,7 +6,7 @@ from fastapi import Request, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.auth.security import verify_token
+from app.auth.security import issued_before_password_change, verify_token
 from app.database import get_db
 from app.models.organization import Organization
 from app.models.token_blacklist import RevokedToken
@@ -14,6 +14,17 @@ from app.models.user import User
 from app.services.audit import set_audit_actor
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# While must_change_password is set, these are the only paths that answer.
+# /auth/me so the frontend can see who it is and why it is being redirected,
+# change-password so the user can fix it, and the logouts so they can leave.
+_PASSWORD_CHANGE_ALLOWED_PATHS = (
+    "/auth/me",
+    "/auth/change-password",
+    "/auth/logout",
+    "/auth/logout-all",
+)
+PASSWORD_CHANGE_REQUIRED = "password_change_required"
 
 
 def get_current_user(
@@ -49,10 +60,31 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
+    # A password change or "log out everywhere" ends sessions opened earlier.
+    # Checked here rather than at login, because the point is to kill a token
+    # someone else is already holding.
+    if issued_before_password_change(payload, user.sessions_valid_after):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Your session has ended. Log in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     if not user.active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user account",
+        )
+    if user.pending_approval:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account is waiting for an administrator to approve it.",
+        )
+    # A temporary password gets you exactly far enough to replace it.
+    if user.must_change_password and request.url.path not in _PASSWORD_CHANGE_ALLOWED_PATHS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=PASSWORD_CHANGE_REQUIRED,
         )
     if token_org_id is not None and user.organization_id != token_org_id:
         raise HTTPException(

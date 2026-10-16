@@ -6,8 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.auth.dependencies import CANONICAL_ROLES
-
-MIN_PASSWORD_LENGTH = 10
+from app.auth.password_policy import validate_password_strength
 
 
 def _validate_role(value: Optional[str]) -> Optional[str]:
@@ -17,9 +16,12 @@ def _validate_role(value: Optional[str]) -> Optional[str]:
 
 
 def _validate_password(value: str) -> str:
-    if len(value) < MIN_PASSWORD_LENGTH:
-        raise ValueError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters")
-    return value
+    """The one shared policy, rather than this module's old length-only rule.
+
+    Ten characters of anything passed before, so "aaaaaaaaaa" was an
+    acceptable password for an account an admin was creating.
+    """
+    return validate_password_strength(value)
 
 
 class AdminUserCreate(BaseModel):
@@ -66,6 +68,13 @@ class AdminUserResponse(BaseModel):
     organization_id: Optional[int] = None
     created_at: Optional[datetime] = None
     last_login: Optional[datetime] = None
+    # Account-security state, so the admin screen can show what is actually
+    # blocking a user rather than just "inactive".
+    pending_approval: bool = False
+    must_change_password: bool = False
+    locked_until: Optional[datetime] = None
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
 
 
 class RoleDescriptor(BaseModel):
