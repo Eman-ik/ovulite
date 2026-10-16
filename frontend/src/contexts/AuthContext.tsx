@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           navigate("/change-password");
           return;
         }
-        navigate(getRoleLandingPath(userRes.data.role));
+        navigate(getRoleLandingPath());
       } catch (error) {
         console.error("[AuthContext] Login failed:", error);
         throw error;
@@ -207,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       setUser(userRes.data);
-      navigate(getRoleLandingPath(userRes.data.role));
+      navigate(getRoleLandingPath());
     },
     [navigate],
   );

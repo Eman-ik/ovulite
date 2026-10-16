@@ -56,12 +56,12 @@ function App() {
                 <Route index element={<DashboardPage />} />
                 <Route path="literature" element={<LiteraturePage />} />
                 {/* Data intake writes records, so the read-only researcher role is excluded. */}
-                <Route path="intake" element={<ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian"]}><IntakePage /></ProtectedRoute>} />
+                <Route path="intake" element={<ProtectedRoute allowedRoles={["admin", "embryologist", "veterinarian"]}><IntakePage /></ProtectedRoute>} />
 
 <Route
   path="data-entry"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <DataEntryPage />
     </ProtectedRoute>
   }
@@ -70,7 +70,7 @@ function App() {
 <Route
   path="data-entry/new"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <TransferFormPage />
     </ProtectedRoute>
   }
@@ -79,7 +79,7 @@ function App() {
 <Route
   path="data-entry/:id"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <TransferFormPage />
     </ProtectedRoute>
   }
@@ -91,7 +91,7 @@ function App() {
 <Route
   path="predictions"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian", "researcher", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian", "researcher", "embryologist"]}>
       <PredictionPage />
     </ProtectedRoute>
   }
@@ -100,7 +100,7 @@ function App() {
 <Route
   path="predictions/:id/decision-support"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <DecisionSupportPage />
     </ProtectedRoute>
   }
@@ -109,7 +109,7 @@ function App() {
 <Route
   path="embryo-grading"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <GradingPage />
     </ProtectedRoute>
   }
@@ -118,7 +118,7 @@ function App() {
 <Route
   path="lab-qc"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <QCDashboardPage />
     </ProtectedRoute>
   }
@@ -127,7 +127,7 @@ function App() {
 <Route
   path="opu-ivf"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <OPUIVFPage />
     </ProtectedRoute>
   }
@@ -136,7 +136,7 @@ function App() {
 <Route
   path="analytics"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "researcher"]}>
       <AnalyticsPage />
     </ProtectedRoute>
   }
@@ -145,7 +145,7 @@ function App() {
 <Route
   path="laboratory"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <LaboratoryPage />
     </ProtectedRoute>
   }
@@ -154,7 +154,7 @@ function App() {
 <Route
   path="oocyte-processing"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist"]}>
       <OocyteProcessingPage />
     </ProtectedRoute>
   }
@@ -163,7 +163,7 @@ function App() {
 <Route
   path="synchronization"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <SynchronizationPage />
     </ProtectedRoute>
   }
@@ -172,7 +172,7 @@ function App() {
 <Route
   path="protocol-schedules"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <ProtocolSchedulesPage />
     </ProtectedRoute>
   }
@@ -181,7 +181,7 @@ function App() {
 <Route
   path="pregnancy-diagnosis"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "et team", "veterinarian"]}>
+    <ProtectedRoute allowedRoles={["admin", "veterinarian"]}>
       <PregnancyDiagnosisPage />
     </ProtectedRoute>
   }
@@ -190,7 +190,7 @@ function App() {
 <Route
   path="admin"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin"]}>
+    <ProtectedRoute allowedRoles={["admin"]}>
       <AdminPage />
     </ProtectedRoute>
   }
@@ -199,7 +199,7 @@ function App() {
 <Route
   path="research"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "researcher"]}>
       <ResearchPage />
     </ProtectedRoute>
   }
@@ -208,7 +208,7 @@ function App() {
 <Route
   path="cases"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher", "viewer"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist", "veterinarian", "researcher"]}>
       <CaseRecordsPage />
     </ProtectedRoute>
   }
@@ -216,7 +216,7 @@ function App() {
 <Route
   path="cases/:id"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher", "viewer"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist", "veterinarian", "researcher"]}>
       <CaseDetailPage />
     </ProtectedRoute>
   }
@@ -225,7 +225,7 @@ function App() {
 <Route
   path="model-performance"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "researcher"]}>
       <ModelPerformancePage />
     </ProtectedRoute>
   }
@@ -239,7 +239,7 @@ function App() {
 <Route
   path="monitoring"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "researcher"]}>
       <MonitoringDashboardPage />
     </ProtectedRoute>
   }
@@ -248,7 +248,7 @@ function App() {
 <Route
   path="reports"
   element={
-    <ProtectedRoute allowedRoles={["admin", "organization_admin", "embryologist", "et team", "veterinarian", "researcher"]}>
+    <ProtectedRoute allowedRoles={["admin", "embryologist", "veterinarian", "researcher"]}>
       <ReportsExportPage />
     </ProtectedRoute>
   }

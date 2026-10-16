@@ -103,7 +103,7 @@ export default function MonitoringDashboardPage() {
   // as /qc/run and /analytics/run — so one check covers both, and it matches
   // what the API will actually allow.
   const role = normalizeRole(user?.role);
-  const canRun = role === "admin" || role === "organization_admin";
+  const canRun = role === "admin";
   const admin = canRun;
   const [lastRunNote, setLastRunNote] = useState<string | null>(null);
   const [drift, setDrift] = useState<DriftReport | null>(null);

@@ -4,6 +4,7 @@ import api from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { normalizeRole } from "@/lib/roleRoutes";
 
 type Document = { document_id: number; title: string; authors: string; year: number; source_url: string; source_kind: string; rights: string };
 type Citation = Document & { passage: number; excerpt: string };
@@ -12,7 +13,7 @@ const empty = { title: "", authors: "", year: new Date().getFullYear(), source_u
 
 export default function LiteraturePage() {
   const { user } = useAuth();
-  const canCurate = ["admin", "organization_admin", "embryologist"].includes(user?.role ?? "");
+  const canCurate = ["admin", "embryologist"].includes(normalizeRole(user?.role));
   const [documents, setDocuments] = useState<Document[]>([]);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<Answer | null>(null);

@@ -42,7 +42,7 @@ export function ChangePasswordPage() {
       // comes back in this response and has to be stored, or the user is
       // immediately logged out by their own password change.
       await applyTokens(res.data.access_token, res.data.refresh_token);
-      navigate(getRoleLandingPath(user?.role ?? null));
+      navigate(getRoleLandingPath());
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
       setError(typeof detail === "string" ? detail : "Could not change the password. Try again.");

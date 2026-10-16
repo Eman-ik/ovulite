@@ -23,6 +23,7 @@ import type {
   PaginatedResponse,
   RoleDescriptor,
 } from "@/lib/types";
+import { normalizeRole } from "@/lib/roleRoutes";
 
 /**
  * Administration — users, roles and sites.
@@ -119,7 +120,7 @@ type UserDraft = {
 const EMPTY_DRAFT: UserDraft = {
   username: "",
   password: "",
-  role: "viewer",
+  role: "researcher",
   full_name: "",
   email: "",
 };
@@ -168,7 +169,7 @@ function UsersPanel() {
   }, [roles]);
 
   const activeAdmins = users.filter(
-    (u) => u.active && (u.role === "admin" || u.role === "organization_admin"),
+    (u) => u.active && normalizeRole(u.role) === "admin",
   ).length;
 
   const run = async (action: () => Promise<void>, success: string) => {
@@ -640,7 +641,7 @@ function EditUserForm({
   onSubmit: (changes: Record<string, unknown>) => void | Promise<void>;
   busy: boolean;
 }) {
-  const [role, setRole] = useState(user.role ?? "viewer");
+  const [role, setRole] = useState(user.role ?? "researcher");
   const [fullName, setFullName] = useState(user.full_name ?? "");
   const [email, setEmail] = useState(user.email ?? "");
 

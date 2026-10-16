@@ -88,7 +88,7 @@ export function LoginPage() {
             </span>
             <button
               type="button"
-              onClick={() => navigate(getRoleLandingPath(user.role))}
+              onClick={() => navigate(getRoleLandingPath())}
               className="font-semibold text-[#1F5468] hover:underline"
             >
               Continue
