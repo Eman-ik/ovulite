@@ -32,7 +32,7 @@ from app.auth.dependencies import (
     PREDICTION_RUN_ROLES,
     require_role,
 )
-from app.auth.security import hash_password
+from app.auth.security import hash_password, revocation_stamp
 from app.database import get_db
 from app.models.user import User
 from app.schemas.admin import (
@@ -308,7 +308,7 @@ def update_user(
     # Same reason as DELETE: deactivating here must end the live sessions, and
     # a role change must stop tokens that still carry the old role claim.
     if changes.get("active") is False or "role" in changes:
-        target.sessions_revoked_at = datetime.now(timezone.utc)
+        target.sessions_revoked_at = revocation_stamp()
     db.commit()
     db.refresh(target)
     return target
@@ -333,7 +333,7 @@ def reset_password(
     target.must_change_password = True
     # Ends sessions opened with the old password — otherwise resetting the
     # password of a compromised account left the intruder logged in.
-    target.password_changed_at = datetime.now(timezone.utc)
+    target.password_changed_at = revocation_stamp()
     target.failed_login_count = 0
     target.locked_until = None
     target.reset_token = None
@@ -366,6 +366,6 @@ def deactivate_user(
     # Deactivation has to end the sessions too. Clearing the flag alone left
     # any token the user already held working until it expired, so "remove
     # this person's access" did not remove it for up to 30 minutes.
-    target.sessions_revoked_at = datetime.now(timezone.utc)
+    target.sessions_revoked_at = revocation_stamp()
     db.commit()
     return None
