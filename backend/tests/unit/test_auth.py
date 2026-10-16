@@ -8,7 +8,8 @@ Tests:
 """
 import pytest
 from datetime import timedelta, datetime, timezone
-from jose import jwt, JWTError
+import jwt  # PyJWT, which replaced python-jose
+from jwt import PyJWTError as JWTError
 
 from app.auth.security import (
     hash_password,
