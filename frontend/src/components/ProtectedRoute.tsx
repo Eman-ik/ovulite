@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { normalizeRole } from "@/lib/roleRoutes";
 import type { ReactNode } from "react";
 
 type ProtectedRouteProps = {
@@ -28,9 +29,11 @@ export default function ProtectedRoute({ allowedRoles, children }: ProtectedRout
     return <Navigate to="/change-password" replace />;
   }
 
-  const role = user.role?.toLowerCase();
-
-  if (allowedRoles && !allowedRoles.includes(role || "")) {
+  // Compare the same way the sidebar does: both sides go through normalizeRole,
+  // so a legacy string ("et team", "organization_admin", "viewer") is judged as
+  // the role it means. Comparing raw strings here would have let a sidebar item
+  // show for a role the guard then refused, or the reverse.
+  if (allowedRoles && !allowedRoles.map(normalizeRole).includes(normalizeRole(user.role))) {
     return <Navigate to="/app" replace />;
   }
 
