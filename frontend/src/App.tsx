@@ -24,6 +24,7 @@ import OocyteProcessingPage from "@/pages/OocyteProcessingPage";
 import CaseRecordsPage from "@/pages/CaseRecordsPage";
 import CaseDetailPage from "@/pages/CaseDetailPage";
 import ModelPerformancePage from "@/pages/ModelPerformancePage";
+import MonitoringDashboardPage from "@/pages/MonitoringDashboardPage";
 import ReportsExportPage from "@/pages/ReportsExportPage";
 import LiteraturePage from "@/pages/LiteraturePage";
 import IntakePage from "@/pages/IntakePage";
@@ -218,6 +219,20 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
       <ModelPerformancePage />
+    </ProtectedRoute>
+  }
+/>
+
+{/* The live counterpart to model-performance: that page reports the
+    artifact's training-time holdout metrics, this one tracks how the model
+    behaves against outcomes that have since resolved. Same audience, so the
+    same gate. Running the pipeline is admin-only and the page hides that
+    control for everyone else. */}
+<Route
+  path="monitoring"
+  element={
+    <ProtectedRoute allowedRoles={["admin", "organization_admin", "researcher"]}>
+      <MonitoringDashboardPage />
     </ProtectedRoute>
   }
 />

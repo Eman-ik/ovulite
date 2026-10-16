@@ -2,8 +2,11 @@
 
 This is deliberately NOT full AutoML. It writes a reproducible audit-trail
 record (a `retrain_jobs` row) whenever drift is detected, and leaves the
-actual retrain script (ml/train_pipeline.py) to be run manually or via the
-n8n HTTP Request node -> POST /monitoring/retrain-jobs/{id}/run.
+actual retrain script (ml/train_pipeline.py) to be launched by hand.
+
+POST /monitoring/retrain-jobs/{id}/acknowledge only records that someone
+picked the decision up; it does not start a retrain. (Upstream's docstring
+pointed at a `/run` route on this resource, which does not exist.)
 """
 
 from datetime import datetime, timezone
