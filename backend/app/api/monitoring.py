@@ -37,7 +37,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import ADMIN_ROLES, get_current_user, require_role
+from app.auth.dependencies import ADMIN_ROLES, ANALYST_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.et_transfer import ETTransfer
 from app.models.model_metric import ModelMetric
@@ -364,7 +364,7 @@ async def get_metrics(
     model_version: str = Query(DEFAULT_MODEL_VERSION),
     limit: int = Query(90, ge=1, le=500),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ):
     """Return persisted rolling-metric history for a model version."""
     organization_id = _require_org(current_user)
@@ -399,7 +399,7 @@ async def get_metrics(
 async def get_drift(
     model_version: str = Query(DEFAULT_MODEL_VERSION),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ):
     """Compute the current drift report WITHOUT writing anything.
 
@@ -429,7 +429,7 @@ async def get_retrain_jobs(
     status: str | None = Query(None, description="Filter by status: PENDING, RUNNING, COMPLETE, FAILED"),
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ):
     """Audit trail of retrain decisions (Module 7 continuous-learning log)."""
     organization_id = _require_org(current_user)

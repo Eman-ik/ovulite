@@ -183,6 +183,11 @@ def normalize_role(role: str | None) -> str | None:
 # rather than hard-coding one string in thirty places.
 ADMIN_ROLES = ("admin",)
 
+# The analysis surfaces: analytics, research, model monitoring, data quality.
+# The frontend already limits these screens to admin and researcher; this is the
+# same rule enforced where the data is served, so it holds for any client.
+ANALYST_ROLES = ("admin", "researcher")
+
 # Write/delete role groups for the core clinical CRUD routers. Read access
 # (list/get) stays open to any authenticated role; only mutation is
 # restricted, split along the lab-side / ET-side line the SRS describes:

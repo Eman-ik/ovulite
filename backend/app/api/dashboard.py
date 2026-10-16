@@ -25,7 +25,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.transfers import _clean_pregnancy_result
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ANALYST_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.donor import Donor
 from app.models.embryo import Embryo
@@ -796,7 +796,7 @@ def get_trends(
 def get_charts(
     filters: DashboardFilterValues = Depends(get_dashboard_filters),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ):
     """Programme charts, computed from transfer records under the dashboard filters.
 
@@ -1202,7 +1202,7 @@ def _dq_row(table: str, field: str, total: int, missing: int, stale: bool) -> Da
 
 
 @router.get("/data-quality", response_model=DataQualityResponse)
-def get_data_quality(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_data_quality(db: Session = Depends(get_db), current_user: User = Depends(require_role(*ANALYST_ROLES))):
     org_id = current_user.organization_id
     stale_cutoff = date.today() - timedelta(days=45)
     rows: list[DataQualityRow] = []

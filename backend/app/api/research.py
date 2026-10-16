@@ -35,7 +35,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.transfers import _clean_pregnancy_result
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import ANALYST_ROLES, require_role
 from app.database import get_db
 from app.models.embryo import Embryo
 from app.models.et_transfer import ETTransfer
@@ -225,7 +225,7 @@ def donor_sire_matrix(
     limit_donors: int = Query(12, ge=1, le=50),
     limit_sires: int = Query(12, ge=1, le=50),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ) -> DonorSireResponse:
     """Pregnancy rate for each donor × sire combination.
 
@@ -296,7 +296,7 @@ def donor_sire_matrix(
 @router.get("/protocols", response_model=ProtocolComparisonResponse)
 def protocol_comparison(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ) -> ProtocolComparisonResponse:
     """Pregnancy rate per synchronization protocol, tested against the largest.
 
@@ -316,10 +316,17 @@ def protocol_comparison(
             protocol_names[t.protocol_id] = t.protocol.name
 
     if not groups:
+        # Every required field is given, not just the ones that were interesting.
+        # Leaving out confounding_detected, warning and period_rates made this
+        # branch fail response validation, so an organisation with no
+        # protocol-linked outcomes got a 400 instead of an empty comparison.
         return ProtocolComparisonResponse(
             min_sample_size=MIN_SAMPLE_SIZE,
             baseline_protocol=None,
             rows=[],
+            confounding_detected=False,
+            warning=None,
+            period_rates=[],
             note="No transfers with both a protocol and a resolved outcome.",
         )
 
@@ -459,7 +466,7 @@ def protocol_comparison(
 @router.get("/outcome-factors", response_model=OutcomeFactorsResponse)
 def outcome_factors(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ) -> OutcomeFactorsResponse:
     """Pregnancy rate broken down by each embryo attribute that varies.
 
@@ -546,7 +553,7 @@ ATTRIBUTION_DIMENSIONS = [
 @router.get("/attribution", response_model=AttributionResponse)
 def change_attribution(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ) -> AttributionResponse:
     """Detect the strongest step change in pregnancy rate and explain it.
 

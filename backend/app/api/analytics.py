@@ -21,7 +21,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.auth.dependencies import ADMIN_ROLES, get_current_user, require_role
+from app.auth.dependencies import ADMIN_ROLES, ANALYST_ROLES, require_role
 from app.models.user import User
 
 from app.schemas.analytics import (
@@ -81,7 +81,7 @@ def _ensure_data():
 # ── KPIs ─────────────────────────────────────────────────
 
 @router.get("/kpis", response_model=KPIResponse)
-async def get_kpis(_current_user: User = Depends(get_current_user)):
+async def get_kpis(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get core reproductive KPIs."""
     _ensure_data()
     data = _load_artifact("kpis.json")
@@ -91,7 +91,7 @@ async def get_kpis(_current_user: User = Depends(get_current_user)):
 
 
 @router.get("/trends", response_model=list[MonthlyTrend])
-async def get_trends(_current_user: User = Depends(get_current_user)):
+async def get_trends(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get monthly KPI trends."""
     _ensure_data()
     data = _load_artifact("monthly_trends.json")
@@ -101,7 +101,7 @@ async def get_trends(_current_user: User = Depends(get_current_user)):
 
 
 @router.get("/funnel", response_model=FunnelResponse)
-async def get_funnel(_current_user: User = Depends(get_current_user)):
+async def get_funnel(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get IVF funnel metrics."""
     _ensure_data()
     data = _load_artifact("ivf_funnel.json")
@@ -113,7 +113,7 @@ async def get_funnel(_current_user: User = Depends(get_current_user)):
 # ── Protocol Analysis ────────────────────────────────────
 
 @router.get("/protocols", response_model=ProtocolRatesResponse)
-async def get_protocol_rates(_current_user: User = Depends(get_current_user)):
+async def get_protocol_rates(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get pregnancy rates per protocol with confidence intervals."""
     _ensure_data()
     data = _load_artifact("protocol_rates.json")
@@ -123,7 +123,7 @@ async def get_protocol_rates(_current_user: User = Depends(get_current_user)):
 
 
 @router.get("/protocols/regression", response_model=ProtocolRegression)
-async def get_protocol_regression(_current_user: User = Depends(get_current_user)):
+async def get_protocol_regression(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get logistic regression results for protocol effectiveness."""
     _ensure_data()
     data = _load_artifact("protocol_regression.json")
@@ -133,7 +133,7 @@ async def get_protocol_regression(_current_user: User = Depends(get_current_user
 
 
 @router.get("/protocols/importance", response_model=ProtocolImportance)
-async def get_protocol_importance(_current_user: User = Depends(get_current_user)):
+async def get_protocol_importance(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get permutation importance for protocol features."""
     _ensure_data()
     data = _load_artifact("protocol_importance.json")
@@ -145,7 +145,7 @@ async def get_protocol_importance(_current_user: User = Depends(get_current_user
 # ── Donor Analysis ───────────────────────────────────────
 
 @router.get("/donors", response_model=DonorStatsResponse)
-async def get_donor_stats(_current_user: User = Depends(get_current_user)):
+async def get_donor_stats(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get per-donor pregnancy rates and performance metrics."""
     _ensure_data()
     data = _load_artifact("donor_performance.json")
@@ -155,7 +155,7 @@ async def get_donor_stats(_current_user: User = Depends(get_current_user)):
 
 
 @router.get("/donors/trends", response_model=DonorTrendsResponse)
-async def get_donor_trends(_current_user: User = Depends(get_current_user)):
+async def get_donor_trends(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get monthly pregnancy rate trends for top donors."""
     _ensure_data()
     data = _load_artifact("donor_trends.json")
@@ -165,7 +165,7 @@ async def get_donor_trends(_current_user: User = Depends(get_current_user)):
 
 
 @router.get("/breeds", response_model=BreedStatsResponse)
-async def get_breed_stats(_current_user: User = Depends(get_current_user)):
+async def get_breed_stats(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get pregnancy rates by donor breed."""
     _ensure_data()
     data = _load_artifact("breed_stats.json")
@@ -177,7 +177,7 @@ async def get_breed_stats(_current_user: User = Depends(get_current_user)):
 # ── Biomarker Analysis ───────────────────────────────────
 
 @router.get("/biomarkers", response_model=BiomarkersResponse)
-async def get_biomarkers(_current_user: User = Depends(get_current_user)):
+async def get_biomarkers(_current_user: User = Depends(require_role(*ANALYST_ROLES))):
     """Get biomarker sweet-spot analysis (CL, BC score, heat day)."""
     _ensure_data()
     data = _load_artifact("biomarkers.json")
