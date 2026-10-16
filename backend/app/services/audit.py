@@ -201,6 +201,11 @@ AUDITED_TABLES = {
     "recipient_evaluations": "recipient_evaluation",
     "synchronization_enrollments": "synchronization_enrollment",
     "embryo_observations": "embryo_observation",
+    # A retrain decision, and the admin acknowledging it, is a privileged
+    # change worth attributing. model_metrics is deliberately absent: it is a
+    # machine-written snapshot, one row per day updated in place, so auditing
+    # it would bury the human actions above in noise.
+    "retrain_jobs": "retrain_job",
 }
 
 

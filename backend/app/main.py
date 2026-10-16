@@ -30,6 +30,7 @@ from app.api.import_data import router as import_router
 from app.api.grading import router as grading_router
 from app.api.health import router as health_router
 from app.api.literature import router as literature_router
+from app.api.monitoring import router as monitoring_router
 from app.api.canonical_intake import router as canonical_intake_router
 from app.api.case_timeline import router as case_timeline_router
 from app.api.ivf_batches import router as ivf_batches_router
@@ -187,6 +188,7 @@ app.include_router(import_router, prefix="/import", tags=["import"])
 app.include_router(predictions_router, prefix="/predict", tags=["predictions"])
 app.include_router(grading_router, prefix="/grade", tags=["grading"])
 app.include_router(qc_router, prefix="/qc", tags=["qc"])
+app.include_router(monitoring_router, prefix="/monitoring", tags=["monitoring"])
 app.include_router(analytics_router, prefix="/analytics", tags=["analytics"])
 app.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 app.include_router(research_router, prefix="/research", tags=["research"])

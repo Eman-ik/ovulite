@@ -13,7 +13,9 @@ from app.models.ivm_batch import IVMBatch
 from app.models.embryo_observation import EmbryoObservation
 from app.models.opu_session import OPUSession
 from app.models.organization import Organization, OrganizationInvitation, OrganizationMembership
+from app.models.model_metric import ModelMetric
 from app.models.prediction import Prediction
+from app.models.retrain_job import RetrainJob
 from app.models.protocol import Protocol
 from app.models.protocol_log import ProtocolLog
 from app.models.protocol_step import ProtocolStep
@@ -48,7 +50,9 @@ __all__ = [
     "Organization",
     "OrganizationInvitation",
     "OrganizationMembership",
+    "ModelMetric",
     "Prediction",
+    "RetrainJob",
     "Protocol",
     "ProtocolLog",
     "ProtocolStep",
