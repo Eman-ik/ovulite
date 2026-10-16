@@ -91,7 +91,7 @@ def _flag(name: str, default: bool) -> bool:
 
 
 # The role a self-registered account gets. Never taken from the request.
-SELF_REGISTER_ROLE = "viewer"
+SELF_REGISTER_ROLE = "researcher"
 PENDING_MESSAGE = "Your account is waiting for an administrator to approve it."
 
 # Signup approval is on by default. The flag exists so a demo can be run

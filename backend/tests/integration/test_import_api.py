@@ -39,7 +39,7 @@ def test_import_csv_forbidden_for_viewer_role(client, db_session):
         User(
             username=username,
             password_hash=hash_password(password),
-            role="viewer",
+            role="researcher",
             active=True,
         )
     )

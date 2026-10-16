@@ -37,7 +37,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user, require_role
+from app.auth.dependencies import ADMIN_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.et_transfer import ETTransfer
 from app.models.model_metric import ModelMetric
@@ -73,7 +73,7 @@ DEFAULT_MODEL_VERSION = "pregnancy_ensemble"
 
 # Running the pipeline and closing a retrain job are both platform-operations
 # actions, gated the same way as POST /qc/run and POST /analytics/run.
-PIPELINE_ADMIN_ROLES = ("admin", "organization_admin")
+PIPELINE_ADMIN_ROLES = ADMIN_ROLES
 
 
 def _load_resolved_predictions(

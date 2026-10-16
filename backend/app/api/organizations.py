@@ -7,7 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_organization, get_current_user, require_role
+from app.auth.dependencies import (
+    ADMIN_ROLES,
+    get_current_organization,
+    get_current_user,
+    require_role,
+)
 from app.database import get_db
 from app.models.organization import Organization, OrganizationInvitation, OrganizationMembership
 from app.models.user import User
@@ -32,7 +37,7 @@ def get_my_organization(
     "/{organization_id}/invitations",
     response_model=OrganizationInvitationResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(require_role("admin", "organization_admin"))],
+    dependencies=[Depends(require_role(*ADMIN_ROLES))],
 )
 def create_invitation(
     organization_id: int,
@@ -69,7 +74,7 @@ def create_invitation(
 @router.get(
     "/{organization_id}/invitations",
     response_model=list[OrganizationInvitationResponse],
-    dependencies=[Depends(require_role("admin", "organization_admin"))],
+    dependencies=[Depends(require_role(*ADMIN_ROLES))],
 )
 def list_invitations(
     organization_id: int,
@@ -93,7 +98,7 @@ def list_invitations(
 @router.get(
     "/{organization_id}/members",
     response_model=list[OrganizationMembershipResponse],
-    dependencies=[Depends(require_role("admin", "organization_admin"))],
+    dependencies=[Depends(require_role(*ADMIN_ROLES))],
 )
 def list_members(
     organization_id: int,

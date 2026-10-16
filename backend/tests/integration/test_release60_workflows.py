@@ -81,7 +81,7 @@ def test_import_org_isolation_and_readonly_role(harness):
     user.organization_id = 102
     assert client.get("/intake/batches").json() == []
     assert client.post(f"/intake/batches/{batch}/commit").status_code == 404
-    user.role = "viewer"
+    user.role = "researcher"
     assert preview(client).status_code == 403
 
 
@@ -135,7 +135,7 @@ def test_literature_citations_duplicates_abstention_and_tenant(harness):
     user.organization_id = 102
     assert client.get("/literature/documents").json()["total"] == 0
     assert client.post("/literature/query", json={"question": "progesterone evidence"}).json()["citations"] == []
-    user.role = "viewer"
+    user.role = "researcher"
     assert client.post("/literature/documents", json=DOCUMENT).status_code == 403
 
 

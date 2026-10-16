@@ -28,7 +28,9 @@ from app.schemas.laboratory import (
 
 router = APIRouter()
 
-ADMIN_ROLES = ("admin", "organization_admin")
+# Imported rather than redefined: one list of admin roles, in
+# app/auth/dependencies.py.
+from app.auth.dependencies import ADMIN_ROLES  # noqa: E402
 
 
 def _owned(laboratory_id: int, db: Session, user: User) -> Laboratory:

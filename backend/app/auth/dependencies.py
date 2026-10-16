@@ -123,33 +123,76 @@ def get_current_organization(current_user: User = Depends(get_current_user)) -> 
     return organization
 
 
-# The four operational roles, plus the two support roles. `role` is a free
-# string column on User, so this tuple is the vocabulary rather than a DB
-# constraint — it must stay in sync with CANONICAL_ROLES in
-# frontend/src/lib/roleRoutes.ts.
+# The four roles Ovulite actually has. This tuple is the vocabulary, and it
+# must stay in sync with CANONICAL_ROLES in frontend/src/lib/roleRoutes.ts.
 #
-# "et team" is the legacy string for veterinarian; the imported ET dataset
-# uses it, so both are accepted wherever a vet is allowed.
+#   admin         runs the system      — users, settings, every module
+#   embryologist  runs the laboratory  — OPU, IVF, IVM, grading, lab QC
+#   veterinarian  runs recipients/ET   — sync, protocols, transfers, PD
+#   researcher    analyses outcomes    — read-only everywhere, no clinical writes
+#
+# This replaced a seven-value list. The three that went were not separate
+# jobs, which is why nobody could say what they meant:
+#
+#   organization_admin  had exactly admin's permissions, everywhere it was
+#                       named. It was a second word for one thing.
+#   et team             is the ET dataset's spelling of veterinarian, and was
+#                       carried as a role of its own purely because the import
+#                       wrote it that way.
+#   viewer              was read-only-minus-analytics, which is not a job
+#                       anyone does here; it is researcher with the useful
+#                       screens switched off.
 CANONICAL_ROLES = (
     "admin",
-    "organization_admin",
     "embryologist",
     "veterinarian",
-    "et team",
     "researcher",
-    "viewer",
 )
+
+# Strings that are still out there — in old rows, old JWT claims, and the
+# imported ET dataset — mapped onto the role they always meant. Accepting
+# these is what lets the vocabulary shrink without a flag day: a token issued
+# before the migration still authorises exactly what it did before.
+LEGACY_ROLE_ALIASES = {
+    "organization_admin": "admin",
+    "organization admin": "admin",
+    "et team": "veterinarian",
+    "et-team": "veterinarian",
+    "et_team": "veterinarian",
+    "viewer": "researcher",
+}
+
+
+def normalize_role(role: str | None) -> str | None:
+    """Map any role string this system has ever stored onto a canonical one.
+
+    Returns None for an unknown value rather than guessing: an unrecognised
+    role must fail closed at the permission check, not quietly become the
+    nearest match.
+    """
+    if role is None:
+        return None
+    value = role.strip().lower()
+    if value in CANONICAL_ROLES:
+        return value
+    return LEGACY_ROLE_ALIASES.get(value)
+
+
+# Admin is now a single role, but the tuple stays so the many
+# `require_role(*ADMIN_ROLES)` call sites keep reading as a set of roles
+# rather than hard-coding one string in thirty places.
+ADMIN_ROLES = ("admin",)
 
 # Write/delete role groups for the core clinical CRUD routers. Read access
 # (list/get) stays open to any authenticated role; only mutation is
 # restricted, split along the lab-side / ET-side line the SRS describes:
-# embryologist owns lab data entry, et team/veterinarian own recipient and
-# transfer entry. admin and organization_admin can write everywhere.
+# embryologist owns lab data entry, veterinarian owns recipient and transfer
+# entry. admin can write everywhere.
 #
 # `researcher` is deliberately absent from both: the role analyses outcomes
 # and evaluates models, and must not be able to edit clinical records.
-LAB_WRITE_ROLES = ("admin", "organization_admin", "embryologist")
-ET_WRITE_ROLES = ("admin", "organization_admin", "et team", "veterinarian")
+LAB_WRITE_ROLES = ("admin", "embryologist")
+ET_WRITE_ROLES = ("admin", "veterinarian")
 
 # Running a prediction is a third thing, and lumping it into ET_WRITE_ROLES
 # conflated three different privileges:
@@ -166,8 +209,6 @@ ET_WRITE_ROLES = ("admin", "organization_admin", "et team", "veterinarian")
 # So only the first opens to the lab. The other two stay on ET_WRITE_ROLES.
 PREDICTION_RUN_ROLES = (
     "admin",
-    "organization_admin",
-    "et team",
     "veterinarian",
     "embryologist",
 )
@@ -176,12 +217,17 @@ PREDICTION_RUN_ROLES = (
 def require_role(*allowed_roles: str) -> Callable:
     """Return a dependency that restricts access to users with specific roles.
 
+    Both sides are normalized, so a row or token still carrying "et team" or
+    "organization_admin" is checked as the role it always meant rather than
+    being refused for its spelling.
+
     Usage:
         @router.get("/admin-only", dependencies=[Depends(require_role("admin"))])
     """
+    allowed = {normalize_role(r) or r for r in allowed_roles}
 
     def role_checker(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in allowed_roles:
+        if normalize_role(current_user.role) not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Role '{current_user.role}' not authorized. Required: {', '.join(allowed_roles)}",

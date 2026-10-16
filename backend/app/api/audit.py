@@ -24,7 +24,9 @@ from app.schemas.audit import AuditEventResponse, AuditPage
 
 router = APIRouter()
 
-ADMIN_ROLES = ("admin", "organization_admin")
+# Imported rather than redefined: one list of admin roles, in
+# app/auth/dependencies.py.
+from app.auth.dependencies import ADMIN_ROLES  # noqa: E402
 
 
 @router.get("/events", response_model=AuditPage)

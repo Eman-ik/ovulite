@@ -26,6 +26,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import (
+    ADMIN_ROLES,
     CANONICAL_ROLES,
     ET_WRITE_ROLES,
     LAB_WRITE_ROLES,
@@ -47,16 +48,13 @@ from app.services.audit import record
 
 router = APIRouter()
 
-ADMIN_ROLES = ("admin", "organization_admin")
+
 
 ROLE_LABELS: dict[str, tuple[str, str]] = {
-    "admin": ("Administrator", "Full access, including user management and all clinical data."),
-    "organization_admin": ("Organization Admin", "Full access within this organization."),
-    "embryologist": ("Embryologist / Lab", "Owns OPU, IVM, IVF and embryo records. Can run predictions."),
-    "veterinarian": ("Veterinarian / ET", "Owns recipients, transfers, pregnancy checks and outcomes."),
-    "et team": ("ET Team", "Records transfers, pregnancy checks and outcomes."),
-    "researcher": ("Researcher / Analyst", "Read-only across clinical data, plus analytics and model evaluation."),
-    "viewer": ("Viewer", "Read-only. Cannot edit any record."),
+    "admin": ("Admin", "Full access: user management, system settings, every module, reports and export."),
+    "embryologist": ("Embryologist", "Laboratory: OPU, IVF, IVM, embryo grading and lab QC. Can run predictions."),
+    "veterinarian": ("Veterinarian", "Recipients, synchronization, protocols, transfers, pregnancy diagnosis and outcomes."),
+    "researcher": ("Researcher", "Read-only: dashboard, analytics, model performance, research and literature. No clinical or lab writes."),
 }
 
 

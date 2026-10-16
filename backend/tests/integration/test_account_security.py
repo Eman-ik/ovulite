@@ -47,7 +47,7 @@ def test_signup_cannot_choose_its_own_role(client, db_session):
 
     created = db_session.query(User).filter(User.username == "mallory").first()
     assert created is not None
-    assert created.role == "viewer", f"signup was granted role {created.role!r}"
+    assert created.role == "researcher", f"signup was granted role {created.role!r}"
 
 
 @pytest.mark.integration

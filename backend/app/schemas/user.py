@@ -20,7 +20,7 @@ class UserCreate(BaseModel):
 
     username: str
     password: str
-    role: str = "viewer"
+    role: str = "researcher"
     organization_id: Optional[int] = None
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None

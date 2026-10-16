@@ -8,7 +8,12 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import require_role
+from app.auth.dependencies import (
+    ADMIN_ROLES,
+    ET_WRITE_ROLES,
+    LAB_WRITE_ROLES,
+    require_role,
+)
 from app.database import get_db
 from app.models.donor import Donor
 from app.models.embryo import Embryo
@@ -23,7 +28,7 @@ from app.services.canonical_intake import CanonicalET, read_csv, validate_csv
 from app.services.case_persistence import persist_case
 
 router = APIRouter()
-writer = require_role("admin", "organization_admin", "embryologist", "et team", "veterinarian")
+writer = require_role(*ADMIN_ROLES, *LAB_WRITE_ROLES, *ET_WRITE_ROLES)
 
 
 class Preview(BaseModel):

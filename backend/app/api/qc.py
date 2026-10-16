@@ -15,7 +15,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.auth.dependencies import get_current_user, require_role
+from app.auth.dependencies import ADMIN_ROLES, get_current_user, require_role
 from app.models.user import User
 
 from app.schemas.qc import (
@@ -268,7 +268,7 @@ async def get_summary(_current_user: User = Depends(get_current_user)):
 @router.post("/run")
 async def run_pipeline(
     with_synthetic: bool = Query(False),
-    _current_user: User = Depends(require_role("admin", "organization_admin")),
+    _current_user: User = Depends(require_role(*ADMIN_ROLES)),
 ):
     """Trigger QC pipeline execution.
 

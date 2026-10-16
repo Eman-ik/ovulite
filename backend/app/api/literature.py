@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user, require_role
+from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.literature import LiteratureDocument
 from app.models.user import User
@@ -47,7 +47,7 @@ def documents(db: Session = Depends(get_db), user: User = Depends(get_current_us
 
 @router.post("/documents", status_code=201)
 def add_document(payload: DocumentInput, db: Session = Depends(get_db),
-                 user: User = Depends(require_role("admin", "organization_admin", "embryologist"))):
+                 user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     values = payload.model_dump()
     values["source_url"] = str(payload.source_url)
     if len(values["source_url"]) > 2000:
@@ -78,6 +78,6 @@ def status(user: User = Depends(get_current_user)):
 
 
 @router.post("/seed", status_code=201)
-def seed(db: Session = Depends(get_db), user: User = Depends(require_role("admin", "organization_admin", "embryologist"))):
+def seed(db: Session = Depends(get_db), user: User = Depends(require_role(*LAB_WRITE_ROLES))):
     from app.services.literature_seed import seed_corpus
     return seed_corpus(db, organization(user), user.username)
