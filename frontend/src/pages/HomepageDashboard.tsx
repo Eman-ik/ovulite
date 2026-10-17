@@ -150,22 +150,30 @@ export default function HomepageDashboard() {
   const loadCore = useCallback(async () => {
     setLoadError(null);
     try {
-      const [kpiRes, funnelRes, opsRes, pipelineRes] = await Promise.all([
-        api.get<DashboardKpiResponse>("/dashboard/kpis", { params: filters }),
-        api.get<DashboardFunnelResponse>("/dashboard/funnel", { params: filters }),
-        api.get<DashboardOperationsResponse>("/dashboard/operations", { params: filters }),
-        api.get<PaginatedResponse<DashboardPipelineRow>>("/dashboard/pipeline", {
-          params: { ...filters, page_size: 50 },
-        }),
-      ]);
+      // The server refuses operations and pipeline to roles with no such view
+      // (researcher), so those roles must not ask. A refused request here would
+      // fail the whole load, not just the panel it feeds.
+      const kpiP = api.get<DashboardKpiResponse>("/dashboard/kpis", { params: filters });
+      const funnelP = api.get<DashboardFunnelResponse>("/dashboard/funnel", { params: filters });
+      const opsP = showOperations
+        ? api.get<DashboardOperationsResponse>("/dashboard/operations", { params: filters }).then((r) => r.data)
+        : Promise.resolve(null);
+      const pipeP = showPipeline
+        ? api
+            .get<PaginatedResponse<DashboardPipelineRow>>("/dashboard/pipeline", {
+              params: { ...filters, page_size: 50 },
+            })
+            .then((r) => r.data.items)
+        : Promise.resolve([] as DashboardPipelineRow[]);
+      const [kpiRes, funnelRes, ops, pipe] = await Promise.all([kpiP, funnelP, opsP, pipeP]);
       setKpis(kpiRes.data);
       setFunnel(funnelRes.data);
-      setOperations(opsRes.data);
-      setPipeline(pipelineRes.data.items);
+      setOperations(ops);
+      setPipeline(pipe);
     } catch {
       setLoadError("Unable to load dashboard data from the server.");
     }
-  }, [filters]);
+  }, [filters, showOperations, showPipeline]);
 
   useEffect(() => {
     loadCore();

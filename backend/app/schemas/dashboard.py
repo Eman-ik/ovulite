@@ -65,12 +65,13 @@ class TrendResponse(BaseModel):
 
 
 class OperationsResponse(BaseModel):
-    opu_sessions_today: int
-    ivf_batches_in_culture: int
-    embryos_pending_grading: int
-    transfers_scheduled_today: int
-    pregnancy_checks_due: int
-    predictions_pending_outcome: int
+    # None means "not in this role's view" (the server omits it), not zero.
+    opu_sessions_today: Optional[int] = None
+    ivf_batches_in_culture: Optional[int] = None
+    embryos_pending_grading: Optional[int] = None
+    transfers_scheduled_today: Optional[int] = None
+    pregnancy_checks_due: Optional[int] = None
+    predictions_pending_outcome: Optional[int] = None
     estimated_fields: list[str]
 
 

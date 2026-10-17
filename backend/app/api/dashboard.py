@@ -25,7 +25,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.transfers import _clean_pregnancy_result
-from app.auth.dependencies import ANALYST_ROLES, get_current_user, require_role
+from app.auth.dependencies import ANALYST_ROLES, get_current_user, normalize_role, require_role
 from app.database import get_db
 from app.models.donor import Donor
 from app.models.embryo import Embryo
@@ -464,6 +464,61 @@ def _compute_operations(db: Session, org_id: int, f: DashboardFilterValues) -> d
 # Endpoints
 # --------------------------------------------------------------------------
 
+# ──────────────────────────────────────────────────────────────────────────
+# What each role may see on the homepage dashboard. Enforced here, on the
+# server, so a client calling the API directly gets the same restriction the
+# screen applies. None means everything. An empty set means nothing.
+# Kept beside the endpoints so a change to one role's view is one edit.
+# ──────────────────────────────────────────────────────────────────────────
+_NOTHING: frozenset = frozenset()
+DASHBOARD_SCOPE: dict[str, dict[str, Optional[frozenset]]] = {
+    "admin": {
+        "kpis": None, "funnel": None, "operations": None, "pipeline": None, "performance": None,
+    },
+    "embryologist": {
+        "kpis": frozenset({"oocytes_recovered", "maturation_rate", "cleavage_rate", "blastocyst_rate"}),
+        "funnel": frozenset({"Oocytes Recovered", "Mature Oocytes", "Cleaved Embryos", "Blastocysts"}),
+        "operations": frozenset({"opu_sessions_today", "ivf_batches_in_culture", "embryos_pending_grading"}),
+        "pipeline": frozenset({"opu", "ivf", "grading"}),
+        "performance": frozenset({"donor", "sire"}),
+    },
+    "veterinarian": {
+        "kpis": frozenset({"transferable_embryos", "transfers_completed", "pregnancy_rate", "model_auc"}),
+        "funnel": frozenset({"Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"}),
+        "operations": frozenset({"transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"}),
+        "pipeline": frozenset({"transfer_scheduled", "pending_pc"}),
+        "performance": frozenset({"protocol", "technician"}),
+    },
+    "researcher": {
+        # Outcome analysis: no daily operations, no pipeline.
+        "kpis": frozenset({"oocytes_recovered", "blastocyst_rate", "transferable_embryos",
+                           "transfers_completed", "pregnancy_rate", "model_auc"}),
+        "funnel": None,
+        "operations": _NOTHING,
+        "pipeline": _NOTHING,
+        "performance": frozenset({"donor", "sire", "protocol", "technician"}),
+    },
+}
+_FAIL_CLOSED = {section: _NOTHING for section in ("kpis", "funnel", "operations", "pipeline", "performance")}
+
+
+def _scope(user: User, section: str) -> Optional[frozenset]:
+    """The allowed set for one section. None = all. Unknown roles get nothing."""
+    role = normalize_role(user.role)
+    return DASHBOARD_SCOPE[role][section] if role else _FAIL_CLOSED[section]
+
+
+def _visible(user: User, section: str, item: str) -> bool:
+    allowed = _scope(user, section)
+    return True if allowed is None else item in allowed
+
+
+def _section_open(user: User, section: str) -> bool:
+    """Whether the role has any view of the section at all."""
+    allowed = _scope(user, section)
+    return allowed is None or len(allowed) > 0
+
+
 @router.get("/filters", response_model=DashboardFilterOptions)
 def get_filter_options(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     org_id = current_user.organization_id
@@ -615,6 +670,7 @@ def get_kpis(
         ),
     ))
 
+    kpis = [k for k in kpis if _visible(current_user, "kpis", k.key)]
     return KpiResponse(kpis=kpis, date_from=start, date_to=end)
 
 
@@ -721,6 +777,7 @@ def get_funnel(
         ))
         prev_value = value
 
+    stages = [st for st in stages if _visible(current_user, "funnel", st.name)]
     return FunnelResponse(stages=stages, omitted_stages=[])
 
 
@@ -954,10 +1011,14 @@ def get_operations(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if not _section_open(current_user, "operations"):
+        raise HTTPException(status_code=403, detail="Your role has no operations view.")
     ops = _compute_operations(db, current_user.organization_id, filters)
+    ops = {k: (v if _visible(current_user, "operations", k) else None) for k, v in ops.items()}
+    estimated = ["ivf_batches_in_culture", "embryos_pending_grading", "pregnancy_checks_due"]
     return OperationsResponse(
         **ops,
-        estimated_fields=["ivf_batches_in_culture", "embryos_pending_grading", "pregnancy_checks_due"],
+        estimated_fields=[f for f in estimated if ops.get(f) is not None],
     )
 
 
@@ -1046,6 +1107,9 @@ def get_pipeline(
             date=t.et_date, detail="Pregnancy check due (estimated)",
         ))
 
+    if not _section_open(current_user, "pipeline"):
+        raise HTTPException(status_code=403, detail="Your role has no pipeline view.")
+    rows = [r for r in rows if _visible(current_user, "pipeline", r.stage)]
     rows.sort(key=lambda r: r.date or date.min, reverse=True)
     total = len(rows)
     start_idx = (page - 1) * page_size
@@ -1138,6 +1202,8 @@ def get_performance(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    if not _visible(current_user, "performance", dimension):
+        raise HTTPException(status_code=403, detail=f"Your role cannot view {dimension} performance.")
     org_id = current_user.organization_id
     start, end = resolve_date_range(filters.date_from, filters.date_to, anchor=_latest_activity_date(db, org_id))
     transfers = _fetch_transfers(db, org_id, filters, start, end)
