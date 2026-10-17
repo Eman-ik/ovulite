@@ -805,7 +805,7 @@ def google_login(
 
     Verifies the ID token issued by Google Identity Services against
     GOOGLE_CLIENT_ID, then logs in the matching user (by verified email) or
-    provisions a new "viewer" account in the default organization — an
+    provisions a new researcher account in the default organization — an
     admin can promote the role afterward. Requires GOOGLE_CLIENT_ID to be
     configured; see .env.example for setup instructions.
     """
@@ -838,7 +838,7 @@ def google_login(
             organization_id=organization.organization_id,
             username=email,
             password_hash=hash_password(secrets.token_urlsafe(32)),
-            role="viewer",
+            role=SELF_REGISTER_ROLE,
             full_name=claims.get("name") or email,
             email=email,
         )
@@ -849,7 +849,7 @@ def google_login(
         db.add(OrganizationMembership(
             organization_id=organization.organization_id,
             user_id=user.user_id,
-            role="viewer",
+            role=SELF_REGISTER_ROLE,
             status="active",
             is_primary=False,
         ))
@@ -897,7 +897,7 @@ def google_login_mock(db: Session = Depends(get_db)) -> TokenResponse:
             organization_id=organization.organization_id,
             username="google_demo",
             password_hash=hash_password(secrets.token_urlsafe(32)),
-            role="viewer",
+            role=SELF_REGISTER_ROLE,
             full_name="Google Demo User",
             email="google-demo@ovulite.local",
         )
@@ -908,7 +908,7 @@ def google_login_mock(db: Session = Depends(get_db)) -> TokenResponse:
         db.add(OrganizationMembership(
             organization_id=organization.organization_id,
             user_id=user.user_id,
-            role="viewer",
+            role=SELF_REGISTER_ROLE,
             status="active",
             is_primary=False,
         ))

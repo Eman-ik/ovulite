@@ -104,7 +104,7 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean): RoleCo
       showIntelligence: true,
     };
   }
-  // admin and viewer see everything
+  // admin sees everything
   return {
     trendMetrics: [
       { metric: "pregnancy_rate", title: "Pregnancy Rate", color: MEANING.positive },
@@ -124,7 +124,7 @@ export default function HomepageDashboard() {
     [role, permissions.canViewAnalytics]
   );
   // An empty tile/stage list means the role has no operational view at all
-  // (researcher); undefined means "show everything" (admin, viewer).
+  // (researcher); undefined means "show everything" (admin).
   const showOperations = roleConfig.operationsTiles?.length !== 0;
   const showPipeline = roleConfig.pipelineStages?.length !== 0;
 

@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import (
+    ANALYST_ROLES,
     ET_WRITE_ROLES,
     PREDICTION_RUN_ROLES,
     get_current_user,
@@ -266,7 +267,7 @@ AUC_CHANCE_CEILING = 0.57
 
 @router.get("/performance", response_model=ModelPerformanceResponse)
 def model_performance(
-    _current_user: User = Depends(get_current_user),
+    _current_user: User = Depends(require_role(*ANALYST_ROLES)),
 ) -> ModelPerformanceResponse:
     """Holdout metrics for the deployed artifact, as recorded at training time.
 

@@ -15,7 +15,7 @@ resolved, which is the only way calibration decay becomes visible.
 Two adaptations from the upstream module:
 
 1. Authorisation. Upstream used a `require_permission(...)` registry built for a
-   three-role model (admin / technical_staff / viewer_researcher). This
+   seven-role model. This
    repository has six canonical roles and `require_role`, so the gates are
    expressed in those terms: reads are open to any authenticated user (matching
    /qc/*, /analytics/* and /predict/performance), while the two writes are

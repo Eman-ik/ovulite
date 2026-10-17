@@ -427,8 +427,11 @@ export default function PredictionPage() {
   // figure rendered at 6xl with no such caveat reads as a clinical finding.
   // Fetched once per mount and shown beside every estimate.
   const [modelQuality, setModelQuality] = useState<ModelQuality | null>(null);
+  // Only admin and researcher may read model performance (the API refuses
+  // other roles), so other roles skip the request rather than fail it.
+  const canReadModelPerformance = permissions.canViewResearch;
   useEffect(() => {
-    if (token === null) return;
+    if (token === null || !canReadModelPerformance) return;
     let cancelled = false;
     api
       .get<ModelPerformanceResponse>("/predict/performance")
@@ -449,7 +452,7 @@ export default function PredictionPage() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, canReadModelPerformance]);
 
   const dataQuality = useMemo(() => getDataQuality(form), [form]);
   const completenessLabel = useMemo(() => getCompletenessLabel(dataQuality.completeness), [dataQuality.completeness]);

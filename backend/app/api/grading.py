@@ -131,7 +131,7 @@ def _get_grade_classifier():
 @router.post("/embryo", response_model=GradePredictionResponse)
 async def grade_embryo(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
-    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
+    _current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Predict embryo grade (1/2/3) for an uploaded image.
 
@@ -179,7 +179,7 @@ async def grade_embryo(
 @router.post("/embryo-with-heatmap", response_model=GradePredictionWithHeatmapResponse)
 async def grade_embryo_with_heatmap(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
-    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
+    _current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Predict embryo grade and return a Grad-CAM overlay explaining the prediction."""
     import base64
@@ -213,7 +213,7 @@ async def grade_embryo_with_heatmap(
 async def grade_similar_cases(
     image: UploadFile = File(..., description="Embryo image (any file format)"),
     k: int = Form(5, ge=1, le=20, description="Number of similar cases to return"),
-    _current_user: User = Depends(require_role(*PREDICTION_RUN_ROLES)),
+    _current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
     """Find the k most visually similar known embryo cases for an uploaded image.
 
