@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type FormEvent } from "react";
-import api from "@/lib/api";
+import api, { fetchAllPages } from "@/lib/api";
 import SitePicker from "@/components/SitePicker";
 import type {
   PaginatedResponse,
@@ -66,13 +66,13 @@ export default function OPUIVFPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<PaginatedResponse<Donor>>("/donors/", { params: { page_size: 100 } }),
-      api.get<PaginatedResponse<Sire>>("/sires/", { params: { page_size: 100 } }),
-      api.get<PaginatedResponse<Technician>>("/technicians/", { params: { page_size: 100 } }),
-    ]).then(([donorRes, sireRes, techRes]) => {
-      setDonors(donorRes.data.items);
-      setSires(sireRes.data.items);
-      setTechnicians(techRes.data.items);
+      fetchAllPages<Donor>("/donors/"),
+      fetchAllPages<Sire>("/sires/"),
+      fetchAllPages<Technician>("/technicians/"),
+    ]).then(([donorRows, sireRows, techRows]) => {
+      setDonors(donorRows);
+      setSires(sireRows);
+      setTechnicians(techRows);
     });
   }, []);
 
@@ -267,9 +267,8 @@ function IVFBatchesTab({ technicians, sires }: { technicians: Technician[]; sire
   const [editing, setEditing] = useState<IVFBatch | null>(null);
 
   useEffect(() => {
-    api
-      .get<PaginatedResponse<OPUSession>>("/opu-sessions/", { params: { page_size: 100 } })
-      .then((res) => setOpuSessions(res.data.items));
+    // The IVF form picks an OPU session from the full list, not the first 100.
+    fetchAllPages<OPUSession>("/opu-sessions/").then(setOpuSessions);
   }, [refreshNonce]);
 
   const load = useCallback(() => {

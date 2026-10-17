@@ -1,9 +1,8 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "@/lib/api";
+import api, { fetchAllPages } from "@/lib/api";
 import SitePicker from "@/components/SitePicker";
 import type {
-  PaginatedResponse,
   Donor,
   Embryo,
   Sire,
@@ -99,30 +98,22 @@ export default function TransferFormPage() {
   useEffect(() => {
     let cancelled = false;
 
+    // Every list is loaded in full. A 100-row page silently dropped most
+    // recipients (about 1,800) and donors from the pickers.
     Promise.all([
-      api.get<PaginatedResponse<Donor>>("/donors/", {
-        params: { page_size: 100 },
-      }),
-      api.get<PaginatedResponse<Sire>>("/sires/", {
-        params: { page_size: 100 },
-      }),
-      api.get<PaginatedResponse<Recipient>>("/recipients/", {
-        params: { page_size: 100 },
-      }),
-      api.get<PaginatedResponse<Technician>>("/technicians/", {
-        params: { page_size: 100 },
-      }),
-      api.get<PaginatedResponse<Protocol>>("/protocols/", {
-        params: { page_size: 100 },
-      }),
+      fetchAllPages<Donor>("/donors/"),
+      fetchAllPages<Sire>("/sires/"),
+      fetchAllPages<Recipient>("/recipients/"),
+      fetchAllPages<Technician>("/technicians/"),
+      fetchAllPages<Protocol>("/protocols/"),
     ])
-      .then(([donorRes, sireRes, recipRes, techRes, protoRes]) => {
+      .then(([donorRows, sireRows, recipRows, techRows, protoRows]) => {
         if (cancelled) return;
-        setDonors(donorRes.data.items);
-        setSires(sireRes.data.items);
-        setRecipients(recipRes.data.items);
-        setTechnicians(techRes.data.items);
-        setProtocols(protoRes.data.items);
+        setDonors(donorRows);
+        setSires(sireRows);
+        setRecipients(recipRows);
+        setTechnicians(techRows);
+        setProtocols(protoRows);
       })
       .catch((err: unknown) => {
         if (cancelled) return;

@@ -85,6 +85,14 @@ interface CaseDetail {
   }>;
 }
 
+/** A value for display: "—" when it is missing, never "null", "undefined" or a blank cell. */
+const shown = (value: unknown, unit?: string): string =>
+  value === null || value === undefined || value === ""
+    ? "—"
+    : unit
+      ? `${value} ${unit}`
+      : String(value);
+
 export default function CaseDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -191,9 +199,9 @@ export default function CaseDetailPage() {
           </Button>
           <h1 className="text-3xl font-bold mt-2">Case #{caseDetail.transfer_id}</h1>
           <p className="text-gray-600">
-            {new Date(caseDetail.case_date).toLocaleDateString()} • {caseDetail.protocol_name}
+            {new Date(caseDetail.case_date).toLocaleDateString()} • {shown(caseDetail.protocol_name)}
             {" • "}
-            {caseDetail.technician_name}
+            {shown(caseDetail.technician_name)}
           </p>
         </div>
 
@@ -269,11 +277,11 @@ export default function CaseDetailPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Protocol</p>
-                  <p>{caseDetail.protocol_name}</p>
+                  <p>{shown(caseDetail.protocol_name)}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Technician</p>
-                  <p>{caseDetail.technician_name}</p>
+                  <p>{shown(caseDetail.technician_name)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -289,15 +297,15 @@ export default function CaseDetailPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Grade</p>
-                  <p className="font-bold">{caseDetail.embryo_grade}</p>
+                  <p className="font-bold">{shown(caseDetail.embryo_grade)}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">CL Size</p>
-                  <p>{caseDetail.cl_size_mm} mm</p>
+                  <p>{shown(caseDetail.cl_size_mm, "mm")}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Embryo Source</p>
-                  <p>{caseDetail.fresh_or_frozen}</p>
+                  <p>{shown(caseDetail.fresh_or_frozen)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -313,11 +321,11 @@ export default function CaseDetailPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Breed</p>
-                  <p>{caseDetail.donor.breed}</p>
+                  <p>{shown(caseDetail.donor.breed)}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Birth Weight EPD</p>
-                  <p>{caseDetail.donor.birth_weight_epd}</p>
+                  <p>{shown(caseDetail.donor.birth_weight_epd)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -333,11 +341,11 @@ export default function CaseDetailPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Breed</p>
-                  <p>{caseDetail.sire.breed}</p>
+                  <p>{shown(caseDetail.sire.breed)}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Semen Type</p>
-                  <p>{caseDetail.sire.semen_type}</p>
+                  <p>{shown(caseDetail.sire.semen_type)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -353,11 +361,11 @@ export default function CaseDetailPage() {
                 </div>
                 <div>
                   <p className="text-gray-600">Type</p>
-                  <p>{caseDetail.recipient.cow_or_heifer}</p>
+                  <p>{shown(caseDetail.recipient.cow_or_heifer)}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Farm</p>
-                  <p>{caseDetail.recipient.farm_location}</p>
+                  <p>{shown(caseDetail.recipient.farm_location)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -376,15 +384,15 @@ export default function CaseDetailPage() {
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="font-semibold mb-1">Donor Genetics</p>
                   <ul className="space-y-1 text-gray-700">
-                    <li>{caseDetail.donor.breed} Breed</li>
-                    <li>Birth Weight EPD: {caseDetail.donor.birth_weight_epd}</li>
+                    <li>Breed: {shown(caseDetail.donor.breed)}</li>
+                    <li>Birth Weight EPD: {shown(caseDetail.donor.birth_weight_epd)}</li>
                   </ul>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
                   <p className="font-semibold mb-1">Sire Genetics</p>
                   <ul className="space-y-1 text-gray-700">
-                    <li>{caseDetail.sire.breed} Breed</li>
-                    <li>Semen Type: {caseDetail.sire.semen_type}</li>
+                    <li>Breed: {shown(caseDetail.sire.breed)}</li>
+                    <li>Semen Type: {shown(caseDetail.sire.semen_type)}</li>
                   </ul>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "@/lib/api";
+import api, { fetchAllPages } from "@/lib/api";
 import type {
   PaginatedResponse,
   ETTransferDetail,
@@ -58,18 +58,11 @@ export default function DataEntryPage() {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all([
-      api.get<PaginatedResponse<Protocol>>("/protocols/", {
-        params: { page_size: 100 },
-      }),
-      api.get<PaginatedResponse<Technician>>("/technicians/", {
-        params: { page_size: 100 },
-      }),
-    ])
-      .then(([protocolRes, techRes]) => {
+    Promise.all([fetchAllPages<Protocol>("/protocols/"), fetchAllPages<Technician>("/technicians/")])
+      .then(([protocolRows, techRows]) => {
         if (cancelled) return;
-        setProtocols(protocolRes.data.items);
-        setTechnicians(techRes.data.items);
+        setProtocols(protocolRows);
+        setTechnicians(techRows);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
