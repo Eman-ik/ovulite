@@ -26,6 +26,7 @@ from app.schemas.common import PaginatedResponse
 from app.schemas.et_transfer import (
     ETTransferCreate,
     ETTransferDetail,
+    ETTransferNew,
     ETTransferResponse,
     ETTransferUpdate,
 )
@@ -168,14 +169,35 @@ def get_transfer(
     return _build_detail(t)
 
 
+def _check_embryo_available(db, embryo_id, organization_id, exclude_transfer_id=None):
+    """An embryo can be in one embryo-transfer record, and only if it is not
+    already marked Transferred. Enforced here because nothing else stops a
+    second ET for the same embryo."""
+    if embryo_id is None:
+        return
+    embryo = db.query(Embryo).filter(
+        Embryo.embryo_id == embryo_id, Embryo.organization_id == organization_id
+    ).first()
+    if embryo is not None and embryo.status == "Transferred":
+        raise HTTPException(409, "This embryo is already marked Transferred and cannot be transferred again.")
+    existing = db.query(ETTransfer).filter(
+        ETTransfer.embryo_id == embryo_id, ETTransfer.organization_id == organization_id
+    )
+    if exclude_transfer_id is not None:
+        existing = existing.filter(ETTransfer.transfer_id != exclude_transfer_id)
+    if existing.first() is not None:
+        raise HTTPException(409, "This embryo already has an embryo-transfer record.")
+
+
 @router.post("/", response_model=ETTransferResponse, status_code=status.HTTP_201_CREATED)
 def create_transfer(
-    payload: ETTransferCreate,
+    payload: ETTransferNew,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role(*ET_WRITE_ROLES)),
 ):
     """Create a new ET transfer record."""
     _validate_links(db, payload.model_dump(), current_user.organization_id)
+    _check_embryo_available(db, payload.embryo_id, current_user.organization_id)
     transfer = ETTransfer(
         **payload.model_dump(), organization_id=current_user.organization_id
     )
@@ -211,6 +233,8 @@ def update_transfer(
     except ValidationError as error:
         raise HTTPException(422, detail=jsonable_encoder(error.errors(), custom_encoder={ValueError: str}))
     _validate_links(db, combined, current_user.organization_id, transfer_id)
+    if "embryo_id" in payload.model_dump(exclude_unset=True):
+        _check_embryo_available(db, combined.get("embryo_id"), current_user.organization_id, transfer_id)
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(t, key, value)
     db.flush()

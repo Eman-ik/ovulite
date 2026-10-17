@@ -15,14 +15,27 @@ def _create_opu_session(client, auth_headers, tag_id="IVF-TEST-DONOR"):
     return opu_resp.json()["opu_id"]
 
 
+def _create_ivm(client, auth_headers, opu_id):
+    """IVF needs an IVM batch from the same OPU session (the lab sequence)."""
+    resp = client.post(
+        f"/lab/opu-sessions/{opu_id}/ivm-batches",
+        json={"ivm_date": "2026-01-15", "oocytes_in": 9, "mature_oocytes_out": 6},
+        headers=auth_headers,
+    )
+    assert resp.status_code in (200, 201), resp.text
+    return resp.json()["ivm_batch_id"]
+
+
 @pytest.mark.integration
 def test_create_and_get_ivf_batch_with_computed_rates(client, auth_headers):
     opu_id = _create_opu_session(client, auth_headers)
+    ivm_id = _create_ivm(client, auth_headers, opu_id)
 
     resp = client.post(
         "/ivf-batches/",
         json={
             "opu_id": opu_id,
+            "ivm_batch_id": ivm_id,
             "oocytes_used": 16,
             "mature_oocytes": 14,
             "cleaved_embryos": 12,
@@ -45,7 +58,8 @@ def test_create_and_get_ivf_batch_with_computed_rates(client, auth_headers):
 @pytest.mark.integration
 def test_ivf_batch_rates_null_when_counts_missing(client, auth_headers):
     opu_id = _create_opu_session(client, auth_headers, "IVF-TEST-DONOR-2")
-    resp = client.post("/ivf-batches/", json={"opu_id": opu_id}, headers=auth_headers)
+    ivm_id = _create_ivm(client, auth_headers, opu_id)
+    resp = client.post("/ivf-batches/", json={"opu_id": opu_id, "ivm_batch_id": ivm_id}, headers=auth_headers)
     assert resp.status_code == 201, resp.text
     body = resp.json()
     assert body["cleavage_rate"] is None
@@ -57,7 +71,7 @@ def test_ivf_batch_rejects_impossible_counts(client, auth_headers):
     opu_id = _create_opu_session(client, auth_headers, "IVF-TEST-DONOR-3")
     resp = client.post(
         "/ivf-batches/",
-        json={"opu_id": opu_id, "oocytes_used": 5, "cleaved_embryos": 10},
+        json={"opu_id": opu_id, "ivm_batch_id": _create_ivm(client, auth_headers, opu_id), "oocytes_used": 5, "cleaved_embryos": 10},
         headers=auth_headers,
     )
     assert resp.status_code == 422, resp.text
@@ -67,8 +81,8 @@ def test_ivf_batch_rejects_impossible_counts(client, auth_headers):
 def test_ivf_batch_list_filters_by_opu_id(client, auth_headers):
     opu_a = _create_opu_session(client, auth_headers, "IVF-TEST-DONOR-A")
     opu_b = _create_opu_session(client, auth_headers, "IVF-TEST-DONOR-B")
-    client.post("/ivf-batches/", json={"opu_id": opu_a}, headers=auth_headers)
-    client.post("/ivf-batches/", json={"opu_id": opu_b}, headers=auth_headers)
+    client.post("/ivf-batches/", json={"opu_id": opu_a, "ivm_batch_id": _create_ivm(client, auth_headers, opu_a)}, headers=auth_headers)
+    client.post("/ivf-batches/", json={"opu_id": opu_b, "ivm_batch_id": _create_ivm(client, auth_headers, opu_b)}, headers=auth_headers)
 
     resp = client.get("/ivf-batches/", params={"opu_id": opu_a}, headers=auth_headers)
     assert resp.status_code == 200
@@ -80,7 +94,7 @@ def test_ivf_batch_list_filters_by_opu_id(client, auth_headers):
 @pytest.mark.integration
 def test_update_and_delete_ivf_batch(client, auth_headers):
     opu_id = _create_opu_session(client, auth_headers, "IVF-TEST-DONOR-4")
-    create_resp = client.post("/ivf-batches/", json={"opu_id": opu_id}, headers=auth_headers)
+    create_resp = client.post("/ivf-batches/", json={"opu_id": opu_id, "ivm_batch_id": _create_ivm(client, auth_headers, opu_id)}, headers=auth_headers)
     batch_id = create_resp.json()["ivf_batch_id"]
 
     update_resp = client.put(
@@ -100,3 +114,13 @@ def test_update_and_delete_ivf_batch(client, auth_headers):
 def test_get_nonexistent_ivf_batch_404s(client, auth_headers):
     resp = client.get("/ivf-batches/999999", headers=auth_headers)
     assert resp.status_code == 404
+
+
+@pytest.mark.integration
+def test_ivf_batch_rejects_ivm_from_another_opu(client, auth_headers):
+    """An IVM batch belongs to one OPU session; an IVF batch cannot borrow another's."""
+    opu_a = _create_opu_session(client, auth_headers, "IVF-XOPU-A")
+    opu_b = _create_opu_session(client, auth_headers, "IVF-XOPU-B")
+    ivm_of_a = _create_ivm(client, auth_headers, opu_a)
+    resp = client.post("/ivf-batches/", json={"opu_id": opu_b, "ivm_batch_id": ivm_of_a}, headers=auth_headers)
+    assert resp.status_code == 422, resp.text

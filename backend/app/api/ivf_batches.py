@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.auth.dependencies import LAB_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.ivf_batch import IVFBatch
+from app.models.ivm_batch import IVMBatch
 from app.models.opu_session import OPUSession
 from app.models.user import User
 from app.schemas.common import PaginatedResponse
@@ -71,6 +72,16 @@ def get_ivf_batch(ivf_batch_id: int, db: Session = Depends(get_db), current_user
 def create_ivf_batch(
     payload: IVFBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role(*LAB_WRITE_ROLES)),
 ):
+    # The lab sequence is OPU -> IVM -> IVF. An IVF batch that does not come
+    # from a recorded IVM batch of the same OPU session has skipped a stage.
+    if payload.ivm_batch_id is None:
+        raise HTTPException(422, "Record the IVM batch for this OPU session before creating the IVF batch.")
+    ivm = db.query(IVMBatch).filter(
+        IVMBatch.ivm_batch_id == payload.ivm_batch_id,
+        IVMBatch.organization_id == current_user.organization_id,
+    ).first()
+    if ivm is None or ivm.opu_id != payload.opu_id:
+        raise HTTPException(422, "The IVM batch does not belong to this OPU session.")
     b = IVFBatch(**payload.model_dump(), organization_id=current_user.organization_id)
     db.add(b)
     db.commit()

@@ -3,6 +3,7 @@ Acceptance Tests: AT-1 through AT-4
 Aligned to current API contracts.
 """
 
+import uuid
 from decimal import Decimal
 
 import pytest
@@ -49,6 +50,13 @@ class TestAT1DataImport:
 
 
 @pytest.mark.acceptance
+def _recipient_id(client, auth_headers) -> int:
+    """A new ET record must name a recipient (plan U2-1 / F7-2)."""
+    r = client.post("/recipients/", json={"tag_id": f"AT2-{uuid.uuid4().hex[:8]}"}, headers=auth_headers)
+    assert r.status_code == 201, r.text
+    return r.json()["recipient_id"]
+
+
 class TestAT2CLValidation:
     """AT-2: CL validation for transfer create."""
 
@@ -63,7 +71,7 @@ class TestAT2CLValidation:
     def test_invalid_cl_too_large(self, client: TestClient, auth_headers: dict):
         response = client.post(
             "/transfers/",
-            json={"et_date": "2026-03-01", "cl_measure_mm": 60},
+            json={"et_date": "2026-03-01", "cl_measure_mm": 60, "recipient_id": _recipient_id(client, auth_headers)},
             headers=auth_headers,
         )
         assert response.status_code == 422, response.text
@@ -71,7 +79,7 @@ class TestAT2CLValidation:
     def test_valid_cl_midrange(self, client: TestClient, auth_headers: dict):
         response = client.post(
             "/transfers/",
-            json={"et_date": "2026-03-01", "cl_measure_mm": 25},
+            json={"et_date": "2026-03-01", "cl_measure_mm": 25, "recipient_id": _recipient_id(client, auth_headers)},
             headers=auth_headers,
         )
         assert response.status_code == 201, response.text
@@ -81,7 +89,7 @@ class TestAT2CLValidation:
     def test_valid_cl_minimum(self, client: TestClient, auth_headers: dict):
         response = client.post(
             "/transfers/",
-            json={"et_date": "2026-03-01", "cl_measure_mm": 0},
+            json={"et_date": "2026-03-01", "cl_measure_mm": 0, "recipient_id": _recipient_id(client, auth_headers)},
             headers=auth_headers,
         )
         assert response.status_code == 201, response.text
@@ -89,7 +97,7 @@ class TestAT2CLValidation:
     def test_valid_cl_maximum(self, client: TestClient, auth_headers: dict):
         response = client.post(
             "/transfers/",
-            json={"et_date": "2026-03-01", "cl_measure_mm": 50},
+            json={"et_date": "2026-03-01", "cl_measure_mm": 50, "recipient_id": _recipient_id(client, auth_headers)},
             headers=auth_headers,
         )
         assert response.status_code == 201, response.text

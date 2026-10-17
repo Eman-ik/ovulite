@@ -72,6 +72,16 @@ class ETTransferCreate(ETTransferBase):
     pass
 
 
+class ETTransferNew(ETTransferCreate):
+    """A new ET record. Recipient and CL measure are required here.
+
+    Not on ETTransferCreate: the update route validates a merged record through
+    that class, and older rows without these values must stay editable.
+    """
+    recipient_id: int
+    cl_measure_mm: Decimal
+
+
 class ETTransferUpdate(BaseModel):
     et_number: Optional[int] = None
     lab: Optional[str] = None

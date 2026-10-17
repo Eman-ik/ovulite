@@ -32,7 +32,7 @@ from app.models.embryo import Embryo
 from app.models.et_transfer import ETTransfer
 from app.models.prediction import Prediction
 from app.models.user import User
-from app.schemas.et_transfer import ETTransferCreate
+from app.schemas.et_transfer import ETTransferCreate, ETTransferNew
 from app.schemas.user import UserCreate
 
 PW = "Str0ng!Passw0rd"
@@ -174,11 +174,12 @@ def test_U2_1_complete_et_record_validates():
 def test_U2_2_missing_cl_measure_rejected():
     """Plan U2-2: CL Measure = NULL -> the record is rejected.
 
-    KNOWN GAP: cl_measure_mm is optional on the ET record, so a record without
-    it is accepted. Prediction does require it, so only the record is affected.
+    A new ET record must name a CL measure. The edit route still validates
+    through ETTransferCreate, so older rows without one stay editable.
+
     """
     with pytest.raises(ValidationError):
-        ETTransferCreate(et_date=date.today())
+        ETTransferNew(et_date=date.today())
 
 
 @pytest.mark.acceptance
