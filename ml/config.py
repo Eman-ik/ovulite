@@ -92,11 +92,14 @@ FEATURE_SCHEMA_VERSION = "pregnancy_features_v1.0"
 
 
 def get_risk_band(probability: float, thresholds: dict | None = None) -> str:
-    """Return risk band using business-rule thresholds.
+    """Return the risk band for a probability.
 
-    - High: probability > 0.6
-    - Medium: 0.3 <= probability <= 0.6
-    - Low: probability < 0.3
+    The cut-offs are the ones saved with the model artifact
+    (RISK_BANDS: low_max 0.35, high_min 0.65), not fixed here.
+
+    - High: probability >= high_min
+    - Moderate: low_max <= probability < high_min
+    - Low: probability < low_max
     """
     thresholds = thresholds or RISK_BANDS
     if probability >= thresholds["high_min"]:
