@@ -10,7 +10,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.auth.dependencies import get_current_user, require_role
+from app.auth.dependencies import ET_WRITE_ROLES, get_current_user, require_role
 from app.database import get_db
 from app.models.user import User
 from app.services.data_intake import DATA_ROOT, DataIntakeService
@@ -44,19 +44,19 @@ async def _process_upload(file: UploadFile, db: Session, current_user: User, csv
     return response
 
 
-@router.post("/file", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role("admin", "embryologist"))])
+@router.post("/file", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role(*ET_WRITE_ROLES))])
 async def import_file(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Accept CSV clinical datasets or blastocyst image ZIP archives."""
     return await _process_upload(file, db, current_user)
 
 
-@router.post("/csv", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role("admin", "embryologist"))])
+@router.post("/csv", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role(*ET_WRITE_ROLES))])
 async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Backward-compatible CSV-only route using the full validation pipeline."""
     return await _process_upload(file, db, current_user, csv_only=True)
 
 
-@router.get("/reports", dependencies=[Depends(require_role("admin", "embryologist"))])
+@router.get("/reports", dependencies=[Depends(require_role(*ET_WRITE_ROLES))])
 def ingestion_reports(current_user: User = Depends(get_current_user)):
     ledger = DATA_ROOT / "reports" / "ingestion_report.csv"
     if not ledger.exists():
@@ -78,7 +78,7 @@ def ingestion_reports(current_user: User = Depends(get_current_user)):
     return {"items": items[:200], "total": len(items)}
 
 
-@router.get("/reports/{intake_id}", dependencies=[Depends(require_role("admin", "embryologist"))])
+@router.get("/reports/{intake_id}", dependencies=[Depends(require_role(*ET_WRITE_ROLES))])
 def ingestion_report(intake_id: str, current_user: User = Depends(get_current_user)):
     if not all(character.isalnum() or character == "-" for character in intake_id):
         raise HTTPException(status_code=400, detail="Invalid intake identifier")
@@ -91,6 +91,6 @@ def ingestion_report(intake_id: str, current_user: User = Depends(get_current_us
     return report
 
 
-@router.post("/seed-from-disk", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role("admin", "embryologist"))])
+@router.post("/seed-from-disk", status_code=status.HTTP_200_OK, dependencies=[Depends(require_role(*ET_WRITE_ROLES))])
 def seed_from_disk(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     raise HTTPException(status_code=410, detail="Disk seeding has been retired. Import the file through the mapped intake with an explicit source classification.")
