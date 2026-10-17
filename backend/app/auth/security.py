@@ -128,6 +128,9 @@ def create_access_token(
     to_encode.update({
         "exp": expire,
         "iat": int(time.time()),
+        # Sub-second issue time for session revocation. PyJWT rejects a fractional
+        # iat, so this is a separate claim. See issued_before_password_change().
+        "issued_ms": time.time(),
         "type": "access",
         "jti": str(uuid.uuid4()),
     })
@@ -146,6 +149,7 @@ def create_refresh_token(
     to_encode.update({
         "exp": expire,
         "iat": int(time.time()),
+        "issued_ms": time.time(),
         "type": "refresh",
         "jti": str(uuid.uuid4()),
     })
@@ -235,6 +239,12 @@ def issued_before_password_change(
         return False
     if sessions_valid_after.tzinfo is None:
         sessions_valid_after = sessions_valid_after.replace(tzinfo=timezone.utc)
+    issued_ms = payload.get("issued_ms")
+    if issued_ms is not None:
+        # Exact: a token minted after the revocation is valid even within the
+        # same second. Comparing whole-second iat instead refused a login made
+        # right after a reset or role change (see test_session_revocation.py).
+        return float(issued_ms) < sessions_valid_after.timestamp()
     issued = payload.get("iat")
     if issued is None:
         return True  # minted before `iat` was added: cannot prove it is current
@@ -242,17 +252,12 @@ def issued_before_password_change(
 
 
 def revocation_stamp() -> datetime:
-    """A ``sessions_revoked_at`` value that reliably kills tokens issued right now.
+    """The ``sessions_revoked_at`` value for "end every session issued before now".
 
-    JWT ``iat`` is whole seconds and the check above is "issued strictly
-    before the stamp", so stamping the current instant leaves a token minted
-    in the same second alive — which made "log out everywhere" silently do
-    nothing when called moments after logging in. One second into the future
-    closes that window.
-
-    Only for paths that issue NO replacement token. A future stamp cannot be
-    paired with a freshly minted one: PyJWT refuses a token whose ``iat`` is
-    ahead of the clock (ImmatureSignatureError). Those paths stamp the current
-    second and revoke the caller's old token by jti instead.
+    The current instant, not a second ahead. Tokens carry ``issued_ms`` at
+    sub-second precision, so a token minted after this moment is valid and one
+    minted before it is refused — the replacement pair from a password change,
+    and a login made straight after a reset or role change, both work. The
+    caller's own token is still revoked by jti where it is available.
     """
-    return datetime.now(timezone.utc) + timedelta(seconds=1)
+    return datetime.now(timezone.utc)
