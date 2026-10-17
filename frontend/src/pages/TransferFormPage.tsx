@@ -10,6 +10,8 @@ import type {
   Technician,
   Protocol,
   ETTransferDetail,
+  OPUSession,
+  IVFBatch,
 } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,8 @@ interface FormData {
   heat_day: string;
   donor_id: string;
   sire_id: string;
+  opu_id: string;
+  ivf_batch_id: string;
   embryo_stage: string;
   embryo_grade: string;
   fresh_or_frozen: string;
@@ -65,6 +69,8 @@ const emptyForm: FormData = {
   heat_day: "",
   donor_id: "",
   sire_id: "",
+  opu_id: "",
+  ivf_batch_id: "",
   embryo_stage: "",
   embryo_grade: "",
   fresh_or_frozen: "Fresh",
@@ -93,6 +99,8 @@ export default function TransferFormPage() {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [opuSessions, setOpuSessions] = useState<OPUSession[]>([]);
+  const [ivfBatches, setIvfBatches] = useState<IVFBatch[]>([]);
 
   // Load reference data
   useEffect(() => {
@@ -106,14 +114,16 @@ export default function TransferFormPage() {
       fetchAllPages<Recipient>("/recipients/"),
       fetchAllPages<Technician>("/technicians/"),
       fetchAllPages<Protocol>("/protocols/"),
+      fetchAllPages<OPUSession>("/opu-sessions/"),
     ])
-      .then(([donorRows, sireRows, recipRows, techRows, protoRows]) => {
+      .then(([donorRows, sireRows, recipRows, techRows, protoRows, opuRows]) => {
         if (cancelled) return;
         setDonors(donorRows);
         setSires(sireRows);
         setRecipients(recipRows);
         setTechnicians(techRows);
         setProtocols(protoRows);
+        setOpuSessions(opuRows);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -163,6 +173,8 @@ export default function TransferFormPage() {
           heat_day: t.heat_day?.toString() ?? "",
           donor_id: "",
           sire_id: "",
+          opu_id: "",
+          ivf_batch_id: "",
           embryo_stage: t.embryo_stage?.toString() ?? "",
           embryo_grade: t.embryo_grade?.toString() ?? "",
           fresh_or_frozen: t.fresh_or_frozen ?? "Fresh",
@@ -182,6 +194,8 @@ export default function TransferFormPage() {
             ...prev,
             donor_id: embryo.donor_id?.toString() ?? "",
             sire_id: embryo.sire_id?.toString() ?? "",
+            opu_id: embryo.opu_id?.toString() ?? "",
+            ivf_batch_id: embryo.ivf_batch_id?.toString() ?? "",
             opu_date: embryo.opu_date ?? "",
             cane_number: embryo.cane_number ?? "",
             fresh_or_frozen: embryo.fresh_or_frozen ?? prev.fresh_or_frozen,
@@ -204,9 +218,33 @@ export default function TransferFormPage() {
     };
   }, [id, isEdit]);
 
+  // IVF batches of the chosen OPU session. Only that session's batches are valid
+  // for the embryo, so the list follows the OPU selection.
+  useEffect(() => {
+    if (!form.opu_id) {
+      setIvfBatches([]);
+      return;
+    }
+    let cancelled = false;
+    fetchAllPages<IVFBatch>("/ivf-batches/", { opu_id: form.opu_id })
+      .then((rows) => {
+        if (!cancelled) setIvfBatches(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setIvfBatches([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.opu_id]);
+
   const set = (field: keyof FormData) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  // Changing the OPU session drops an IVF batch picked from the previous one.
+  const setOpuSession = (e: React.ChangeEvent<HTMLSelectElement>) =>
+    setForm((prev) => ({ ...prev, opu_id: e.target.value, ivf_batch_id: "" }));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -242,10 +280,13 @@ export default function TransferFormPage() {
 
       // Create or update embryo if embryo data is present.
       let embryo_id: number | undefined = currentEmbryoId ?? undefined;
-      if (form.embryo_stage || form.embryo_grade) {
+      if (form.embryo_stage || form.embryo_grade || form.opu_id || form.ivf_batch_id) {
         const embryoPayload: Record<string, unknown> = {};
         if (form.donor_id) embryoPayload.donor_id = parseInt(form.donor_id);
         if (form.sire_id) embryoPayload.sire_id = parseInt(form.sire_id);
+        // Sent as null when cleared, so an edit can remove a link.
+        embryoPayload.opu_id = form.opu_id ? parseInt(form.opu_id) : null;
+        embryoPayload.ivf_batch_id = form.ivf_batch_id ? parseInt(form.ivf_batch_id) : null;
         if (form.opu_date) embryoPayload.opu_date = form.opu_date;
         if (form.embryo_stage)
           embryoPayload.stage = parseInt(form.embryo_stage);
@@ -538,6 +579,39 @@ export default function TransferFormPage() {
                   </option>
                 ))}
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="opu_id">OPU Session</Label>
+              <Select id="opu_id" value={form.opu_id} onChange={setOpuSession}>
+                <option value="">Select...</option>
+                {opuSessions.map((s) => (
+                  <option key={s.opu_id} value={s.opu_id}>
+                    #{s.opu_id} · {s.donor_tag ?? `donor ${s.donor_id}`} · {s.opu_date}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ivf_batch_id">IVF Batch</Label>
+              <Select
+                id="ivf_batch_id"
+                value={form.ivf_batch_id}
+                onChange={set("ivf_batch_id")}
+                disabled={!form.opu_id}
+              >
+                <option value="">Select...</option>
+                {ivfBatches.map((b) => (
+                  <option key={b.ivf_batch_id} value={b.ivf_batch_id}>
+                    IVF #{b.ivf_batch_id}
+                    {b.ivf_date ? ` · ${b.ivf_date}` : ""}
+                  </option>
+                ))}
+              </Select>
+              {form.opu_id && ivfBatches.length === 0 && (
+                <p className="text-xs text-[#3F4758]">
+                  No IVF batch recorded for this OPU session.
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="opu_date">OPU Date</Label>
