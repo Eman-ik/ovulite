@@ -82,6 +82,7 @@ export interface OPUSession {
 export interface IVFBatch {
   ivf_batch_id: number;
   opu_id: number;
+  ivm_batch_id: number | null;
   opu_donor_tag: string | null;
   opu_date: string | null;
   sire_id: number | null;

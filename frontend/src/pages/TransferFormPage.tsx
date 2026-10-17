@@ -230,6 +230,16 @@ export default function TransferFormPage() {
         return;
       }
 
+      if (!isEdit && !form.recipient_id) {
+        setError("Recipient is required for a new ET record");
+        setSaving(false);
+        return;
+      }
+      if (!isEdit && !form.cl_measure_mm) {
+        setError("CL measure is required for a new ET record");
+        setSaving(false);
+        return;
+      }
       if (form.cl_measure_mm) {
         const cl = parseFloat(form.cl_measure_mm);
         if (isNaN(cl) || cl < 0 || cl > 50) {
@@ -412,7 +422,7 @@ export default function TransferFormPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="recipient_id">Recipient</Label>
+              <Label htmlFor="recipient_id">Recipient{isEdit ? "" : " *"}</Label>
               <Select
                 id="recipient_id"
                 value={form.recipient_id}
@@ -450,7 +460,7 @@ export default function TransferFormPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cl_measure_mm">CL Measure (mm)</Label>
+              <Label htmlFor="cl_measure_mm">CL Measure (mm){isEdit ? "" : " *"}</Label>
               <Input
                 id="cl_measure_mm"
                 type="number"

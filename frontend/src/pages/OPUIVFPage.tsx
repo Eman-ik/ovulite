@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   OPUSession,
   IVFBatch,
+  IVMBatch,
   Donor,
   Sire,
   Technician,
@@ -593,6 +594,7 @@ function IVFBatchModal({
 }) {
   const [form, setForm] = useState({
     opu_id: editing?.opu_id?.toString() ?? "",
+    ivm_batch_id: editing?.ivm_batch_id?.toString() ?? "",
     sire_id: editing?.sire_id?.toString() ?? "",
     ivf_date: editing?.ivf_date ?? "",
     oocytes_used: editing?.oocytes_used?.toString() ?? "",
@@ -606,6 +608,28 @@ function IVFBatchModal({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // IVM batches for the chosen OPU session. The lab sequence is OPU -> IVM -> IVF,
+  // so an IVF batch needs one of these.
+  const [ivmOptions, setIvmOptions] = useState<IVMBatch[]>([]);
+
+  useEffect(() => {
+    if (!form.opu_id) {
+      setIvmOptions([]);
+      return;
+    }
+    let cancelled = false;
+    api
+      .get<{ ivm_batches: IVMBatch[] }>(`/lab/opu-sessions/${form.opu_id}/processing`)
+      .then((r) => {
+        if (!cancelled) setIvmOptions(r.data.ivm_batches);
+      })
+      .catch(() => {
+        if (!cancelled) setIvmOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.opu_id]);
 
   const set = (field: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -618,8 +642,13 @@ function IVFBatchModal({
       setError("OPU session is required");
       return;
     }
+    if (!editing && !form.ivm_batch_id) {
+      setError("Choose the IVM batch this IVF comes from. Record one on Oocytes & IVM first if none is listed.");
+      return;
+    }
     setSaving(true);
     const payload: Record<string, unknown> = { opu_id: parseInt(form.opu_id) };
+    if (form.ivm_batch_id) payload.ivm_batch_id = parseInt(form.ivm_batch_id);
     if (form.sire_id) payload.sire_id = parseInt(form.sire_id);
     if (form.ivf_date) payload.ivf_date = form.ivf_date;
     if (form.oocytes_used) payload.oocytes_used = parseInt(form.oocytes_used);
@@ -657,6 +686,22 @@ function IVFBatchModal({
               <option value="">Select...</option>
               {opuSessions.map((s) => <option key={s.opu_id} value={s.opu_id}>{opuLabel(s)}</option>)}
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="ivf-ivm">IVM Batch {editing ? "" : "*"}</Label>
+            <Select id="ivf-ivm" value={form.ivm_batch_id} onChange={set("ivm_batch_id")} required={!editing} disabled={!form.opu_id}>
+              <option value="">Select...</option>
+              {ivmOptions.map((b) => (
+                <option key={b.ivm_batch_id} value={b.ivm_batch_id}>
+                  IVM #{b.ivm_batch_id}{b.ivm_date ? ` · ${b.ivm_date}` : ""}
+                </option>
+              ))}
+            </Select>
+            {form.opu_id && ivmOptions.length === 0 && (
+              <p className="text-xs text-[#9d3730]">
+                No IVM batch for this OPU session yet. Record one on Oocytes &amp; IVM first.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="ivf-sire">Sire</Label>
