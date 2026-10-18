@@ -131,6 +131,10 @@ class HighRiskTransfer(BaseModel):
 
 class AISummaryResponse(BaseModel):
     pending_predictions_count: int
+    # Every high-risk transfer without a pregnancy check, not just the rows listed.
+    high_risk_total: int
+    # Probability at or above which a prediction is banded High (ml/config.py).
+    high_risk_threshold: float
     high_risk_transfers: list[HighRiskTransfer]
 
 

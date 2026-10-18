@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { normalizeRole } from "@/lib/roleRoutes";
 import type { DashboardAISummaryResponse } from "@/lib/types";
 import { Brain } from "lucide-react";
 
@@ -11,10 +14,17 @@ interface ModelInfo {
   artifact_integrity_verified: boolean;
 }
 
+// Same roles the Pregnancy Diagnosis route allows (App.tsx).
+const OUTCOME_ROLES = ["admin", "veterinarian"];
+const SHOWN_ROWS = 5;
+
 export default function IntelligencePanel() {
+  const { user } = useAuth();
+  const canRecordOutcomes = OUTCOME_ROLES.includes(normalizeRole(user?.role));
   const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
   const [summary, setSummary] = useState<DashboardAISummaryResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -24,13 +34,22 @@ export default function IntelligencePanel() {
     ]).then(([modelRes, summaryRes]) => {
       if (cancelled) return;
       if (modelRes.status === "fulfilled") setModelInfo(modelRes.value.data);
-      else setError("No prediction model is currently loaded.");
+      else setModelError("No prediction model is currently loaded.");
       if (summaryRes.status === "fulfilled") setSummary(summaryRes.value.data);
+      else setSummaryError("Could not load pending outcomes or high-risk transfers.");
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const recordLink = canRecordOutcomes ? (
+    <Link to="/app/pregnancy-diagnosis" className="underline underline-offset-2 dash-heading">
+      Pregnancy Diagnosis
+    </Link>
+  ) : (
+    <span>Pregnancy Diagnosis</span>
+  );
 
   return (
     <div className="space-y-4">
@@ -39,8 +58,8 @@ export default function IntelligencePanel() {
         <h3 className="text-base font-semibold dash-heading">Ovulite Intelligence</h3>
       </div>
 
-      {error && !modelInfo ? (
-        <p className="text-sm dash-muted">{error}</p>
+      {modelError && !modelInfo ? (
+        <p className="text-sm dash-muted">{modelError}</p>
       ) : modelInfo ? (
         <div className="dash-tile p-3.5 text-sm">
           <p className="font-medium text-[var(--primary)]">
@@ -48,37 +67,57 @@ export default function IntelligencePanel() {
           </p>
           <p className="mt-0.5 text-xs dash-muted">
             {modelInfo.n_features} features · best model: {modelInfo.best_model_key} ·{" "}
-            {modelInfo.artifact_integrity_verified ? "integrity verified" : "integrity unverified"}
+            {modelInfo.artifact_integrity_verified
+              ? "model files match their checksums"
+              : "model files do not match their checksums"}
           </p>
         </div>
       ) : (
         <p className="text-sm dash-muted">Loading model info…</p>
       )}
 
-      {summary ? (
+      {summaryError ? (
+        <p className="text-sm dash-muted">{summaryError}</p>
+      ) : summary ? (
         <div className="space-y-3">
-          <p className="text-sm dash-muted">
-            <span className="font-semibold dash-heading">{summary.pending_predictions_count}</span> predictions have no
-            recorded outcome yet.
-          </p>
+          <div>
+            <p className="text-sm dash-muted">
+              <span className="font-semibold dash-heading">{summary.pending_predictions_count}</span> predictions have
+              no recorded pregnancy outcome yet.
+            </p>
+            {summary.pending_predictions_count > 0 && (
+              <p className="mt-0.5 text-xs dash-muted">Record the result on {recordLink} to close them.</p>
+            )}
+          </div>
+
           <div>
             <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide dash-muted">
-              High-Risk Transfers ({summary.high_risk_transfers.length})
+              High-risk transfers awaiting a pregnancy check ({summary.high_risk_total})
             </p>
-            {summary.high_risk_transfers.length === 0 ? (
-              <p className="text-sm dash-muted opacity-70">No high-risk pending transfers flagged.</p>
+            <p className="mb-1.5 text-xs dash-muted">
+              Predicted at {(summary.high_risk_threshold * 100).toFixed(0)}% or higher.
+            </p>
+            {summary.high_risk_total === 0 ? (
+              <p className="text-sm dash-muted opacity-70">No high-risk transfers are waiting for a pregnancy check.</p>
             ) : (
-              <ul className="space-y-1.5">
-                {summary.high_risk_transfers.slice(0, 5).map((t) => (
-                  <li
-                    key={t.transfer_id}
-                    className="flex items-center justify-between rounded-xl border border-[rgba(179,69,63,0.26)] bg-[rgba(117, 127, 153,0.15)] px-3 py-2 text-xs text-[#9d3730]"
-                  >
-                    <span>Transfer #{t.transfer_id} {t.et_date ? `(${t.et_date})` : ""}</span>
-                    <span className="font-semibold">{(t.probability * 100).toFixed(0)}% predicted</span>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul className="space-y-1.5">
+                  {summary.high_risk_transfers.slice(0, SHOWN_ROWS).map((t) => (
+                    <li
+                      key={t.transfer_id}
+                      className="flex items-center justify-between rounded-xl border border-[rgba(179,69,63,0.26)] bg-[rgba(117, 127, 153,0.15)] px-3 py-2 text-xs text-[#9d3730]"
+                    >
+                      <span>Transfer #{t.transfer_id} {t.et_date ? `(${t.et_date})` : ""}</span>
+                      <span className="font-semibold">{(t.probability * 100).toFixed(0)}% predicted</span>
+                    </li>
+                  ))}
+                </ul>
+                {summary.high_risk_total > SHOWN_ROWS && (
+                  <p className="mt-1.5 text-xs dash-muted">
+                    Showing {SHOWN_ROWS} of {summary.high_risk_total}.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>

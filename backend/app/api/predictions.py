@@ -4,10 +4,13 @@ Loads trained model artifacts and serves real-time pregnancy predictions
 with uncertainty estimates and SHAP explanations.
 """
 
+import hashlib
+import json
 import logging
 import sys
 import uuid
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -164,6 +167,33 @@ def predict_pregnancy(
     )
 
 
+@lru_cache(maxsize=4)
+def _manifest_matches(artifact_dir: str) -> bool:
+    """True when every file the artifact manifest lists exists and has its recorded SHA-256.
+
+    Presence alone proves nothing: a swapped model file would still pass it.
+    # ponytail: cached per process, so replacing artifacts needs a restart to be seen.
+    """
+    base = Path(artifact_dir)
+    try:
+        files = json.loads((base / "manifest.json").read_text(encoding="utf-8"))["files"]
+    except (OSError, ValueError, KeyError):
+        return False
+    if not files:
+        return False
+    for name, expected in files.items():
+        path = base / name
+        if not path.is_file():
+            return False
+        digest = hashlib.sha256()
+        with path.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                digest.update(chunk)
+        if digest.hexdigest() != expected:
+            return False
+    return True
+
+
 @router.get("/model-info", response_model=ModelInfoResponse)
 def get_model_info(current_user: User = Depends(get_current_user)):
     """Return information about the currently loaded prediction model."""
@@ -176,7 +206,7 @@ def get_model_info(current_user: User = Depends(get_current_user)):
         n_features=len(predictor.feature_names),
         best_model_key=metadata.get("best_model", "unknown"),
         feature_schema_version=metadata.get("feature_schema_version", "unknown"),
-        artifact_integrity_verified=(predictor.artifact_dir / "manifest.json").exists(),
+        artifact_integrity_verified=_manifest_matches(str(predictor.artifact_dir)),
         training_split=metadata.get("split", {}),
         top_features=metadata.get("shap_top_features", []),
     )

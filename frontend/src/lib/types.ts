@@ -465,6 +465,8 @@ export interface DashboardHighRiskTransfer {
 
 export interface DashboardAISummaryResponse {
   pending_predictions_count: number;
+  high_risk_total: number;
+  high_risk_threshold: number;
   high_risk_transfers: DashboardHighRiskTransfer[];
 }
 

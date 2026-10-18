@@ -1309,15 +1309,18 @@ def get_ai_summary(db: Session = Depends(get_db), current_user: User = Depends(g
         Prediction.organization_id == org_id, Prediction.actual_outcome.is_(None)
     ).count()
 
-    high_risk = (
+    high_risk_query = (
         db.query(Prediction)
-        .options(joinedload(Prediction.transfer))
         .join(ETTransfer, Prediction.transfer_id == ETTransfer.transfer_id)
         .filter(
             Prediction.organization_id == org_id,
             ETTransfer.pc1_result.is_(None),
             Prediction.risk_band == "High",
         )
+    )
+    high_risk_total = high_risk_query.count()
+    high_risk = (
+        high_risk_query.options(joinedload(Prediction.transfer))
         .order_by(Prediction.predicted_at.desc())
         .limit(10)
         .all()
@@ -1332,4 +1335,11 @@ def get_ai_summary(db: Session = Depends(get_db), current_user: User = Depends(g
         )
         for p in high_risk if p.transfer_id is not None
     ]
-    return AISummaryResponse(pending_predictions_count=pending, high_risk_transfers=items)
+    from ml.config import RISK_BANDS
+
+    return AISummaryResponse(
+        pending_predictions_count=pending,
+        high_risk_total=high_risk_total,
+        high_risk_threshold=RISK_BANDS["high_min"],
+        high_risk_transfers=items,
+    )
