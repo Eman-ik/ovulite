@@ -60,8 +60,7 @@ from app.models.audit_event import (
 )
 from app.models.user import User
 from app.services.audit import record, record_auth
-from app.models.organization import Organization, OrganizationMembership
-from app.schemas.organization import OrganizationRegistrationRequest, OrganizationRegistrationResponse
+from app.models.organization import Organization, OrganizationInvitation, OrganizationMembership
 from app.schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -99,13 +98,11 @@ PENDING_MESSAGE = "Your account is waiting for an administrator to approve it."
 # self-registered account is always SELF_REGISTER_ROLE either way.
 REQUIRE_SIGNUP_APPROVAL = _flag("REQUIRE_SIGNUP_APPROVAL", default=True)
 
-# Bootstrap admin password. In production it must come from the environment,
-# and an explicitly provisioned one must be changed at first login. Outside
-# production the documented development password is kept as-is, because
-# CLAUDE.md documents it and the demo logins depend on it.
-DEV_DEFAULT_ADMIN_PASSWORD = "ovulite2026"
+# Bootstrap admin password. It is never written in source: it must come from
+# DEFAULT_ADMIN_PASSWORD, and an admin created from it must change it at first
+# login. With no value set, no admin is bootstrapped.
 _ENV_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
-DEFAULT_ADMIN_PASSWORD = _ENV_ADMIN_PASSWORD or (None if IS_PRODUCTION else DEV_DEFAULT_ADMIN_PASSWORD)
+DEFAULT_ADMIN_PASSWORD = _ENV_ADMIN_PASSWORD or None
 
 
 # ── Per-IP failed-login throttle ───────────────────────────────────────────
@@ -428,9 +425,10 @@ def register(
 ) -> RegisterResponse:
     """Public signup.
 
-    The account is always created with SELF_REGISTER_ROLE in the default
-    organization, and (unless REQUIRE_SIGNUP_APPROVAL=false) cannot log in
-    until an administrator approves it.
+    Needs an invitation code from the organization the user is joining. The
+    account is created with SELF_REGISTER_ROLE in that organization, and (unless
+    REQUIRE_SIGNUP_APPROVAL=false) cannot log in until an administrator approves
+    it and assigns a role.
 
     ``payload.role`` and ``payload.organization_id`` are ignored on purpose.
     This endpoint is unauthenticated, and it previously passed both straight
@@ -449,12 +447,47 @@ def register(
             detail="An account with this email already exists",
         )
 
-    organization_id = ensure_default_organization(db).organization_id
-    if payload.organization_id is not None and payload.organization_id != organization_id:
+    # Joining an organization takes an invitation its administrator issued. The
+    # code is single-use, must not have expired, and is bound to an email when the
+    # admin set one. ``payload.organization_id`` is ignored: a caller cannot name
+    # the organization they want, only redeem the code that was given to them.
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="The invitation code is invalid or has expired.",
+    )
+    if not payload.invitation_code:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Self-registration cannot join another organization.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An invitation code from your organization's administrator is required to sign up.",
         )
+    invitation = db.query(OrganizationInvitation).filter(
+        OrganizationInvitation.token == payload.invitation_code.strip(),
+        OrganizationInvitation.status == "pending",
+    ).first()
+    now = datetime.now(timezone.utc)
+    if invitation is None:
+        raise invalid
+    expires_at = invitation.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at <= now:
+        raise invalid
+    if invitation.email and (payload.email or "").lower() != invitation.email.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This invitation was issued to a different email address.",
+        )
+
+    # Spend the code in the same transaction as the account, and only while it
+    # is still pending, so two signups cannot both redeem it.
+    spent = db.query(OrganizationInvitation).filter(
+        OrganizationInvitation.invitation_id == invitation.invitation_id,
+        OrganizationInvitation.status == "pending",
+    ).update({"status": "accepted", "accepted_at": now}, synchronize_session=False)
+    if spent != 1:
+        db.rollback()
+        raise invalid
+    organization_id = invitation.organization_id
 
     user = User(
         organization_id=organization_id,
@@ -690,8 +723,12 @@ def seed_admin(db: Session = Depends(get_db)) -> User:
     """Create the default admin user if no users exist.
 
     This is a one-time bootstrap endpoint. Returns 409 if any user
-    already exists in the database.
+    already exists in the database. Not served in production: there the first
+    admin is provisioned from the environment, and this open route would let
+    whoever reaches an empty database first create that admin.
     """
+    if IS_PRODUCTION:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     if not ensure_default_admin(db):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -699,86 +736,6 @@ def seed_admin(db: Session = Depends(get_db)) -> User:
         )
 
     return db.query(User).filter(func.lower(User.username) == "admin").first()
-
-
-@router.post(
-    "/register-organization",
-    response_model=OrganizationRegistrationResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def register_organization(
-    payload: OrganizationRegistrationRequest,
-    db: Session = Depends(get_db),
-) -> OrganizationRegistrationResponse:
-    """Create a new organization and its first admin user."""
-    org_exists = (
-        db.query(Organization)
-        .filter(
-            or_(
-                func.lower(Organization.name) == func.lower(payload.organization.name),
-                func.lower(Organization.slug) == func.lower(payload.organization.slug),
-            )
-        )
-        .first()
-    )
-    if org_exists:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Organization already exists",
-        )
-
-    user_filters = [func.lower(User.username) == func.lower(payload.admin_username)]
-    if payload.admin_email:
-        user_filters.append(func.lower(User.email) == func.lower(payload.admin_email))
-    user_exists = db.query(User).filter(or_(*user_filters)).first()
-    if user_exists:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Admin username or email already exists",
-        )
-
-    organization = Organization(**payload.organization.model_dump())
-    db.add(organization)
-    db.commit()
-    db.refresh(organization)
-
-    user = User(
-        organization_id=organization.organization_id,
-        username=payload.admin_username,
-        password_hash=hash_password(payload.admin_password),
-        role="admin",
-        full_name=payload.admin_full_name,
-        email=payload.admin_email,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    membership = OrganizationMembership(
-        organization_id=organization.organization_id,
-        user_id=user.user_id,
-        role="admin",
-        status="active",
-        is_primary=True,
-    )
-    db.add(membership)
-    db.commit()
-
-    access_token = create_access_token(
-        data={"sub": user.username, "role": user.role, "org_id": user.organization_id}
-    )
-    refresh_token = create_refresh_token(
-        data={"sub": user.username, "org_id": user.organization_id}
-    )
-
-    return OrganizationRegistrationResponse(
-        organization=organization,
-        user_id=user.user_id,
-        username=user.username,
-        role=user.role or "admin",
-        access_token=access_token,
-        refresh_token=refresh_token,
-    )
 
 
 def _issue_tokens_for(user: User) -> TokenResponse:

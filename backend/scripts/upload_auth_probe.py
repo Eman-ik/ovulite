@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """Test authenticated file upload."""
+import os
 import requests
 from pathlib import Path
 
-# Login to get token
+# Login to get token. The password comes from OVULITE_PASSWORD, not this file.
 login_resp = requests.post(
     "http://localhost:8000/auth/login",
-    data={"username": "admin", "password": "ovulite2026"}
+    data={"username": "admin", "password": os.environ["OVULITE_PASSWORD"]}
 )
 print(f"Login Status: {login_resp.status_code}")
 

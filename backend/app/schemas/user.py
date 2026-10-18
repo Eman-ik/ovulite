@@ -24,6 +24,8 @@ class UserCreate(BaseModel):
     organization_id: Optional[int] = None
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
+    # Joining an organization needs an invitation its administrator issued.
+    invitation_code: Optional[str] = None
 
     @field_validator("password")
     @classmethod

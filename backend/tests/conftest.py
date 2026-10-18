@@ -14,8 +14,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 
-from app.main import app
-from app.database import Base, get_db
+# The bootstrap admin's password comes from the environment, and auth reads it at
+# import time, so set it before the app is imported. Tests log in with this value.
+os.environ["DEFAULT_ADMIN_PASSWORD"] = "ovulite2026"
+
+from app.main import app  # noqa: E402
+from app.database import Base, get_db  # noqa: E402
+from app.models.user import User  # noqa: E402
 
 
 # Test database URL - use in-memory SQLite for speed or PostgreSQL for production-like tests
@@ -108,12 +113,48 @@ def admin_user(client, db_session):
     response = client.post("/auth/seed")
     assert response.status_code in (201, 409), f"Failed to seed admin: {response.text}"
 
+    # An env-provisioned admin is flagged to change its password. The fixtures
+    # log in with the test password many times, so clear the flag here.
+    db_session.query(User).filter(User.username == "admin").update({"must_change_password": False})
+    db_session.commit()
+
     # 409 means bootstrap user already exists; auth fixture can still login.
     if response.status_code == 409:
         return {"username": "admin"}
 
     user_data = response.json()
     return user_data
+
+
+@pytest.fixture(scope="function")
+def issue_invitation(db_session, admin_user):
+    """Issue an invitation the way an organization admin does; returns its code.
+
+    Defaults to the seeded admin's organization. Pass ``org_id`` to issue for
+    another organization, ``status`` or a negative ``expires_in`` to make one that
+    cannot be redeemed.
+    """
+    import uuid
+    from datetime import datetime, timedelta, timezone
+
+    from app.models.organization import OrganizationInvitation
+
+    def issue(email, *, org_id=None, role="researcher", expires_in=timedelta(days=7), status="pending"):
+        admin = db_session.query(User).filter(User.username == "admin").one()
+        code = uuid.uuid4().hex
+        db_session.add(OrganizationInvitation(
+            organization_id=org_id or admin.organization_id,
+            email=email,
+            role=role,
+            invited_by_user_id=admin.user_id,
+            token=code,
+            status=status,
+            expires_at=datetime.now(timezone.utc) + expires_in,
+        ))
+        db_session.commit()
+        return code
+
+    return issue
 
 
 @pytest.fixture(scope="function")

@@ -89,7 +89,7 @@ def main() -> None:
             client,
             "POST",
             "/auth/login",
-            data={"username": "admin", "password": "ovulite2026"},
+            data={"username": "admin", "password": os.environ["OVULITE_PASSWORD"]},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         token = body.get("access_token") if isinstance(body, dict) else None

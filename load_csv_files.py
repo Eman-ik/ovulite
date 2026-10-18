@@ -4,14 +4,16 @@ Load CSV files from docs/dataset/ into the Ovulite system.
 Authenticates as admin and imports multiple CSV files.
 """
 
+import os
 import requests
 import json
 from pathlib import Path
 
 BASE_URL = "http://localhost:8000"
+# Read from the environment, so the password is not stored in this file.
 CREDENTIALS = {
     "username": "admin",
-    "password": "ovulite2026"
+    "password": os.environ["OVULITE_PASSWORD"],
 }
 
 CSV_FILES = [

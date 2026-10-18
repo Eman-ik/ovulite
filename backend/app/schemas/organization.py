@@ -63,20 +63,3 @@ class OrganizationInvitationResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class OrganizationRegistrationRequest(BaseModel):
-    organization: OrganizationCreate
-    admin_username: str = Field(..., min_length=3, max_length=100)
-    admin_password: str = Field(..., min_length=8, max_length=128)
-    admin_full_name: Optional[str] = Field(default=None, max_length=200)
-    admin_email: Optional[EmailStr] = None
-
-
-class OrganizationRegistrationResponse(BaseModel):
-    organization: OrganizationResponse
-    user_id: int
-    username: str
-    role: str
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-

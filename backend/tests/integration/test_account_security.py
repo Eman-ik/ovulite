@@ -18,8 +18,10 @@ GOOD_PASSWORD = "Str0ng!Passw0rd"
 OTHER_PASSWORD = "An0ther!Passw0rd"
 
 
-def _signup(client, username="newbie", password=GOOD_PASSWORD, **extra):
-    body = {"username": username, "password": password, "email": f"{username}@example.com"}
+def _signup(client, issue, username="newbie", password=GOOD_PASSWORD, **extra):
+    """Sign up with an invitation issued for the same email, so only the field under test varies."""
+    email = f"{username}@example.com"
+    body = {"username": username, "password": password, "email": email, "invitation_code": issue(email)}
     body.update(extra)
     return client.post("/auth/register", json=body)
 
@@ -34,13 +36,13 @@ def _admin_headers(client, admin_user):
 
 
 @pytest.mark.integration
-def test_signup_cannot_choose_its_own_role(client, db_session):
+def test_signup_cannot_choose_its_own_role(client, db_session, issue_invitation):
     """An unauthenticated signup asking for "admin" must not get it.
 
     This is the regression guard. Before the fix this returned 201 with
     role "admin", and that account could then call admin-gated endpoints.
     """
-    response = _signup(client, "mallory", role="admin")
+    response = _signup(client, issue_invitation, "mallory", role="admin")
     assert response.status_code == 201, response.text
     # The response no longer echoes the stored row back to an anonymous caller.
     assert "role" not in response.json()
@@ -51,14 +53,18 @@ def test_signup_cannot_choose_its_own_role(client, db_session):
 
 
 @pytest.mark.integration
-def test_signup_cannot_join_another_organization(client):
-    response = _signup(client, "wanderer", organization_id=99999)
-    assert response.status_code == 403, response.text
+def test_signup_cannot_choose_its_organization(client, db_session, issue_invitation):
+    """organization_id in the body is ignored: the account joins the code's organization."""
+    response = _signup(client, issue_invitation, "wanderer", organization_id=99999)
+    assert response.status_code == 201, response.text
+    user = db_session.query(User).filter(User.username == "wanderer").one()
+    admin = db_session.query(User).filter(User.username == "admin").one()
+    assert user.organization_id == admin.organization_id
 
 
 @pytest.mark.integration
-def test_signup_is_pending_and_cannot_log_in(client):
-    response = _signup(client, "pending_pat")
+def test_signup_is_pending_and_cannot_log_in(client, issue_invitation):
+    response = _signup(client, issue_invitation, "pending_pat")
     assert response.status_code == 201, response.text
     assert response.json()["pending_approval"] is True
 
@@ -68,8 +74,8 @@ def test_signup_is_pending_and_cannot_log_in(client):
 
 
 @pytest.mark.integration
-def test_admin_approval_lets_the_account_in(client, db_session, admin_user):
-    _signup(client, "approve_me")
+def test_admin_approval_lets_the_account_in(client, db_session, admin_user, issue_invitation):
+    _signup(client, issue_invitation, "approve_me")
     headers = _admin_headers(client, admin_user)
     target = db_session.query(User).filter(User.username == "approve_me").first()
 
@@ -87,8 +93,8 @@ def test_admin_approval_lets_the_account_in(client, db_session, admin_user):
 
 
 @pytest.mark.integration
-def test_password_policy_is_enforced_on_signup(client):
-    weak = _signup(client, "weakling", password="password")
+def test_password_policy_is_enforced_on_signup(client, issue_invitation):
+    weak = _signup(client, issue_invitation, "weakling", password="password")
     assert weak.status_code == 422, weak.text
 
 

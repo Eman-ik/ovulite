@@ -102,7 +102,7 @@ def main() -> None:
         client.post("/auth/seed")
         login = client.post(
             "/auth/login",
-            data={"username": "admin", "password": "ovulite2026"},
+            data={"username": "admin", "password": os.environ["OVULITE_PASSWORD"]},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         token = login.json().get("access_token") if login.status_code == 200 else None

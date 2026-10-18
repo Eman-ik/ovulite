@@ -95,7 +95,8 @@ def main() -> None:
     parser.add_argument("--database-url", default=os.getenv("DATABASE_URL", DEFAULT_DSN))
     parser.add_argument("--api", default=os.getenv("OVULITE_API", DEFAULT_API))
     parser.add_argument("--username", default="admin")
-    parser.add_argument("--password", default="ovulite2026")
+    parser.add_argument("--password", default=os.environ.get("OVULITE_PASSWORD"),
+                        help="admin password (defaults to $OVULITE_PASSWORD)")
     parser.add_argument("--limit", type=int, default=200)
     parser.add_argument("--purge", action="store_true")
     args = parser.parse_args()

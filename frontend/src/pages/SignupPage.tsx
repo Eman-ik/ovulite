@@ -1,8 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { ArrowRight, CheckCircle, Eye, EyeOff, KeyRound, Lock, Mail, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { SilkBackdrop } from "@/components/backdrop/SilkBackdrop";
 import api from "@/lib/api";
 
@@ -13,6 +12,7 @@ const inputClass =
 export function SignupPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [invitationCode, setInvitationCode] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,6 +52,7 @@ export function SignupPage() {
           email: email,
           password: password,
           full_name: fullName,
+          invitation_code: invitationCode.trim(),
         },
       );
       setSuccess(true);
@@ -116,6 +117,20 @@ export function SignupPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="relative block">
+            <span className="sr-only">Invitation code</span>
+            <KeyRound className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#1F5468]" />
+            <input
+              type="text"
+              required
+              autoComplete="off"
+              placeholder="Invitation code from your organization"
+              value={invitationCode}
+              onChange={(e) => setInvitationCode(e.target.value)}
+              className={inputClass}
+            />
+          </label>
+
           <label className="relative block">
             <span className="sr-only">Full name</span>
             <User className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#1F5468]" />
@@ -219,14 +234,6 @@ export function SignupPage() {
             {!isLoading && <ArrowRight className="h-5 w-5" />}
           </button>
         </form>
-
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-[#1F5468]/20" />
-          <span className="text-xs uppercase tracking-wider text-[#3F5A66]">or</span>
-          <div className="h-px flex-1 bg-[#1F5468]/20" />
-        </div>
-
-        <GoogleAuthButton isDark={false} onLoading={setIsLoading} onError={setError} />
 
         <p className="mt-8 text-center text-sm text-[#3F5A66]">
           Already have an account?{" "}
