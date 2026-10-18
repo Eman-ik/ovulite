@@ -39,6 +39,9 @@ def timeline(transfer_id: int, db: Session = Depends(get_db), user: User = Depen
         elif embryo.opu_date:
             add("opu", embryo.opu_date, "OPU date recorded on embryo", embryo.embryo_id)
         if batch and batch.organization_id == org_id:
+            ivm = batch.ivm_batch
+            if ivm and ivm.organization_id == org_id:
+                add("ivm", ivm.ivm_date, "IVM batch", ivm.ivm_batch_id)
             add("ivf", batch.ivf_date, "IVF batch", batch.ivf_batch_id)
         add("cryopreservation", embryo.freezing_date, "Embryo freezing", embryo.embryo_id)
     add("transfer", transfer.et_date, "Embryo transfer", transfer.transfer_id)
