@@ -71,7 +71,7 @@ function buildRoleConfig(role: CanonicalRole, canViewAnalytics: boolean): RoleCo
   }
   if (role === "veterinarian") {
     return {
-      kpiKeys: ["transferable_embryos", "transfers_completed", "pregnancy_rate", "model_auc"],
+      kpiKeys: ["transferable_embryos", "transfers_completed", "pregnancy_rate"],
       funnelStages: ["Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"],
       operationsTiles: ["transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"],
       pipelineStages: ["transfer_scheduled", "pending_pc"],

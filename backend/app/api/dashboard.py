@@ -483,7 +483,8 @@ DASHBOARD_SCOPE: dict[str, dict[str, Optional[frozenset]]] = {
         "performance": frozenset({"donor", "sire"}),
     },
     "veterinarian": {
-        "kpis": frozenset({"transferable_embryos", "transfers_completed", "pregnancy_rate", "model_auc"}),
+        # Model performance is admin and researcher only (dashboard role table).
+        "kpis": frozenset({"transferable_embryos", "transfers_completed", "pregnancy_rate"}),
         "funnel": frozenset({"Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"}),
         "operations": frozenset({"transfers_scheduled_today", "pregnancy_checks_due", "predictions_pending_outcome"}),
         "pipeline": frozenset({"transfer_scheduled", "pending_pc"}),

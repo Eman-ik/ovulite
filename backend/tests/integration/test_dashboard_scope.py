@@ -17,7 +17,7 @@ from app.models.user import User
 PASSWORD = "Str0ng!Passw0rd"
 
 LAB_KPIS = {"oocytes_recovered", "maturation_rate", "cleavage_rate", "blastocyst_rate"}
-ET_KPIS = {"transferable_embryos", "transfers_completed", "pregnancy_rate", "model_auc"}
+ET_KPIS = {"transferable_embryos", "transfers_completed", "pregnancy_rate"}
 LAB_FUNNEL = {"Oocytes Recovered", "Mature Oocytes", "Cleaved Embryos", "Blastocysts"}
 ET_FUNNEL = {"Transferable Embryos", "Transfers", "Pregnancies", "Ongoing Pregnancies"}
 LAB_OPS = {"opu_sessions_today", "ivf_batches_in_culture", "embryos_pending_grading"}
@@ -102,6 +102,15 @@ def test_veterinarian_kpis_are_et_only(client, db_session, admin_user):
     h = _headers(client, db_session, "veterinarian")
     keys = _kpi_keys(client, h)
     assert keys <= ET_KPIS, f"veterinarian was sent non-ET KPIs: {keys - ET_KPIS}"
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("role, expected", [
+    ("admin", True), ("researcher", True), ("veterinarian", False), ("embryologist", False),
+])
+def test_model_metric_is_admin_and_researcher_only(client, db_session, admin_user, role, expected):
+    h = _headers(client, db_session, role)
+    assert ("model_auc" in _kpi_keys(client, h)) is expected
 
 
 @pytest.mark.integration
